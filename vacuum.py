@@ -460,7 +460,7 @@ class Vacuum:
                     "who gave %s the new IP address?",
                     "%s is back to top ouchies!"
                 ]
-                message = random.randrange(0, len(comments) - 1)
+                message = comments[random.randrange(0, len(comments) - 1)]
                 return message % player
             else:
                 return "welcome to progress %s" % player
