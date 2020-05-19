@@ -174,21 +174,18 @@ class Vacuum:
             with urllib.request.urlopen(self.updateurl) as url:
                 data = json.loads(url.read().decode())
                 pl = data['players']
+                query_data = list()
                 players = []
                 for p in pl:
                     print("found player %s" % p['name'])
-                    self.db.do_insert("INSERT INTO `progress_NSA_module`"
-                                      "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
-                                      "VALUES (%s, %s, %s, %s, %s, %s)",
-                                      (
-                                          datetime.datetime.utcnow(),
-                                          p['name'],
-                                          p['world'],
-                                          p['x'],
-                                          p['y'],
-                                          p['z']
-                                      )
-                                      )
+                    query_data.append((
+                        datetime.datetime.utcnow(),
+                        p['name'],
+                        p['world'],
+                        p['x'],
+                        p['y'],
+                        p['z']
+                    ))
                     if not p['name'] in players:
                         players.append(p['name'])
                     # we start by checking to see if the player is currently active
@@ -205,6 +202,9 @@ class Vacuum:
                 print("players list:")
                 print(self.players)
                 print("end players list")
+                self.db.do_insertmany("INSERT INTO `progress_NSA_module`"
+                                      "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
+                                      "VALUES (%s, %s, %s, %s, %s, %s)", query_data)
                 self.playtime_player_checkplayers(players)
 
         except urllib.error.URLError:
