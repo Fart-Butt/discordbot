@@ -221,19 +221,25 @@ class Vacuum:
             pass
 
     def playtime_player_checkplayers(self, players):
+        print("starting checkplayers")
         try:
             for e in self.players:
+                print("on player %s" % e[0])
                 if e[0] in players:
+                    print("still in game")
                     pass
                     # person is still logged in. we do not need to do anything at this time.
                 else:
                     # log that they logged out
+                    print("logged out")
                     self.playtime_player_record(e[0], self.playtime_player_deltaseconds(e[1]))
                     self.playtime_player_removeplayer(e)
         except TypeError:
             # something went wrong with variable initialization.
             self.players = []
             self.playtime_player_checkplayers(players)
+        finally:
+            print("end checkplayer")
 
     @staticmethod
     def playtime_player_deltaseconds(starttime):
@@ -260,6 +266,7 @@ class Vacuum:
         self.playtime_serialize()
 
     def playtime_player_removeplayer(self, player):
+        print("removing player %s" % player)
         self.players.remove(player)
         self.playtime_serialize()
 
