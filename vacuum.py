@@ -193,6 +193,7 @@ class Vacuum:
                         players.append(p['name'])
                     # we start by checking to see if the player is currently active
                     if self.playtime_player_active(p['name']):
+                        print("%s already in, not adding to list." % p['name'])
                         pass
                         # player was logged in, and is still logged in
                         # we do not need to do anything for this player at this time.
@@ -201,6 +202,9 @@ class Vacuum:
                         # player was not logged in, but is logged in now.
                         self.playtime_player_addplayer(p['name'])
                 # now we are going to find players that have logged out since the last check
+                print("players list:")
+                print(self.players)
+                print("end players list")
                 self.playtime_player_checkplayers(players)
 
         except urllib.error.URLError:
