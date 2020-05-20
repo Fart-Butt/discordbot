@@ -51,6 +51,7 @@ class ButtBot:
             self.vacuum.playtime_scraper()
 
     def is_played_time_loop_running(self):
+        pass
         if self.config.getboolean('vacuum', 'enabled') is True:
             print("")
             d = self._played_time_loop_last_ran - datetime.datetime.utcnow()
