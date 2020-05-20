@@ -336,7 +336,7 @@ class Vacuum:
         try:
             if dph[0]['deaths_per_hour'] > 0:
                 # good return
-                if dph[0]['deaths_per_hour'] > 5:
+                if dph[0]['deaths_per_hour'] > 1:
                     insults = [
                         "my hero",
                         "a true gaming legend"
