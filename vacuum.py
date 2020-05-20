@@ -206,6 +206,7 @@ class Vacuum:
                                       "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
                                       "VALUES (%s, %s, %s, %s, %s, %s)", query_data)
                 self.playtime_player_checkplayers(players)
+                print("------------scraper completed--------------")
 
         except urllib.error.URLError:
             # minecraft server is offline and buttbot is still online
