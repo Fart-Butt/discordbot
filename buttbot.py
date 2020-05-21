@@ -180,7 +180,7 @@ class ButtBot:
         return module
 
     async def command_dispatch(self, message):
-        self.is_played_time_loop_running()  # garbage hack
+        # self.is_played_time_loop_running()  # garbage hack
         if not self.should_i_reply_to_user(message):
             # user is either a bot not on whitelist or is a user on the ignore list
             return
