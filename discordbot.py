@@ -19,6 +19,21 @@ channel_configs = butt_library.load_all_config_files()  # global that will hold 
 command_channels = {}
 nlp_ = spacy.load('en_core_web_lg')
 
+if test_environment:
+    command_channels[408168696834424832] = ButtBot(client, "development.ini", db_, db_secrets[0], db_secrets[1],
+                                                   stat_module, weights, True, nlp_)
+    command_channels[199981748098957312] = ButtBot(client, "DPT_document.ini", db_, db_secrets[0], db_secrets[1],
+                                                   stat_module, weights, True, nlp_)
+    command_channels[154337182717444096] = ButtBot(client, "development.ini", db_, db_secrets[0], db_secrets[1],
+                                                   stat_module, weights, True, nlp_)
+else:
+    for i in channel_configs:
+        command_channels[int(i.split("/")[1][:-4])] = ButtBot(client, i, db_, db_secrets[0], db_secrets[1],
+                                                              stat_module,
+                                                              weights, False, nlp_)
+        print("started on guild GUID %s" % i.split("/")[1][:-4])
+
+
 @client.event
 async def on_ready():
     print('Use this link to invite {}:'.format(client.user.name))
@@ -27,19 +42,7 @@ async def on_ready():
     print('You are running FartBot V6.0.00')
     print('Created by Poop Poop')
     print('--------')
-    if test_environment:
-        command_channels[408168696834424832] = ButtBot(client, "development.ini", db_, db_secrets[0], db_secrets[1],
-                                                       stat_module, weights, True, nlp_)
-        command_channels[199981748098957312] = ButtBot(client, "DPT_document.ini", db_, db_secrets[0], db_secrets[1],
-                                                       stat_module, weights, True, nlp_)
-        command_channels[154337182717444096] = ButtBot(client, "development.ini", db_, db_secrets[0], db_secrets[1],
-                                                       stat_module, weights, True, nlp_)
-    else:
-        for i in channel_configs:
-            command_channels[int(i.split("/")[1][:-4])] = ButtBot(client, i, db_, db_secrets[0], db_secrets[1],
-                                                                  stat_module,
-                                                                  weights, False, nlp_)
-            print("started on guild GUID %s" % i.split("/")[1][:-4])
+
 
 
 @client.event
