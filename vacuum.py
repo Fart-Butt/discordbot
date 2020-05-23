@@ -17,6 +17,7 @@ class Vacuum:
                         'deathsperhour': 'vacuum', 'alias': 'vacuum'}
         self.updateurl = ""
         self.config = ""
+        self.scraper_timer = datetime.datetime.utcnow()
 
         try:
             if self.players:
@@ -170,56 +171,62 @@ class Vacuum:
 
     def playtime_scraper(self):
         print("running scraper")
-        try:
-            with urllib.request.urlopen(self.updateurl) as url:
-                data = json.loads(url.read().decode())
-                pl = data['players']
-                query_data = list()
-                players = []
-                for p in pl:
-                    print("found player %s" % p['name'])
-                    query_data.append((
-                        datetime.datetime.utcnow(),
-                        p['name'],
-                        p['world'],
-                        p['x'],
-                        p['y'],
-                        p['z']
-                    ))
-                    if not p['name'] in players:
-                        players.append(p['name'])
-                    # we start by checking to see if the player is currently active
-                    if self.playtime_player_active(p['name']):
-                        print("%s already in, not adding to list." % p['name'])
-                        pass
-                        # player was logged in, and is still logged in
-                        # we do not need to do anything for this player at this time.
-                    else:
-                        print("adding player %s since they have logged in" % p['name'])
-                        # player was not logged in, but is logged in now.
-                        self.playtime_player_addplayer(p['name'])
-                # now we are going to find players that have logged out since the last check
-                print("players list:")
-                print(self.players)
-                print("end players list")
-                self.db.do_insertmany("INSERT INTO `progress_NSA_module`"
-                                      "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
-                                      "VALUES (%s, %s, %s, %s, %s, %s)", query_data)
-                self.playtime_player_checkplayers(players)
-                print("------------scraper completed--------------")
+        d = self.scraper_timer - datetime.datetime.utcnow()
+        if abs(int(d.total_seconds())) > 10:
+            # this dumb thing ran less than 10 second ago
+            print("WHY IS THIS SHIT RUNNING")
+        else:
+            try:
+                with urllib.request.urlopen(self.updateurl) as url:
+                    data = json.loads(url.read().decode())
+                    pl = data['players']
+                    query_data = list()
+                    players = []
+                    for p in pl:
+                        print("found player %s" % p['name'])
+                        query_data.append((
+                            datetime.datetime.utcnow(),
+                            p['name'],
+                            p['world'],
+                            p['x'],
+                            p['y'],
+                            p['z']
+                        ))
+                        if not p['name'] in players:
+                            players.append(p['name'])
+                        # we start by checking to see if the player is currently active
+                        if self.playtime_player_active(p['name']):
+                            print("%s already in, not adding to list." % p['name'])
+                            pass
+                            # player was logged in, and is still logged in
+                            # we do not need to do anything for this player at this time.
+                        else:
+                            print("adding player %s since they have logged in" % p['name'])
+                            # player was not logged in, but is logged in now.
+                            self.playtime_player_addplayer(p['name'])
+                    # now we are going to find players that have logged out since the last check
+                    print("players list:")
+                    print(self.players)
+                    print("end players list")
+                    self.db.do_insertmany("INSERT INTO `progress_NSA_module`"
+                                          "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
+                                          "VALUES (%s, %s, %s, %s, %s, %s)", query_data)
+                    self.playtime_player_checkplayers(players)
+                    self.scraper_timer = datetime.datetime.utcnow()
+                    print("------------scraper completed--------------")
 
-        except urllib.error.URLError:
-            # minecraft server is offline and buttbot is still online
-            self.playtime_player_saveall()
-            print("urllib.error.urlerror")
+            except urllib.error.URLError:
+                # minecraft server is offline and buttbot is still online
+                self.playtime_player_saveall()
+                print("urllib.error.urlerror")
 
-        except http.client.RemoteDisconnected:
-            # we are going to save all data here too
-            self.playtime_player_saveall()
-            print("http.client.remotedisconnected")
+            except http.client.RemoteDisconnected:
+                # we are going to save all data here too
+                self.playtime_player_saveall()
+                print("http.client.remotedisconnected")
 
-        finally:
-            pass
+            finally:
+                pass
 
     def playtime_player_checkplayers(self, players):
         print("starting checkplayers")
@@ -413,7 +420,6 @@ class Vacuum:
         self.db.close()
 
     def top_10_deaths(self):
-
         result = self.db.do_query(
             "SELECT player, count(*) as `count` FROM `progress_deaths` GROUP BY player ORDER BY count DESC LIMIT 10",
             '')
