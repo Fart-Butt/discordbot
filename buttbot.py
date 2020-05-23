@@ -52,14 +52,14 @@ class ButtBot:
 
     def is_played_time_loop_running(self):
         pass
-        if self.config.getboolean('vacuum', 'enabled') is True:
-            print("")
-            d = self._played_time_loop_last_ran - datetime.datetime.utcnow()
-            d = abs(int(d.total_seconds()))
-            if d > 30:
-                # has not run in 30 or more seconds
-                self.do_info_log("I'm a broken piece of shit and had to reboot the background task")
-                self.discordBot.loop.create_task(self.my_background_task())
+        # if self.config.getboolean('vacuum', 'enabled') is True:
+        #    print("")
+        #    d = self._played_time_loop_last_ran - datetime.datetime.utcnow()
+        #    d = abs(int(d.total_seconds()))
+        #    if d > 30:
+        #        # has not run in 30 or more seconds
+        #        self.do_info_log("I'm a broken piece of shit and had to reboot the background task")
+        #        self.discordBot.loop.create_task(self.my_background_task())
 
     async def butt_message_processing(self):
         await self.discordBot.wait_until_ready()
