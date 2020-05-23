@@ -4,6 +4,7 @@ import json
 import urllib.error
 import urllib.request
 import random
+import time
 
 from dateutil.parser import parse
 
@@ -170,7 +171,7 @@ class Vacuum:
         return deaths_this_session / played_this_session_hours
 
     def playtime_scraper(self):
-        print("running scraper")
+        print("running scraper - %s" % str(time.time()))
         d = self.scraper_timer - datetime.datetime.utcnow()
         if abs(int(d.total_seconds())) < 10:
             # this dumb thing ran less than 10 second ago
@@ -215,7 +216,7 @@ class Vacuum:
                                           "VALUES (%s, %s, %s, %s, %s, %s)", query_data)
                     self.playtime_player_checkplayers(players)
                     self.scraper_timer = datetime.datetime.utcnow()
-                    print("------------scraper completed--------------")
+                    print("------------scraper completed %s --------------" % str(time.time()))
 
             except urllib.error.URLError:
                 # minecraft server is offline and buttbot is still online
