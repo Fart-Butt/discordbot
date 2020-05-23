@@ -174,6 +174,8 @@ class Vacuum:
         d = self.scraper_timer - datetime.datetime.utcnow()
         if abs(int(d.total_seconds())) > 10:
             # this dumb thing ran less than 10 second ago
+            print("last run: %d" % self.scraper_timer)
+            print("differential: %s" % str(d))
             print("WHY IS THIS SHIT RUNNING")
         else:
             try:
