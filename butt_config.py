@@ -60,6 +60,14 @@ class ButtConfig:
         return True
 
     @property
+    def vacuum_url(self) -> str:
+        return self.conf["vacuum_update_url"]
+
+    @vacuum_url.setter
+    def vacuum_url(self, setting):
+        self.update_property("vacuum_update_url", setting)
+
+    @property
     def command_freq(self) -> int:
         return self.conf["command_call_freq"]
 
@@ -189,7 +197,10 @@ class Config(dict):
             # we have it, going to make a new instance
             self.configs[guid] = ButtConfig(guid)
             if self.configs[guid].vacuum == True:
+                log.info("subscribing to vaccum for %d" % guid)
                 shared.vacuum_instance.subscribe(self.configs[guid])
+            else:
+                log.info("%d not configured for vacuum. skipping" % guid)
         else:
             # not in database, we need to generate a new
             self.create_config(guid)
@@ -212,5 +223,10 @@ class Config(dict):
         # load all configs saved in the table
         guids = shared.db["buttbot"].do_query("select guid from config where 1")
         for g in guids:
-            log.debug("found config for %d, building config" % g['guid'])
+            log.debug("STARTUP - found config for %d, building config" % g['guid'])
             self.configs[g['guid']] = ButtConfig(g['guid'])
+            if self.configs[g['guid']].vacuum == True:
+                log.info("subscribing to vaccum for %d" % g['guid'])
+                shared.vacuum_instance.subscribe(self.configs[g['guid']])
+            else:
+                log.info("%d not configured for vacuum. skipping" % g['guid'])

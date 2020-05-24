@@ -7,6 +7,7 @@ import random
 import logging
 import time
 from butt_config import ButtConfig
+from collections import UserDict
 
 from dateutil.parser import parse
 import shared
@@ -16,12 +17,15 @@ log = logging.getLogger('bot.' + __name__)
 
 class Vacuum:
     def __init__(self, config: ButtConfig):
+        log.debug("__init__ :: initializing Vaccum instance")
         self.players = []
-        self.playtime_load()
-        self.updateurl = ""
+        self.updateurl = config.vacuum_url
         self.config = ""
         self.table_prefix = config.table_prefix
+        log.debug("__init__ :: table prefix set to %s" % config.table_prefix)
         self.NSA_module = config.nsa_module
+        log.debug("__init__ :: NSA_module enable set to %s" % config.nsa_module)
+        self.playtime_load()
 
         try:
             if self.players:
@@ -214,21 +218,15 @@ class Vacuum:
                 return "welcome to progress %s" % player
 
 
-class VacuumManager(dict):
+class VacuumManager(UserDict):
     def __init__(self):
+        log.debug("initializing VacuumManager")
         super().__init__()
-        self.instances = {}
-
-    def __getitem__(self, attr: int):
-        try:
-            return self.instances[attr]
-        except KeyError:
-            log.warning("attempted load vacuum manager on a non-subscribed channel")
 
     def subscribe(self, config: ButtConfig):
         log.info("new vacuum subscription started for guid %d. table prefix is %s" % (config.guid, config.table_prefix))
-        self.instances[config.guid] = Vacuum(config)
+        self.__setitem__(config.guid, Vacuum(config))
 
     def unsubscribe(self, guild_guid):
         log.info("unsubscribing subscription for guid %d" % guild_guid)
-        self.instances.pop(guild_guid)
+        self.__delitem__(guild_guid)

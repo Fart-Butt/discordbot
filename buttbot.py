@@ -1,7 +1,6 @@
 import asyncio
 import random
 import time
-import datetime
 import logging
 
 import mojang as mj
@@ -9,7 +8,7 @@ from butt_library import is_word_in_text
 from discord import Message
 
 from shared import guild_configs, test_environment, phrase_weights, shitpost, comms_instance, \
-    timer_instance as timer_module, vacuum_instance
+    timer_instance as timer_module, vacuum_instance as vacuum, db
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -18,16 +17,19 @@ class ButtBot:
     def __init__(self, bot):
         self.discordBot = bot
         self.mojang = mj.Mojang()
+        self.discordBot.loop.create_task(self.scraper_subscription_task())
 
     async def scraper_subscription_task(self):
         await self.discordBot.wait_until_ready()
-        print("starting scraper task")
+        log.debug("SCRAPER - starting scraper task")
         while not self.discordBot.is_closed():
             await asyncio.sleep(10)
-            for i in vacuum_instance:
-                log.debug("scraping for server %d" % i.guid)
-                i.playtime_scraper()
-                log.debug("scraping complete for server %d" % i.guid)
+            log.debug("SCRAPER - started")
+            for i in vacuum:
+                log.debug("scraping for server %d" % i)
+                vacuum[i].playtime_scraper()
+                log.debug("scraping complete for server %d" % i)
+            log.debug("SCRAPER - ended")
 
     def is_played_time_loop_running(self):
         pass
@@ -156,34 +158,37 @@ class ButtBot:
     async def _process_rip_message(self, message: Message):
         if (str(message.author) == 'Progress#6064' and message.content[:4] == 'RIP:') or \
                 (str(message.author) == '💩💩#4048' and message.content[:4] == 'RIP:'):
-            self.vacuum.add_death_message(message.content)
+            vacuum[message.guild.id].add_death_message(message.content)
         else:
-
-            if self.allowed_in_channel(message.channel) and self.config.getboolean('discordbot', 'RIP'):
-                self.stats.message_store(message.channel.id)
-                if self.timer_module.check_timeout('rip', 'shitpost'):
-                    self.stats.disposition_store(message.guild.id, message.channel.id,
-                                                 "RIP", "RIP")
+            if self.allowed_in_channel(message.channel) and \
+                    guild_configs[message.guild.id].getboolean('discordbot', 'RIP'):
+                # self.stats.message_store(message.channel.id)
+                if timer_module.check_timeout(str(message.channel.id) + 'rip',
+                                              guild_configs(message.channel.id).shitpost_freq):
+                    # self.stats.disposition_store(message.guild.id, message.channel.id,
+                    #                             "RIP", "RIP")
                     if random.randint(1, 20) == 5:
-                        await self.docomms('Ya, butts', message.channel)
+                        await self.docomms('Ya, butts', message.channel, message.guild.id)
                     else:
-                        await self.docomms('Ya, RIP', message.channel)
+                        await self.docomms('Ya, RIP', message.channel, message.guild.id)
                 else:
-                    self.stats.disposition_store(message.guild.id, message.channel.id,
-                                                 "RIP cooldown", "RIP cooldown")
+                    pass
+                    # self.stats.disposition_store(message.guild.id, message.channel.id,
+                    #                             "RIP cooldown", "RIP cooldown")
 
     async def _process_f_message(self, message):
-        if self.allowed_in_channel(message.channel) and self.config.getboolean('discordbot', 'F'):
-            self.stats.message_store(message.channel.id)
-            if self.timer_module.check_timeout('f', 'shitpost'):
-                self.stats.disposition_store(message.guild.id, message.channel.id,
-                                             "F", "F")
-                await self.docomms('Ya, F', message.channel)
+        if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].getboolean('discordbot', 'F'):
+            # self.stats.message_store(message.channel.id)
+            if timer_module.check_timeout(str(message.channel.id) + 'f',
+                                          guild_configs(message.channel.id).shitpost_freq):
+                # self.stats.disposition_store(message.guild.id, message.channel.id,
+                #                             "F", "F")
+                await self.docomms('Ya, F', message.channel, message.guild.id)
             else:
-                self.stats.disposition_store(message.guild.id, message.channel.id,
-                                             "F cooldown", "F cooldown")
+                # self.stats.disposition_store(message.guild.id, message.channel.id,
+                #                             "F cooldown", "F cooldown")
                 if random.randint(1, 100) == 44:
-                    await self.docomms('suck my dick F under cooldown', message.channel)
+                    await self.docomms('suck my dick F under cooldown', message.channel, message.guild.id)
 
     async def _process_butt_message(self, message):
         # TODO: stats module re-integration
@@ -196,7 +201,7 @@ class ButtBot:
                     if rshitpost:
                         # self.stats.disposition_store(message.guild.id, message.channel.id,
                         #                             "RSP", "RSP", message.content)
-                        await self.docomms(rshitpost, message.channel)
+                        await self.docomms(rshitpost, message.channel, message.guild.id)
                 else:
                     pass
             # self.stats.disposition_store(message.guild.id, message.channel.id,
@@ -204,24 +209,23 @@ class ButtBot:
             elif random.randint(1, 3) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp_emoji',
                                               guild_configs(message.channel.id).shitpost_freq):
-                    await self.doreact(message, message.channel, random.choice(self.config.get_all_emojis()))
+                    await self.doreact(message, message.channel,
+                                       random.choice(guild_configs[message.guild.id].get_all_emojis()))
 
     async def record_player_guid(self, player):
-        self.db.build()
-        players = self.db.do_query(
+        players = db["minecraft"].do_query(
             "select count(player_name) as c from progress.minecraft_players where player_name = %s",
             (player,)
         )
         if players[0]['c'] == 0:
             # we dont see this player in the db, let's record the guid
-            self.db.do_insert("insert into progress.minecraft_players "
-                              "(player_name, player_guid)"
-                              "VALUES (%s, %s)",
-                              (player, self.mojang.mojang_user_to_uuid(player)))
+            db["minecraft"].do_insert("insert into progress.minecraft_players "
+                                      "(player_name, player_guid)"
+                                      "VALUES (%s, %s)",
+                                      (player, self.mojang.mojang_user_to_uuid(player)))
         else:
             # we see this player name in the db, no need to record guid
             pass
-        self.db.close()
 
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
@@ -231,9 +235,10 @@ class ButtBot:
             # this is a join or part message and we are going to ignore it
             # welcome to progress
             if message.author.id == 249966240787988480 and is_word_in_text("joined the game", message.content):
-                hwsp = self.vacuum.have_we_seen_player(player)
+                hwsp = vacuum[message.guild.id].have_we_seen_player(player)
                 if hwsp:
-                    await self.docomms(hwsp, message.channel)
+                    log.debug("have not seen player before: %s" % player)
+                    await self.docomms(hwsp, message.channel, message.guild.id)
 
         else:
             if self.allowed_in_channel(message):

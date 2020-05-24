@@ -16,6 +16,7 @@ class Db:
                                           cursorclass=DictCursor)
 
     def do_query(self, query, args=''):
+        log.debug("QUERY - executing query %s with args %s" % (query, args))
         self.build()
         try:
             with self.connection.cursor() as cursor:
@@ -31,6 +32,7 @@ class Db:
         return result
 
     def do_insert(self, query, args):
+        log.debug("INSERT - executing query %s with args %s" % (query, args))
         self.build()
         try:
             with self.connection.cursor() as cursor:
@@ -42,6 +44,7 @@ class Db:
 
     def do_insert_no_args(self, query):
         self.build()
+        log.debug("INSERT_NO_ARGS - executing query %s with args %s" % (query, args))
         try:
             with self.connection.cursor() as cursor:
                 log.info("running query: %s" % str(query))
@@ -56,6 +59,7 @@ class Db:
 
     def do_insertmany(self, query, args):
         self.build()
+        log.debug("INSERTMANY - executing query %s with args %s" % (query, args))
         with self.connection.cursor() as cursor:
             try:
                 cursor.executemany(query, args)
