@@ -8,6 +8,7 @@ from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
 from shared import guild_configs, bot
 from discord.channel import DMChannel
+import logging
 
 from config import *
 
@@ -34,7 +35,7 @@ def setup_logger() -> logging.Logger:
 
 
 log = setup_logger()
-buttbot = ButtBot(bot)
+buttbot = ButtBot()
 bot.aiohttp_session = aiohttp.ClientSession()
 
 

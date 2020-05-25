@@ -1,7 +1,7 @@
 import logging
 from discord.ext.commands import Bot, Cog, Context, command, BucketType
 from discord.ext import commands
-from shared import db
+from shared import db, shitpost
 import datetime
 import random
 import asyncio
@@ -16,7 +16,40 @@ class VacuumCog(Cog):
 
     @command()
     @commands.cooldown(1, 10, BucketType.guild)
+    async def gaminggods(self, ctx: Context):
+        """lets you know who is boss"""
+        result = db["minecraft"].do_query(
+            "select T.player, format(sum(T.timedelta)/60/60, 1) as time "
+            "FROM progress_playertracker_v2 as T "
+            "left join(SELECT count(D.player) as deaths, D.player from progress_deaths D GROUP BY D.player) D "
+            "ON T.player = D.player "
+            "where coalesce(deaths,0) = 0 "
+            "group by player DESC "
+            "having sum(T.timedelta) > 3600")
+        if len(result) > 1:
+            # normal return
+            async with ctx.typing():
+                await asyncio.sleep(4)
+            await ctx.send("here are your gaming gods: %s" % self.sort(result, 'player', 'time', " hours"))
+        elif len(result) == 1:
+            async with ctx.typing():
+                await asyncio.sleep(4)
+                comments = ["https://www.youtube.com/watch?v=wubnFmYYfHs",
+                            "https://www.youtube.com/watch?v=iLBBRuVDOo4",
+                            "https://media.giphy.com/media/JoV2BiMWVZ96taSewG/giphy.gif"
+                            ]
+                r = comments[random.randrange(0, len(comments)) - 1]
+            await ctx.send("only %s is left. %s" % (result['player'], r))
+        else:
+            async with ctx.typing():
+                await asyncio.sleep(4)
+            await ctx.send(shitpost.do_butting_raw_sentence("this world is without any gaming gods"))
+            # no one left
+
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
     async def lastseen(self, ctx: Context, *args):
+        """i wonder where they went?"""
         log.debug("LASTSEEN - arguments are %s" % args)
         try:
             player = args[0]
@@ -55,6 +88,7 @@ class VacuumCog(Cog):
     @command()
     @commands.cooldown(1, 10, BucketType.guild)
     async def playtime(self, ctx: Context, *args):
+        """watch the muscle atrophy in real time"""
         try:
             player = args[0]
             if player:
@@ -129,7 +163,7 @@ class VacuumCog(Cog):
         result = db["minecraft"].do_query(
             "SELECT player, count(*) as `count` FROM `progress_deaths` where match(message) against (%s)"
             "GROUP BY player ORDER by count DESC",
-            message)
+            (message,))
         db["minecraft"].close()
         if result:
             return self.sort(result, 'player', 'count')
@@ -150,6 +184,7 @@ class VacuumCog(Cog):
     @command()
     @commands.cooldown(1, 10, BucketType.guild)
     async def howchies(self, ctx: Context, *args):
+        """here's whats killing you"""
         log.debug("HOWCHIES - triggered")
         if args:
             r = self.howchies_profile(args)
@@ -178,14 +213,18 @@ class VacuumCog(Cog):
     @command()
     @commands.cooldown(1, 10, BucketType.guild)
     async def ouchies(self, ctx: Context, *args):
+        """reflect upon the dead"""
         log.debug("ouchies ")
-        if args[0]:
-            r = self.ouchies_profile(args[0])
-            log.debug("OUCHIES - player search - searched %s, returned: %s" % (args[0], r))
-            async with ctx.typing():
-                await asyncio.sleep(3)
-            await ctx.send("Deaths for %s: %s" % (args[0], r))
-        else:
+        try:
+            if args[0]:
+                r = self.ouchies_profile(args[0])
+                log.debug("OUCHIES - player search - searched %s, returned: %s" % (args[0], r))
+                async with ctx.typing():
+                    await asyncio.sleep(3)
+                await ctx.send("Deaths for %s: %s" % (args[0], r))
+                return
+        except IndexError:
+            # no args, lets do top 10
             r = self.top_10_deaths()
             log.debug("OUCHIES - top 10 - returned: %s" % r)
             async with ctx.typing():
@@ -195,6 +234,7 @@ class VacuumCog(Cog):
     @command()
     @commands.cooldown(1, 10, BucketType.guild)
     async def alias(self, ctx: Context, *args):
+        """sneaky playerses"""
         names = self.player_alias(args[0])
         log.debug("ALIAS - searching player")
         if len(names) == 0:
@@ -234,7 +274,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     async def deathsperhour(self, ctx: Context, *args):
         dph = db["minecraft"].do_query(
-            "select T.player, COALESCE(D.deaths, 0) / (sum(T.timedelta)/60/60) as deaths_per_hour FROM "
+            "select T.player, COALESCE(D.deaths, 0) / format((sum(T.timedelta)/60/60),1) as deaths_per_hour FROM "
             "progress.progress_playertracker_v2 as T left join (SELECT count(D.player) as deaths, D.player"
             " from progress.progress_deaths D where player=%s GROUP BY D.player) D"
             " ON T.player = D.player where T.player=%s group by T.player", (args[0], args[0]))
@@ -251,13 +291,13 @@ class VacuumCog(Cog):
 
                 else:
                     insult = "you should try harder"
-                log.debug("DEATHSPERHOUR - deaths per hour for %s is %s. %s" % \
+                log.debug("DEATHSPERHOUR - deaths per hour for %s is %s. %s" %
                           (args[0],
                            str(dph[0]['deaths_per_hour']),
                            insult))
                 async with ctx.typing():
                     await asyncio.sleep(3)
-                await ctx.send("deaths per hour for %s is %s. %s" % \
+                await ctx.send("deaths per hour for %s is %s. %s" %
                                (args[0],
                                 str(dph[0]['deaths_per_hour']),
                                 insult))
@@ -290,12 +330,12 @@ class VacuumCog(Cog):
         return names
 
     @staticmethod
-    def sort(target, t1, t2):
+    def sort(target, t1, t2, t3=""):
         cmsg = ''
         i = 1
         for d in target:
             if i != 1:
                 cmsg = cmsg + ', '
-            cmsg = cmsg + d[t1] + '(' + str(d[t2]) + ')'
+            cmsg = cmsg + d[t1] + "(%s%s)" % (str(d[t2]), t3)
             i = i + 1
         return cmsg

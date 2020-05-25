@@ -8,13 +8,13 @@ from butt_library import is_word_in_text
 from discord import Message
 
 from shared import guild_configs, test_environment, phrase_weights, shitpost, comms_instance, \
-    timer_instance as timer_module, vacuum_instance as vacuum, db
+    timer_instance as timer_module, vacuum_instance as vacuum, db, bot
 
 log = logging.getLogger('bot.' + __name__)
 
 
 class ButtBot:
-    def __init__(self, bot):
+    def __init__(self):
         self.discordBot = bot
         self.mojang = mj.Mojang()
         self.discordBot.loop.create_task(self.scraper_subscription_task())
@@ -96,21 +96,57 @@ class ButtBot:
             return False
 
     async def chat_dispatch(self, message: Message):
-        if not self.should_i_reply_to_user(message):
-            # user is either a bot not on whitelist or is a user on the ignore list
-            log.debug("reply to user negative for %s in guild %d" % (str(message.author), message.channel.id))
-            return
+        # if not self.should_i_reply_to_user(message):
+        #    # user is either a bot not on whitelist or is a user on the ignore list
+        #    log.debug("reply to user negative for %s in guild %d" % (str(message.author), message.channel.id))
+        #    return
+        try:
+            if str(message.content).partition(" ")[2][0] == "$":
+                # command from inside of MC or other game server
+                log.debug("CHAT_DISPATCH - message is command from game server: %s " % message.content)
+                await self._process_command_interception(message)
+                return
+        except IndexError:
+            # not in here, skip it and keep going
+            pass
+
+        if is_word_in_text("RIP:", message.content):
+            log.debug("CHAT_DISPATCH - message is death alert from game server: %s " % message.content)
+            await self._process_death_message(message)
+
         elif is_word_in_text("rip", message.content):
+            log.debug("CHAT_DISPATCH - message is rip from player: %s " % message.content)
             await self._process_rip_message(message)
 
         elif is_word_in_text("F", message.content):
+            log.debug("CHAT_DISPATCH - message is F from player" % message.content)
             await self._process_f_message(message)
 
         elif is_word_in_text('butt', message.content) is True or is_word_in_text('butts', message.content) is True:
+            log.debug("CHAT_DISPATCH - message contains butt and is going to RSP %s " % message.content)
             await self._process_butt_message(message)
 
         else:
+            log.debug("CHAT_DISPATCH - message is going to all_other_messages: %s" % message.content)
             await self._process_all_other_messages(message)
+
+    @staticmethod
+    async def _process_command_interception(message: Message):
+        # is this genius? is this not? time will tell.
+        try:
+            command = message.content.split("$", 1)[1]
+        except IndexError:
+            log.debug("_PROCESS_COMMAND_INTERCEPTION - no special character found in message.")
+            # no & found in message.
+            command = ''
+        if command:
+            message.content = "%s%s" % ("$", command)
+            print(message.content)
+            # i wanted to use bot.process_commands here but can't since it explictly filters out bots.  The whole point
+            # of this command is to process text sent by bots.
+            # I make sure that the commands are only processed by allowed bots in a decorator on the commands themselves
+            ctx = await bot.get_context(message)
+            await bot.invoke(ctx)
 
     @staticmethod
     def allowed_in_channel(message: Message):
@@ -156,25 +192,30 @@ class ButtBot:
                 phrase_weights.remove_message(items[0], items[1], items[2])
 
     async def _process_rip_message(self, message: Message):
+        log.debug("PROCESS_RIP_MESSAGE - recieved rip")
+        if self.allowed_in_channel(message.channel) and \
+                guild_configs[message.guild.id].getboolean('discordbot', 'RIP'):
+            # self.stats.message_store(message.channel.id)
+            if timer_module.check_timeout(str(message.channel.id) + 'rip',
+                                          guild_configs(message.channel.id).shitpost_freq):
+                # self.stats.disposition_store(message.guild.id, message.channel.id,
+                #                             "RIP", "RIP")
+                if random.randint(1, 20) == 5:
+                    await self.docomms('Ya, butts', message.channel, message.guild.id)
+                else:
+                    await self.docomms('Ya, RIP', message.channel, message.guild.id)
+            else:
+                pass
+                # self.stats.disposition_store(message.guild.id, message.channel.id,
+                #                             "RIP cooldown", "RIP cooldown")
+
+    @staticmethod
+    async def _process_death_message(message: Message):
+        """recieved a notification from the minecraft interface bot that someone died on the server"""
+        log.debug("PROCESS_DEATH_MESSAGE - message recieved, %s" % message)
         if (str(message.author) == 'Progress#6064' and message.content[:4] == 'RIP:') or \
                 (str(message.author) == '💩💩#4048' and message.content[:4] == 'RIP:'):
             vacuum[message.guild.id].add_death_message(message.content)
-        else:
-            if self.allowed_in_channel(message.channel) and \
-                    guild_configs[message.guild.id].getboolean('discordbot', 'RIP'):
-                # self.stats.message_store(message.channel.id)
-                if timer_module.check_timeout(str(message.channel.id) + 'rip',
-                                              guild_configs(message.channel.id).shitpost_freq):
-                    # self.stats.disposition_store(message.guild.id, message.channel.id,
-                    #                             "RIP", "RIP")
-                    if random.randint(1, 20) == 5:
-                        await self.docomms('Ya, butts', message.channel, message.guild.id)
-                    else:
-                        await self.docomms('Ya, RIP', message.channel, message.guild.id)
-                else:
-                    pass
-                    # self.stats.disposition_store(message.guild.id, message.channel.id,
-                    #                             "RIP cooldown", "RIP cooldown")
 
     async def _process_f_message(self, message):
         if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].getboolean('discordbot', 'F'):
