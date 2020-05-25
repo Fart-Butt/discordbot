@@ -8,11 +8,13 @@ from config import *
 import butt_config
 import logging
 import vacuum
-
+from discord.ext.commands import Bot
 import aiohttp
 import asyncio
 
 import spacy
+
+bot = Bot(description="a bot for farts", command_prefix="$", pm_help=False)
 
 log = logging.getLogger('bot.' + __name__)
 

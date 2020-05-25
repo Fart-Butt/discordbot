@@ -2,16 +2,16 @@ import asyncio
 from pathlib import Path
 import datetime
 import aiohttp
-from discord.ext.commands import Bot
 from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
+from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
-from shared import guild_configs
+from shared import guild_configs, bot
 
 from config import *
 
 LOGDIR = Path('logs')
-bot = Bot(description="a bot for farts", command_prefix="$", pm_help=False)
+
 
 
 def setup_logger() -> logging.Logger:
@@ -103,5 +103,6 @@ async def serialize_weights():
 # bot.loop.create_task(send_stats_to_db())
 bot.add_cog(BotCommands(bot))
 bot.add_cog(BotConfig(bot))
+bot.add_cog(VacuumCog(bot))
 # bot.loop.create_task(serialize_weights())
 bot.run(secretkey)
