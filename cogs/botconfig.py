@@ -1,6 +1,7 @@
 import logging
 from discord.ext.commands import Bot, Cog, Context, command, has_permissions
 import shared
+from butt_library import valid_user_or_bot
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -12,6 +13,7 @@ class BotConfig(Cog):
 
     @command()
     @has_permissions(administrator=True)
+    @valid_user_or_bot()
     async def config(self, ctx: Context, *args):
         log.info("got config command from %s in channel %s. arguments are %s" %
                  (str(ctx.message.author.name), str(ctx.message.channel.name), str(*args)))
