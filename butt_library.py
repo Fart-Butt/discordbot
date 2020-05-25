@@ -81,3 +81,10 @@ def valid_user_or_bot():
         return should_i_reply_to_user(ctx)
 
     return check(predicate)
+
+
+def vacuum():
+    def predicate(ctx: Context):
+        return shared.guild_configs[ctx.guild.id].vacuum
+
+    return check(predicate)

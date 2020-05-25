@@ -81,7 +81,7 @@ class ButtConfig:
 
     @property
     def vacuum(self) -> bool:
-        return self.conf["vacuum"]
+        return bool(self.conf["vacuum"])
 
     @vacuum.setter
     def vacuum(self, setting: bool):
