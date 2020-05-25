@@ -1,8 +1,10 @@
 import logging
-from discord.ext.commands import Bot, Cog, Context, command
-from shared import guild_configs, db
+from discord.ext.commands import Bot, Cog, Context, command, BucketType
+from discord.ext import commands
+from shared import db
 import datetime
 import random
+import asyncio
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -12,13 +14,13 @@ class VacuumCog(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @staticmethod
-    @command
-    def lastseen(ctx: Context, *args):
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    async def lastseen(self, ctx: Context, *args):
+        log.debug("LASTSEEN - arguments are %s" % args)
         try:
             player = args[0]
             if player:
-
                 lastseen = db["minecraft"].do_query(
                     "select datetime from progress_playertracker_v2 "
                     "where player=%s order by datetime desc limit 1".format(),
@@ -34,26 +36,41 @@ class VacuumCog(Cog):
                     if seconds > 15:
                         days, remainder = divmod(seconds, 86400)
                         hours, remainder = divmod(remainder, 3600)
-                        ctx.send('last saw %s %s days %s hours ago' % (player, int(days), int(hours)))
+                        async with ctx.typing():
+                            await asyncio.sleep(3)
+                        await ctx.send('last saw %s %s days %s hours ago' % (player, int(days), int(hours)))
                     else:
-                        ctx.send("Did you remember to wear your helmet today, honey?")
+                        async with ctx.typing():
+                            await asyncio.sleep(3)
+                        await ctx.send("Did you remember to wear your helmet today, honey?")
                 except IndexError:
-                    ctx.send("Havent seen em")
+                    async with ctx.typing():
+                        await asyncio.sleep(3)
+                    await ctx.send("Havent seen em")
         except IndexError:
-            ctx.send("who am i looking for?")
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("who am i looking for?")
 
-    @command
-    def playtime(self, ctx: Context, *args):
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    async def playtime(self, ctx: Context, *args):
         try:
             player = args[0]
             if player:
                 returnz = self.playtime_insult(player)
                 if returnz:
-                    ctx.send(returnz)
+                    async with ctx.typing():
+                        await asyncio.sleep(3)
+                    await ctx.send(returnz)
             else:
-                ctx.send(self.playtime_global())
+                async with ctx.typing():
+                    await asyncio.sleep(3)
+                await ctx.send(self.playtime_global())
         except IndexError:
-            ctx.send(self.playtime_global())
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send(self.playtime_global())
 
     @staticmethod
     def playtime_global():
@@ -130,12 +147,22 @@ class VacuumCog(Cog):
         else:
             return 'No deaths recorded'
 
-    @command
-    def howchies(self, message):
-        if message:
-            return "People who died to " + message + ": " + self.howchies_profile(message)
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    async def howchies(self, ctx: Context, *args):
+        log.debug("HOWCHIES - triggered")
+        if args:
+            r = self.howchies_profile(args)
+            log.debug("HOWCHIES - search mode - returned: 'people who died to %s: %s" % (args, r))
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("People who died to %s: %s" % (args, r))
         else:
-            return 'Heres whats killing you: ' + self.top_10_death_reasons()
+            r = self.top_10_death_reasons()
+            log.debug("HOWCHIES - top 10 - returned: %s" % r)
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("Heres whats killing you: %s" % r)
 
     def top_10_death_reasons(self):
         result = db["minecraft"].do_query(
@@ -148,25 +175,42 @@ class VacuumCog(Cog):
         else:
             pass
 
-    @command
-    def ouchies(self, message):
-        if message:
-            return "Deaths for %s: %s" % (message, self.ouchies_profile(message))
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    async def ouchies(self, ctx: Context, *args):
+        log.debug("ouchies ")
+        if args[0]:
+            r = self.ouchies_profile(args[0])
+            log.debug("OUCHIES - player search - searched %s, returned: %s" % (args[0], r))
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("Deaths for %s: %s" % (args[0], r))
         else:
-            return 'Top 10 ouchies: %s' % self.top_10_deaths()
+            r = self.top_10_deaths()
+            log.debug("OUCHIES - top 10 - returned: %s" % r)
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send('Top 10 ouchies: %s' % r)
 
-    @command
-    def alias(self, player):
-        names = self.player_alias(player)
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    async def alias(self, ctx: Context, *args):
+        names = self.player_alias(args[0])
+        log.debug("ALIAS - searching player")
         if len(names) == 0:
-            return "I dont think i've ever seen that butt"
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("I dont think i've ever seen that butt")
         elif len(names) == 1:
-            return "I've only seen this jerk as %s" % names[0]
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("I've only seen this jerk as %s" % names[0])
         else:
-            return "I've seen this jerk play as %s" % ", ".join(names)
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("I've seen this jerk play as %s" % ", ".join(names))
 
     def top_10_deaths(self):
-
         result = db["minecraft"].do_query(
             "SELECT player, count(*) as `count` FROM `progress_deaths` GROUP BY player ORDER BY count DESC LIMIT 10",
             '')
@@ -186,13 +230,14 @@ class VacuumCog(Cog):
         if dph:
             return self.sort(dph, 'player', 'deaths_per_hour')
 
-    @command
-    def deathsperhour(self, player):
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    async def deathsperhour(self, ctx: Context, *args):
         dph = db["minecraft"].do_query(
             "select T.player, COALESCE(D.deaths, 0) / (sum(T.timedelta)/60/60) as deaths_per_hour FROM "
             "progress.progress_playertracker_v2 as T left join (SELECT count(D.player) as deaths, D.player"
             " from progress.progress_deaths D where player=%s GROUP BY D.player) D"
-            " ON T.player = D.player where T.player=%s group by T.player", (player, player))
+            " ON T.player = D.player where T.player=%s group by T.player", (args[0], args[0]))
         db["minecraft"].close()
         try:
             if dph[0]['deaths_per_hour'] > 0:
@@ -206,10 +251,16 @@ class VacuumCog(Cog):
 
                 else:
                     insult = "you should try harder"
-                return "deaths per hour for %s is %s. %s" % \
-                       (player,
-                        str(dph[0]['deaths_per_hour']),
-                        insult)
+                log.debug("DEATHSPERHOUR - deaths per hour for %s is %s. %s" % \
+                          (args[0],
+                           str(dph[0]['deaths_per_hour']),
+                           insult))
+                async with ctx.typing():
+                    await asyncio.sleep(3)
+                await ctx.send("deaths per hour for %s is %s. %s" % \
+                               (args[0],
+                                str(dph[0]['deaths_per_hour']),
+                                insult))
             else:
                 comments = [
                     "%s is the most boring person on the server",
@@ -217,9 +268,15 @@ class VacuumCog(Cog):
                     "persistence is key for %s",
                     "%s is a god among mortals"
                 ]
-                return comments[random.randrange(0, len(comments)) - 1] % player
+                r = comments[random.randrange(0, len(comments)) - 1] % args[0]
+                log.debug("DEATHSPERHOUR - %s" % r)
+                async with ctx.typing():
+                    await asyncio.sleep(3)
+                await ctx.send(r)
         except IndexError:
-            return "%s doesnt play" % player
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send("%s doesnt play" % args[0])
 
     @staticmethod
     def player_alias(player):
