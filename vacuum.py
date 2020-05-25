@@ -43,7 +43,6 @@ class Vacuum:
                 players = []
                 query_data = list()
                 for p in pl:
-                    log.debug("found player %s" % p['name'])
                     if self.NSA_module:
                         query_data.append((
                             datetime.datetime.utcnow(),
@@ -61,10 +60,11 @@ class Vacuum:
                         # player was logged in, and is still logged in
                         # we do not need to do anything for this player at this time.
                     else:
-                        log.debug("     adding player %s since they have logged in" % p['name'])
+                        log.debug(" adding player %s since they have logged in" % p['name'])
                         # player was not logged in, but is logged in now.
                         self.playtime_player_addplayer(p['name'])
                 # now we are going to find players that have logged out since the last check
+                log.debug("scraper found players %s" % players)
                 if self.NSA_module:
                     shared.db['minecraft'].do_insertmany("INSERT INTO `{}_NSA_module`"
                                                          "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
