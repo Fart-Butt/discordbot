@@ -64,37 +64,6 @@ class ButtBot:
             #                             "React", emojis, message.content)
             await comms_instance.do_react(message, self.discordBot, emojis)
 
-    @staticmethod
-    def _should_i_reply_to_bot(message: Message):
-        """Checks to see if we should reply to message author.  specific to users discord flags as bots"""
-        if message.author in guild_configs[message.guild.id].allowed_bots:
-            # we should always talk to this bot
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def _should_i_reply_to_user(message: Message):
-        """Checks to see if we should reply to message author.  specific to non bot users"""
-        if message.author not in guild_configs[message.guild.id].banned_users:
-            return True
-        else:
-            return False
-
-    def should_i_reply_to_user(self, message: Message):
-        """master clearinghouse for checking if bot should reply to user. checks user block list and accepted bot
-        list"""
-        if message.author.bot:
-            # bot user (flag set by discord server)
-            if self._should_i_reply_to_bot(message):
-                return True
-            else:
-                return False
-        if self._should_i_reply_to_user(message):
-            return True
-        else:
-            return False
-
     async def chat_dispatch(self, message: Message):
         # if not self.should_i_reply_to_user(message):
         #    # user is either a bot not on whitelist or is a user on the ignore list
