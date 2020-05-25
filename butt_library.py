@@ -77,13 +77,16 @@ def should_i_reply_to_user(ctx: Context):
 
 
 def valid_user_or_bot():
+    """makes sure user generating context is a valid to talk to"""
     def predicate(ctx: Context):
         return should_i_reply_to_user(ctx)
 
     return check(predicate)
 
 
-def vacuum():
+def vacuum_enabled_in_guild():
+    """makes sure vacuum module is enabled in guild config"""
+
     def predicate(ctx: Context):
         return shared.guild_configs[ctx.guild.id].vacuum
 
