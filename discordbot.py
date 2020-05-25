@@ -7,11 +7,11 @@ from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
 from shared import guild_configs, bot
+from discord.channel import DMChannel
 
 from config import *
 
 LOGDIR = Path('logs')
-
 
 
 def setup_logger() -> logging.Logger:
@@ -48,38 +48,36 @@ async def on_ready():
     log.info('--------')
 
 
-
-@bot.event
-async def on_server_join(server):
-    pass
-
-
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
-        return
+    if isinstance(message.channel, DMChannel):
+        # we don't care about this
+        pass
+    else:
+        if message.author == bot.user:
+            return
 
-    if message.author == "BroBot#4514":
-        # we dont give a shit about anything this bot says, ever.
-        return
-    # ensure guild has a config loaded
-    try:
-        if guild_configs[message.guild.id].exists is True:
-            pass
-            # loaded
-    except KeyError:
-        guild_configs.create_config(message.guild.id)
+        if message.author == "BroBot#4514":
+            # we dont give a shit about anything this bot says, ever.
+            return
+        # ensure guild has a config loaded
+        try:
+            if guild_configs[message.guild.id].exists is True:
+                pass
+                # loaded
+        except KeyError:
+            guild_configs.create_config(message.guild.id)
 
-    try:
-        if message.content[0] == "$":
-            log.debug("sending message to command processor")
-            await bot.process_commands(message)
-        else:
-            # send to butterizer
+        try:
+            if message.content[0] == "$":
+                log.debug("sending message to command processor")
+                await bot.process_commands(message)
+            else:
+                # send to butterizer
+                await buttbot.chat_dispatch(message)
+        except IndexError:
+            # send these too
             await buttbot.chat_dispatch(message)
-    except IndexError:
-        # send these too
-        await buttbot.chat_dispatch(message)
 
 
 # async def send_stats_to_db():
