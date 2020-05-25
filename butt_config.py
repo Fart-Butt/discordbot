@@ -20,7 +20,7 @@ class ButtConfig:
                                                                 "inner join config "
                                                                 "on config.guid = spp.guid "
                                                                 "where spp.guid = %s", (guid,))
-        self.allowed_bots_query = shared.db["buttbot"].do_query("select bot_guid "
+        self.allowed_bots_query = shared.db["buttbot"].do_query("select bot_guid, minecraft_server "
                                                                 "from whitelisted_bots wb "
                                                                 "inner join config "
                                                                 "on config.guid = wb.guid "
@@ -159,6 +159,14 @@ class ButtConfig:
     def remove_whitelisted_bots(self, user_guid: int):
         self.delete_value("whitelisted_bots", "bot_guid", user_guid)
 
+    def is_bot_minecraft_relay(self, bot_guid: int) -> bool:
+        try:
+            return bool(
+                next(item for item in self.allowed_bots_query if item["bot_guid"] == bot_guid)['minecraft_server']
+            )
+        except KeyError:
+            return False
+
     @property
     def max_sentence_length(self):
         return self.conf["wordreplacer_max_sentence_length"]
@@ -196,7 +204,7 @@ class Config(dict):
         if does_config_exist['count'] > 0:
             # we have it, going to make a new instance
             self.configs[guid] = ButtConfig(guid)
-            if self.configs[guid].vacuum == True:
+            if self.configs[guid].vacuum:
                 log.info("subscribing to vaccum for %d" % guid)
                 shared.vacuum_instance.subscribe(self.configs[guid])
             else:
@@ -225,7 +233,7 @@ class Config(dict):
         for g in guids:
             log.debug("STARTUP - found config for %d, building config" % g['guid'])
             self.configs[g['guid']] = ButtConfig(g['guid'])
-            if self.configs[g['guid']].vacuum == True:
+            if self.configs[g['guid']].vacuum:
                 log.info("subscribing to vaccum for %d" % g['guid'])
                 shared.vacuum_instance.subscribe(self.configs[g['guid']])
             else:
