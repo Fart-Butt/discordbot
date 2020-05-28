@@ -89,7 +89,7 @@ class ButtConfig:
 
     @property
     def allowed_bots(self) -> list:
-        return self.reformat_query_to_list(self.allowed_channels_query, "bot_guid")
+        return self.reformat_query_to_list(self.allowed_bots_query, "bot_guid")
 
     @property
     def allowed_channels(self) -> list:
@@ -231,6 +231,7 @@ class Config(dict):
         # load all configs saved in the table
         guids = shared.db["buttbot"].do_query("select guid from config where 1")
         for g in guids:
+            print("startup for %d" % g['guid'])
             log.debug("STARTUP - found config for %d, building config" % g['guid'])
             self.configs[g['guid']] = ButtConfig(g['guid'])
             if self.configs[g['guid']].vacuum:
