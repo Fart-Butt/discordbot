@@ -44,7 +44,7 @@ class Db:
 
     def do_insert_no_args(self, query):
         self.build()
-        log.debug("INSERT_NO_ARGS - executing query %s with args %s" % (query, args))
+        log.debug("INSERT_NO_ARGS - executing query %s" % (query))
         try:
             with self.connection.cursor() as cursor:
                 log.info("running query: %s" % str(query))

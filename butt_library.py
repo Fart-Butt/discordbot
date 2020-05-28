@@ -1,8 +1,10 @@
 import re
 from discord.ext.commands import Context, check
 import shared
-
+import logging
 from rfc3987 import parse
+
+log = logging.getLogger('bot.' + __name__)
 
 
 def plurality(word, count):
@@ -46,18 +48,24 @@ def get_indexes(list_, word):
 
 def _should_i_reply_to_bot(ctx: Context):
     """Checks to see if we should reply to message author.  specific to users discord flags as bots"""
-    if ctx.message.author in shared.guild_configs[ctx.message.guild.id].allowed_bots:
+    if ctx.message.author.id in shared.guild_configs[ctx.message.channel.id].allowed_bots:
         # we should always talk to this bot
+        log.debug("SHOULD_I_REPLY_TO_USER: bot check passed")
         return True
     else:
+        log.debug("SHOULD_I_REPLY_TO_USER: bot check failed - %d - %s" %
+                  (ctx.message.guild.id, shared.guild_configs[ctx.message.guild.id].allowed_bots))
         return False
 
 
 def _should_i_reply_to_user(ctx: Context):
     """Checks to see if we should reply to message author.  specific to non bot users"""
-    if ctx.message.author not in shared.guild_configs[ctx.message.guild.id].banned_users:
+    if ctx.message.author.id not in shared.guild_configs[ctx.message.channel.id].banned_users:
+        log.debug("SHOULD_I_REPLY_TO_USER: user check passed")
         return True
     else:
+        log.debug(
+            "SHOULD_I_REPLY_TO_USER: user check failed - %s" % shared.guild_configs[ctx.message.guild.id].banned_users)
         return False
 
 
@@ -66,18 +74,13 @@ def should_i_reply_to_user(ctx: Context):
     list on a per-guild basis.  also checks global ban list."""
     if ctx.message.author.bot:
         # bot user (flag set by discord server)
-        if _should_i_reply_to_bot(ctx):
-            return True
-        else:
-            return False
-    if _should_i_reply_to_user(ctx):
-        return True
-    else:
-        return False
+        return _should_i_reply_to_bot(ctx)
+    return _should_i_reply_to_user(ctx)
 
 
 def valid_user_or_bot():
     """makes sure user generating context is a valid to talk to"""
+
     def predicate(ctx: Context):
         return should_i_reply_to_user(ctx)
 
@@ -88,6 +91,19 @@ def vacuum_enabled_in_guild():
     """makes sure vacuum module is enabled in guild config"""
 
     def predicate(ctx: Context):
-        return shared.guild_configs[ctx.guild.id].vacuum
+        return shared.guild_configs[ctx.message.guild.id].vacuum
+
+    return check(predicate)
+
+
+def can_speak_in_channel():
+    """verifies buttbot is allowed to talk in message channel"""
+
+    def predicate(ctx: Context):
+        log.debug("CAN_SPEAK_IN_CHANNEL: %s, %d, %s" %
+                  (ctx.message.channel.id in shared.guild_configs[ctx.message.guild.id].allowed_channels,
+                   ctx.message.channel.id,
+                   shared.guild_configs[ctx.message.guild.id].allowed_channels))
+        return ctx.message.channel.id in shared.guild_configs[ctx.message.guild.id].allowed_channels
 
     return check(predicate)

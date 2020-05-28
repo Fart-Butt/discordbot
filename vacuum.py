@@ -6,9 +6,8 @@ import urllib.request
 import random
 import logging
 import time
-from butt_config import ButtConfig
-from collections import UserDict
 
+from collections import UserDict
 from dateutil.parser import parse
 import shared
 
@@ -16,7 +15,7 @@ log = logging.getLogger('bot.' + __name__)
 
 
 class Vacuum:
-    def __init__(self, config: ButtConfig):
+    def __init__(self, config):
         log.debug("__init__ :: initializing Vaccum instance")
         self.players = []
         self.updateurl = config.vacuum_url
@@ -185,15 +184,19 @@ class Vacuum:
         dmsg = dmsg.strip()
         try:
             shared.db["minecraft"].do_insert(
-                "INSERT INTO `{}_deaths` (`player`,`message`,`world`,`x`,`y`,`z`,`datetime`)"
-                "VALUES(%s, %s, %s, %s, %s, %s, %s);".format(self.table_prefix),
-                (m[1], dmsg, coords['world'], coords['x'], coords['y'], coords['z'], datetime.datetime.utcnow()))
+                "INSERT INTO `{}_deaths` (`player_guid`, `player`,`message`,`world`,`x`,`y`,`z`,`datetime`)"
+                "select player_guid, %s as player, %s as message, %s as world, %s as x, %s as y, %s as z, "
+                "%s as datetime "
+                "from minecraft_players where player_name = %s".format(self.table_prefix),
+                (m[1], dmsg, coords['world'], coords['x'], coords['y'], coords['z'], datetime.datetime.utcnow(), m[1]))
         except TypeError:
             # catch this error, something that i dont believe should be possible with how this is set up but?????
             shared.db["minecraft"].do_insert(
-                "INSERT INTO `{}_deaths` (`player`,`message`,`world`,`x`,`y`,`z`,`datetime`)"
-                "VALUES(%s, %s, %s, %s, %s, %s, %s);".format(self.table_prefix),
-                (m[1], dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()))
+                "INSERT INTO `{}_deaths` (`player_guid`, `player`,`message`,`world`,`x`,`y`,`z`,`datetime`)"
+                "select player_guid, %s as player, %s as message, %s as world, %s as x, %s as y, %s as z, "
+                "%s as datetime "
+                "from minecraft_players where player_name = %s".format(self.table_prefix),
+                (m[1], dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
         shared.db["minecraft"].close()
 
     def have_we_seen_player(self, player):
@@ -223,7 +226,7 @@ class VacuumManager(UserDict):
         log.debug("initializing VacuumManager")
         super().__init__()
 
-    def subscribe(self, config: ButtConfig):
+    def subscribe(self, config):
         log.info("new vacuum subscription started for guid %d. table prefix is %s" % (config.guid, config.table_prefix))
         self.__setitem__(config.guid, Vacuum(config))
 
