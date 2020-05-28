@@ -5,7 +5,7 @@ from shared import db, shitpost
 import datetime
 import random
 import asyncio
-from butt_library import valid_user_or_bot, vacuum_enabled_in_guild
+from butt_library import valid_user_or_bot, vacuum_enabled_in_guild, can_speak_in_channel
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -19,6 +19,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def gaminggods(self, ctx: Context):
         """lets you know who is boss"""
         result = db["minecraft"].do_query(
@@ -53,6 +54,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def lastseen(self, ctx: Context, *args):
         """i wonder where they went?"""
         log.debug("LASTSEEN - arguments are %s" % args)
@@ -94,6 +96,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def playtime(self, ctx: Context, *args):
         """watch the muscle atrophy in real time"""
         try:
@@ -192,6 +195,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def howchies(self, ctx: Context, *args):
         """here's whats killing you"""
         log.debug("HOWCHIES - triggered")
@@ -223,6 +227,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def ouchies(self, ctx: Context, *args):
         """reflect upon the dead"""
         log.debug("ouchies ")
@@ -246,6 +251,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def alias(self, ctx: Context, *args):
         """sneaky playerses"""
         names = self.player_alias(args[0])
@@ -287,6 +293,7 @@ class VacuumCog(Cog):
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
     async def deathsperhour(self, ctx: Context, *args):
         dph = db["minecraft"].do_query(
             "select T.player, COALESCE(D.deaths, 0) / format((sum(T.timedelta)/60/60),1) as deaths_per_hour FROM "
