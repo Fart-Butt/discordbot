@@ -228,7 +228,7 @@ class ButtBot:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp_emoji',
                                               guild_configs[message.guild.id].shitpost_freq):
                     await self.doreact(message, message.channel,
-                                       random.choice(guild_configs[message.guild.id].get_all_emojis()))
+                                       random.choice(guild_configs[message.guild.id].emojis))
 
     async def record_player_guid(self, player):
         players = db["minecraft"].do_query(
