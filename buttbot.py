@@ -120,7 +120,7 @@ class ButtBot:
     @staticmethod
     def allowed_in_channel(message: Message):
         try:
-            if message.channel.id in guild_configs[message.channel.guild.id].allowed_channels:
+            if message.channel.id in guild_configs[message.channel.id].allowed_channels:
                 return True
             else:
                 return False
