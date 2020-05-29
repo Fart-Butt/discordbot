@@ -72,7 +72,9 @@ class ButtBot:
         try:
             if str(message.content).partition(" ")[2][0] == "&":
                 # command from inside of MC or other game server
-                log.debug("CHAT_DISPATCH - message is command from game server: %s " % message.content)
+                log.debug(
+                    "CHAT_DISPATCH  - GUID %d - message is command from game server: %s " % (
+                    message.guild.id, message.content))
                 await self._process_command_interception(message)
                 return
         except IndexError:
@@ -80,23 +82,23 @@ class ButtBot:
             pass
 
         if is_word_in_text("RIP:", message.content):
-            log.debug("CHAT_DISPATCH - message is death alert from game server: %s " % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message is death alert from game server: %s " % message.content)
             await self._process_death_message(message)
 
         elif is_word_in_text("rip", message.content):
-            log.debug("CHAT_DISPATCH - message is rip from player: %s " % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % message.content)
             await self._process_rip_message(message)
 
         elif is_word_in_text("F", message.content):
-            log.debug("CHAT_DISPATCH - message is F from player")
+            log.info("CHAT_DISPATCH - GUID %d - message is F from player")
             await self._process_f_message(message)
 
         elif is_word_in_text('butt', message.content) is True or is_word_in_text('butts', message.content) is True:
-            log.debug("CHAT_DISPATCH - message contains butt and is going to RSP %s " % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % message.content)
             await self._process_butt_message(message)
 
         else:
-            log.debug("CHAT_DISPATCH - message is going to all_other_messages: %s" % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % message.content)
             await self._process_all_other_messages(message)
 
     @staticmethod
@@ -166,7 +168,7 @@ class ButtBot:
                 guild_configs[message.guild.id].rip:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'rip',
-                                          guild_configs[message.channel.id].shitpost_freq):
+                                          guild_configs[message.guild.id].shitpost_freq):
                 # self.stats.disposition_store(message.guild.id, message.channel.id,
                 #                             "RIP", "RIP")
                 if random.randint(1, 20) == 5:
@@ -190,7 +192,7 @@ class ButtBot:
         if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].f:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'f',
-                                          guild_configs[message.channel.id].shitpost_freq):
+                                          guild_configs[message.guild.id].shitpost_freq):
                 # self.stats.disposition_store(message.guild.id, message.channel.id,
                 #                             "F", "F")
                 await self.docomms('Ya, F', message.channel, message.guild.id)
@@ -206,7 +208,7 @@ class ButtBot:
             # self.stats.message_store(message.channel.id)
             if random.randint(1, 6) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp',
-                                              guild_configs[message.channel.id].shitpost_freq):
+                                              guild_configs[message.guild.id].shitpost_freq):
                     rshitpost = shitpost.rspeval(message.content)
                     if rshitpost:
                         # self.stats.disposition_store(message.guild.id, message.channel.id,
@@ -218,7 +220,7 @@ class ButtBot:
             #                             "RSP cooldown", "RSP cooldown")
             elif random.randint(1, 3) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp_emoji',
-                                              guild_configs[message.channel.id].shitpost_freq):
+                                              guild_configs[message.guild.id].shitpost_freq):
                     await self.doreact(message, message.channel,
                                        random.choice(guild_configs[message.guild.id].get_all_emojis()))
 
