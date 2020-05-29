@@ -44,7 +44,7 @@ class ButtConfig:
         shared.db["buttbot"].do_query(query, (value, self.guid))
 
     def insert_new_value(self, tab: str, row: str, val):
-        query = "insert into {0} ('{1}', guid) values('%s', %s)".format(tab, row)
+        query = "insert into {0} (`1`, `guid`) values('%s', %s)".format(tab, row)
         self.do_query(query, (val, self.guid))
 
     def delete_value(self, tab: str, row: str, val):
