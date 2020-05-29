@@ -74,7 +74,7 @@ class ButtBot:
                 # command from inside of MC or other game server
                 log.debug(
                     "CHAT_DISPATCH  - GUID %d - message is command from game server: %s " % (
-                    message.guild.id, message.content))
+                        message.guild.id, message.content))
                 await self._process_command_interception(message)
                 return
         except IndexError:
@@ -82,23 +82,26 @@ class ButtBot:
             pass
 
         if is_word_in_text("RIP:", message.content):
-            log.info("CHAT_DISPATCH - GUID %d - message is death alert from game server: %s " % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message is death alert from game server: %s " % (
+                message.guild.id, message.content))
             await self._process_death_message(message)
 
         elif is_word_in_text("rip", message.content):
-            log.info("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % (message.guild.id, message.content))
             await self._process_rip_message(message)
 
         elif is_word_in_text("F", message.content):
-            log.info("CHAT_DISPATCH - GUID %d - message is F from player")
+            log.info("CHAT_DISPATCH - GUID %d - message is F from player" % message.guild.id)
             await self._process_f_message(message)
 
         elif is_word_in_text('butt', message.content) is True or is_word_in_text('butts', message.content) is True:
-            log.info("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % (
+                message.guild.id, message.content))
             await self._process_butt_message(message)
 
         else:
-            log.info("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % message.content)
+            log.info("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % (
+                message.guild.id, message.content))
             await self._process_all_other_messages(message)
 
     @staticmethod
