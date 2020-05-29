@@ -118,15 +118,15 @@ class ButtBot:
             await bot.invoke(ctx)
 
     @staticmethod
-    def allowed_in_channel(message: Message):
+    def allowed_in_channel(channel):
         try:
-            if message.channel.id in guild_configs[message.channel.id].allowed_channels:
+            if channel.id in guild_configs[channel.id].allowed_channels:
                 return True
             else:
                 return False
         except IndexError:
             # todo: probably shouldnt happen but we might want to load a config here
-            print("didnt find config loaded for channel %d in guild %d" % (message.channel.id, message.guild.id))
+            print("didnt find config loaded for channel %d in guild %d" % (channel.id, channel.guild.id))
             return False
 
     @staticmethod
