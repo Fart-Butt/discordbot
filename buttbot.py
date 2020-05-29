@@ -70,7 +70,7 @@ class ButtBot:
         #    log.debug("reply to user negative for %s in guild %d" % (str(message.author), message.channel.id))
         #    return
         try:
-            if str(message.content).partition(" ")[2][0] == "$":
+            if str(message.content).partition(" ")[2][0] == "&":
                 # command from inside of MC or other game server
                 log.debug("CHAT_DISPATCH - message is command from game server: %s " % message.content)
                 await self._process_command_interception(message)

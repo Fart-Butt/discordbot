@@ -70,7 +70,7 @@ async def on_message(message):
             guild_configs.create_config(message.guild.id)
 
         try:
-            if message.content[0] == "$":
+            if message.content[0] == "&":
                 log.debug("sending message to command processor")
                 await bot.process_commands(message)
             else:
