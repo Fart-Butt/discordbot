@@ -36,6 +36,7 @@ class Db:
         self.build()
         try:
             with self.connection.cursor() as cursor:
+                print("executing query: %s with arguments %s" % (query, args))
                 cursor.execute(query, args)
                 self.connection.commit()
                 cursor.close()
@@ -62,6 +63,7 @@ class Db:
         log.debug("INSERTMANY - executing query %s with args %s" % (query, args))
         with self.connection.cursor() as cursor:
             try:
+                print("executing manyquery: %s with arguments %s" % (query, args))
                 cursor.executemany(query, args)
                 self.connection.commit()
                 cursor.close()
