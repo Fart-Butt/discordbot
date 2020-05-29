@@ -5,10 +5,12 @@ import aiohttp
 from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
+from cogs.mojang import MojangCog
 from buttbot import ButtBot
 from shared import guild_configs, bot
 from discord.channel import DMChannel
 import logging
+
 
 from config import *
 
@@ -103,5 +105,6 @@ async def serialize_weights():
 bot.add_cog(BotCommands(bot))
 bot.add_cog(BotConfig(bot))
 bot.add_cog(VacuumCog(bot))
+bot.add_cog(MojangCog(bot))
 # bot.loop.create_task(serialize_weights())
 bot.run(secretkey)
