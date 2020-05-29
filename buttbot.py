@@ -123,18 +123,18 @@ class ButtBot:
             await bot.invoke(ctx)
 
     @staticmethod
-    def allowed_in_channel(channel):
+    def allowed_in_channel(message: Message):
         try:
-            if channel.id in guild_configs[channel.id].allowed_channels:
+            if message.channel.id in guild_configs[message.guild.id].allowed_channels:
                 log.debug("ALLOWED_IN_CHANNEL - True")
                 return True
             else:
                 log.debug("ALLOWED_IN_CHANNEL - False - %d not in %s" % (
-                    channel.id, str(guild_configs[channel.id].allowed_channels)))
+                    message.channel.id, str(guild_configs[message.guild.id].allowed_channels)))
                 return False
         except IndexError:
             # todo: probably shouldnt happen but we might want to load a config here
-            print("didnt find config loaded for channel %d in guild %d" % (channel.id, channel.guild.id))
+            print("didnt find config loaded for channel %d in guild %d" % (message.channel.id, message.guild.id))
             return False
 
     @staticmethod
@@ -170,7 +170,7 @@ class ButtBot:
 
     async def _process_rip_message(self, message: Message):
         log.debug("PROCESS_RIP_MESSAGE - recieved rip")
-        if self.allowed_in_channel(message.channel) and \
+        if self.allowed_in_channel(message) and \
                 guild_configs[message.guild.id].rip:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'rip',
@@ -195,7 +195,7 @@ class ButtBot:
             vacuum[message.guild.id].add_death_message(message.content)
 
     async def _process_f_message(self, message):
-        if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].f:
+        if self.allowed_in_channel(message) and guild_configs[message.guild.id].f:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'f',
                                           guild_configs[message.guild.id].shitpost_freq):
@@ -210,7 +210,7 @@ class ButtBot:
 
     async def _process_butt_message(self, message):
         # TODO: stats module re-integration
-        if self.allowed_in_channel(message.channel):
+        if self.allowed_in_channel(message):
             # self.stats.message_store(message.channel.id)
             if random.randint(1, 6) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp',
@@ -259,7 +259,7 @@ class ButtBot:
                     await self.docomms(hwsp, message.channel, message.guild.id)
 
         else:
-            if self.allowed_in_channel(message.channel):
+            if self.allowed_in_channel(message):
                 log.debug("allowed to speak in channel")
                 # do not send to shitpost module if we aren't allowed to talk in the channel in question.
                 if test_environment:
