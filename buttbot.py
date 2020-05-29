@@ -166,7 +166,7 @@ class ButtBot:
                 guild_configs[message.guild.id].rip:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'rip',
-                                          guild_configs(message.channel.id).shitpost_freq):
+                                          guild_configs[message.channel.id].shitpost_freq):
                 # self.stats.disposition_store(message.guild.id, message.channel.id,
                 #                             "RIP", "RIP")
                 if random.randint(1, 20) == 5:
@@ -190,7 +190,7 @@ class ButtBot:
         if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].f:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'f',
-                                          guild_configs(message.channel.id).shitpost_freq):
+                                          guild_configs[message.channel.id].shitpost_freq):
                 # self.stats.disposition_store(message.guild.id, message.channel.id,
                 #                             "F", "F")
                 await self.docomms('Ya, F', message.channel, message.guild.id)
@@ -206,7 +206,7 @@ class ButtBot:
             # self.stats.message_store(message.channel.id)
             if random.randint(1, 6) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp',
-                                              guild_configs(message.channel.id).shitpost_freq):
+                                              guild_configs[message.channel.id].shitpost_freq):
                     rshitpost = shitpost.rspeval(message.content)
                     if rshitpost:
                         # self.stats.disposition_store(message.guild.id, message.channel.id,
@@ -218,7 +218,7 @@ class ButtBot:
             #                             "RSP cooldown", "RSP cooldown")
             elif random.randint(1, 3) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp_emoji',
-                                              guild_configs(message.channel.id).shitpost_freq):
+                                              guild_configs[message.channel.id].shitpost_freq):
                     await self.doreact(message, message.channel,
                                        random.choice(guild_configs[message.guild.id].get_all_emojis()))
 
