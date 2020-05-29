@@ -88,7 +88,7 @@ class ButtBot:
             await self._process_rip_message(message)
 
         elif is_word_in_text("F", message.content):
-            log.debug("CHAT_DISPATCH - message is F from player" % message.content)
+            log.debug("CHAT_DISPATCH - message is F from player")
             await self._process_f_message(message)
 
         elif is_word_in_text('butt', message.content) is True or is_word_in_text('butts', message.content) is True:
