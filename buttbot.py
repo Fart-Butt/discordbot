@@ -257,6 +257,7 @@ class ButtBot:
 
         else:
             if self.allowed_in_channel(message.channel):
+                log.debug("allowed to speak in channel")
                 # do not send to shitpost module if we aren't allowed to talk in the channel in question.
                 if test_environment:
                     # always reply in test environment
@@ -275,6 +276,7 @@ class ButtBot:
                             msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
                             phrase_weights.add_message(message, shitpost.get_noun())
             else:
+                log.debug("not allowed to speak in channel")
                 if test_environment:
                     # send to shitpost module for testing.
                     # we don't want to talk at all except in my test channel
