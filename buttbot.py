@@ -108,13 +108,13 @@ class ButtBot:
     async def _process_command_interception(message: Message):
         # is this genius? is this not? time will tell.
         try:
-            command = message.content.split("$", 1)[1]
+            command = message.content.split("&", 1)[1]
         except IndexError:
             log.debug("_PROCESS_COMMAND_INTERCEPTION - no special character found in message.")
             # no & found in message.
             command = ''
         if command:
-            message.content = "%s%s" % ("$", command)
+            message.content = "%s%s" % ("&", command)
             print(message.content)
             # i wanted to use bot.process_commands here but can't since it explictly filters out bots.  The whole point
             # of this command is to process text sent by bots.
@@ -207,7 +207,7 @@ class ButtBot:
 
     async def _process_butt_message(self, message):
         # TODO: stats module re-integration
-        if self.allowed_in_channel(message):
+        if self.allowed_in_channel(message.channel):
             # self.stats.message_store(message.channel.id)
             if random.randint(1, 6) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp',
@@ -256,7 +256,7 @@ class ButtBot:
                     await self.docomms(hwsp, message.channel, message.guild.id)
 
         else:
-            if self.allowed_in_channel(message):
+            if self.allowed_in_channel(message.channel):
                 # do not send to shitpost module if we aren't allowed to talk in the channel in question.
                 if test_environment:
                     # always reply in test environment
