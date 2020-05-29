@@ -115,7 +115,7 @@ class ButtConfig:
 
     @property
     def rip(self) -> bool:
-        return self.conf["rip"]
+        return bool(self.conf["rip"])
 
     @rip.setter
     def rip(self, setting):

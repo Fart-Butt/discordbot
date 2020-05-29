@@ -163,7 +163,7 @@ class ButtBot:
     async def _process_rip_message(self, message: Message):
         log.debug("PROCESS_RIP_MESSAGE - recieved rip")
         if self.allowed_in_channel(message.channel) and \
-                guild_configs[message.guild.id].getboolean('discordbot', 'RIP'):
+                guild_configs[message.guild.id].rip:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'rip',
                                           guild_configs(message.channel.id).shitpost_freq):
@@ -187,7 +187,7 @@ class ButtBot:
             vacuum[message.guild.id].add_death_message(message.content)
 
     async def _process_f_message(self, message):
-        if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].getboolean('discordbot', 'F'):
+        if self.allowed_in_channel(message.channel) and guild_configs[message.guild.id].f:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'f',
                                           guild_configs(message.channel.id).shitpost_freq):
