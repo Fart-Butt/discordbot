@@ -40,15 +40,15 @@ class ButtConfig:
             shared.db["buttbot"].do_query(query)
 
     def update_property(self, prop: str, value):
-        query = "update config set {0} = %s where guid = %d".format(prop)
+        query = "update config set {0} = %s where guid = %s".format(prop)
         shared.db["buttbot"].do_query(query, (value, self.guid))
 
     def insert_new_value(self, tab: str, row: str, val):
-        query = "insert into {0} ('{1}', guid) values('%s', %d)".format(tab, row)
+        query = "insert into {0} ('{1}', guid) values('%s', %s)".format(tab, row)
         self.do_query(query, (val, self.guid))
 
     def delete_value(self, tab: str, row: str, val):
-        query = "delete from {0} where {1} = %s and guid = %d".format(tab, row)
+        query = "delete from {0} where {1} = %s and guid = %s".format(tab, row)
         self.do_query(query, (val, self.guid))
 
     @property
