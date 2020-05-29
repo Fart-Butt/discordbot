@@ -126,8 +126,11 @@ class ButtBot:
     def allowed_in_channel(channel):
         try:
             if channel.id in guild_configs[channel.id].allowed_channels:
+                log.debug("ALLOWED_IN_CHANNEL - True")
                 return True
             else:
+                log.debug("ALLOWED_IN_CHANNEL - False - %d not in %s" % (
+                    channel.id, str(guild_configs[channel.id].allowed_channels)))
                 return False
         except IndexError:
             # todo: probably shouldnt happen but we might want to load a config here
