@@ -36,7 +36,7 @@ class Db:
         self.build()
         try:
             with self.connection.cursor() as cursor:
-                print("executing query: %s with arguments %s" % (query, args))
+                log.debug("executing query: %s with arguments %s" % (query, args))
                 cursor.execute(query, args)
                 self.connection.commit()
                 cursor.close()
@@ -63,12 +63,12 @@ class Db:
         log.debug("INSERTMANY - executing query %s with args %s" % (query, args))
         with self.connection.cursor() as cursor:
             try:
-                print("executing manyquery: %s with arguments %s" % (query, args))
+                log.debug("executing manyquery: %s with arguments %s" % (query, args))
                 cursor.executemany(query, args)
                 self.connection.commit()
                 cursor.close()
             except:
-                print("Error executing this mysql query: %s" % cursor._last_executed)
+                log.critical("Error executing this mysql query: %s" % cursor._last_executed)
                 raise
             finally:
                 pass
