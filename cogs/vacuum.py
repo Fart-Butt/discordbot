@@ -40,7 +40,8 @@ class VacuumCog(Cog):
                 await asyncio.sleep(4)
                 comments = ["https://www.youtube.com/watch?v=wubnFmYYfHs",
                             "https://www.youtube.com/watch?v=iLBBRuVDOo4",
-                            "https://media.giphy.com/media/JoV2BiMWVZ96taSewG/giphy.gif"
+                            "https://media.giphy.com/media/JoV2BiMWVZ96taSewG/giphy.gif",
+                            "https://www.youtube.com/watch?v=m1xs14LwzBM"
                             ]
                 r = comments[random.randrange(0, len(comments)) - 1]
             await ctx.send("only %s is left. %s" % (result['player'], r))

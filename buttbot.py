@@ -56,9 +56,9 @@ class ButtBot:
             msg = await comms_instance.do_send_message(channel, message)
             return msg  # returns the message object of the message that was sent to discord
 
-    async def doreact(self, message, channel, emojis):
+    async def doreact(self, message, emojis):
         # TODO: stats re-integration
-        if self.allowed_in_channel(channel):
+        if self.allowed_in_channel(message):
             # self.stats.message_store(message.channel.id)
             # self.stats.disposition_store(message.guild.id, message.channel.id,
             #                             "React", emojis, message.content)
@@ -227,7 +227,7 @@ class ButtBot:
             elif random.randint(1, 3) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp_emoji',
                                               guild_configs[message.guild.id].shitpost_freq):
-                    await self.doreact(message, message.channel,
+                    await self.doreact(message,
                                        random.choice(guild_configs[message.guild.id].emojis))
 
     async def record_player_guid(self, player):
