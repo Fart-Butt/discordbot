@@ -14,7 +14,7 @@ import asyncio
 
 import spacy
 
-bot = Bot(description="a bot for farts", command_prefix="&", pm_help=False)
+bot = Bot(description="a bot for farts", command_prefix=command_prefix, pm_help=False)
 
 log = logging.getLogger('bot.' + __name__)
 

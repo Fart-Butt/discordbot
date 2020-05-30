@@ -2,6 +2,7 @@ import asyncio
 import random
 import time
 import logging
+from config import command_prefix
 
 import mojang as mj
 from butt_library import is_word_in_text
@@ -70,7 +71,7 @@ class ButtBot:
         #    log.debug("reply to user negative for %s in guild %d" % (str(message.author), message.channel.id))
         #    return
         try:
-            if str(message.content).partition(" ")[2][0] == "&":
+            if str(message.content).partition(" ")[2][0] == command_prefix:
                 # command from inside of MC or other game server
                 log.debug(
                     "CHAT_DISPATCH  - GUID %d - message is command from game server: %s " % (
@@ -108,13 +109,13 @@ class ButtBot:
     async def _process_command_interception(message: Message):
         # is this genius? is this not? time will tell.
         try:
-            command = message.content.split("&", 1)[1]
+            command = message.content.split(command_prefix, 1)[1]
         except IndexError:
             log.debug("_PROCESS_COMMAND_INTERCEPTION - no special character found in message.")
-            # no & found in message.
+            # no command prefix found in message.
             command = ''
         if command:
-            message.content = "%s%s" % ("&", command)
+            message.content = "%s%s" % (command_prefix, command)
             print(message.content)
             # i wanted to use bot.process_commands here but can't since it explictly filters out bots.  The whole point
             # of this command is to process text sent by bots.
