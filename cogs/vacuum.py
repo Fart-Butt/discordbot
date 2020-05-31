@@ -16,7 +16,71 @@ class VacuumCog(Cog):
         self.bot = bot
 
     @command()
-    @commands.cooldown(1, 10, BucketType.guild)
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    @valid_user_or_bot()
+    @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
+    async def registerbase(self, ctx: Context, *args):
+        """register your minecraft base with buttbot.  this will automatically update your previous entry."""
+        db["minecraft"].do_insert("insert into progress_NSA_POI (player, dimension, poi_estimated_size, x, z, datetime)"
+                                  " select * from (select player, dimension, 100 as poi_estimated_size, x, z, datetime "
+                                  "from progress_NSA_module where player = %s order by datetime DESC limit 1) as new "
+                                  "on duplicate key update datetime = new.datetime, x = new.x, z = new.z", (*args,))
+        async with ctx.typing():
+            await asyncio.sleep(4)
+        await ctx.send("your butt is now registered with buttbot")
+
+    @command()
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    @valid_user_or_bot()
+    @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
+    async def whosebase(self, ctx: Context, *args):
+        """reports whose base you are standing in."""
+        # this query checks to see if someone has the base registered in the database.
+        requester = args
+        a = db["minecraft"].do_query("select pnp.player from progress_NSA_POI pnp "
+                                     "left join (select x, z from progress_NSA_module "
+                                     "where player = %s group by datetime DESC limit 1) t1 "
+                                     "on pnp.x between (t1.x-60) and (t1.x+60) "
+                                     "where pnp.z between (t1.z-60) and (t1.z+60)", (requester,))
+
+        players = len(a)
+        if players > 0:
+            # 1 or more players registered at this location
+            player = list()
+            for lines in a:
+                player.append(lines['player'])
+            message = "%s lives there" % ", ".join(player)
+        else:
+            # no one registered at this location, lets poll the tracking table to see who is likely
+            b = db["minecraft"].do_query("select player, "
+                                         "count(*) / (select count(*) from progress_NSA_module pnm left join "
+                                         "(select x, z from progress_NSA_module where player = %s "
+                                         "group by datetime DESC limit 1) t1 on "
+                                         "pnm.x between (t1.x-50) and (t1.x+50) "
+                                         "where pnm.z between (t1.z-50) and (t1.z+50))*100 as percent "
+                                         "from progress_NSA_module pnm left join "
+                                         "(select x, z from progress_NSA_module where "
+                                         "player = %s group by datetime DESC limit 1) t1 "
+                                         "on pnm.x between (t1.x-50) and (t1.x+50) where "
+                                         "pnm.z between (t1.z-50) and (t1.z+50) "
+                                         "group by player "
+                                         "having percent > 15", (requester, requester))
+            if len(b) > 0:
+                # someone probably lives here
+                player = list()
+                for lines in b:
+                    player.append(lines['player'])
+                message = "i think %s might live there" % ", ".join(player)
+            else:
+                # no one lives here??
+                message = "I think no one lives there"
+        async with ctx.typing():
+            await asyncio.sleep(4)
+        await ctx.send(message)
+
+    @command()
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
     @can_speak_in_channel()
