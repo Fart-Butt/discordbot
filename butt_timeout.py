@@ -1,4 +1,7 @@
 import time
+import logging
+
+log = logging.getLogger('bot.' + __name__)
 
 
 class Timeout:
@@ -13,6 +16,9 @@ class Timeout:
         if timeout_member_name not in self.timeout_storage_variable or \
                 time.time() > self.timeout_storage_variable[timeout_member_name]:
             self.timeout_storage_variable[timeout_member_name] = time.time() + timeout_duration
+            log.debug("CHECK_TIMEOUT - PASSED request: %s for duration %d" % (timeout_member_name, timeout_duration))
+            log.debug("Current check variable: %s" % self.timeout_storage_variable)
             return True
         else:
+            log.debug("CHECK_TIMEOUT - FAILED request: %s for duration %d" % (timeout_member_name, timeout_duration))
             return False
