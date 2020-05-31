@@ -109,14 +109,18 @@ class ButtBot:
     async def _process_command_interception(message: Message):
         # is this genius? is this not? time will tell.
         try:
-            command = message.content.split(command_prefix, 1)[1]
+            player, command = message.content.split(command_prefix, 1)
+            # remove <> denoting message came from player
+            player = player[1:-2]
         except IndexError:
             log.debug("_PROCESS_COMMAND_INTERCEPTION - no special character found in message.")
             # no command prefix found in message.
+            player = ''
             command = ''
         if command:
-            message.content = "%s%s" % (command_prefix, command)
-            print(message.content)
+            # 5/30/20 - added player sending command as argument to the command so it can be used by commands
+            # for personalized processing.
+            message.content = "%s%s %s" % (command_prefix, command, player)
             # i wanted to use bot.process_commands here but can't since it explictly filters out bots.  The whole point
             # of this command is to process text sent by bots.
             # I make sure that the commands are only processed by allowed bots in a decorator on the commands themselves
