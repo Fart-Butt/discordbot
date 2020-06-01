@@ -73,7 +73,7 @@ class ButtConfig:
 
     @property
     def shitpost_freq(self) -> int:
-        return self.conf["command_call_freq"]
+        return self.conf["shitpost_call_freq"]
 
     @name.setter
     def name(self, pla: str):
