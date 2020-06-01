@@ -92,8 +92,9 @@ class VacuumCog(Cog):
             "left join(SELECT count(D.player) as deaths, D.player from progress_deaths D GROUP BY D.player) D "
             "ON T.player = D.player "
             "where coalesce(deaths,0) = 0 "
-            "group by player DESC "
-            "having sum(T.timedelta) > 3600")
+            "group by player "
+            "having sum(T.timedelta) > 3600 "
+            "order by time DESC")
         if len(result) > 1:
             # normal return
             async with ctx.typing():
