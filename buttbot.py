@@ -274,7 +274,7 @@ class ButtBot:
                     rv = [1, 5, 3]
                 if random.randint(rv[0], rv[1]) == rv[2]:
                     # message length check
-                    if len(message.content) < guild_configs[message.guild.id].max_sentence_length:
+                    if len(message.content.split()) < guild_configs[message.guild.id].max_sentence_length:
                         if timer_module.check_timeout(str(message.guild.id) + 'shitpost',
                                                       guild_configs[message.guild.id].shitpost_freq):
                             # passed timer check
