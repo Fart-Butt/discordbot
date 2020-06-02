@@ -54,7 +54,7 @@ class VacuumCog(Cog):
             message = "%s lives there" % ", ".join(player)
         else:
             # no one registered at this location, lets poll the tracking table to see who is likely
-            b = db["minecraft"].do_query("select player, "
+            b = db["minecraft"].do_query("select player, count(*) as co, "
                                          "count(*) / (select count(*) from progress_NSA_module pnm left join "
                                          "(select x, z from progress_NSA_module where player = %s "
                                          "group by datetime DESC limit 1) t1 on "
@@ -66,7 +66,7 @@ class VacuumCog(Cog):
                                          "on pnm.x between (t1.x-50) and (t1.x+50) where "
                                          "pnm.z between (t1.z-50) and (t1.z+50) "
                                          "group by player "
-                                         "having percent > 15", (requester, requester))
+                                         "having percent > 15 and co > 500", (requester, requester))
             if len(b) > 0:
                 # someone probably lives here
                 player = list()
@@ -93,7 +93,7 @@ class VacuumCog(Cog):
             "ON T.player = D.player "
             "where coalesce(deaths,0) = 0 "
             "group by player "
-            "having sum(T.timedelta) > 3600 "
+            "having sum(T.timedelta) > 18000 "
             "order by time DESC")
         if len(result) > 1:
             # normal return
