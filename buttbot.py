@@ -273,16 +273,20 @@ class ButtBot:
                 else:
                     rv = [1, 5, 3]
                 if random.randint(rv[0], rv[1]) == rv[2]:
-                    if timer_module.check_timeout(str(message.guild.id) + 'shitpost',
-                                                  guild_configs[message.guild.id].shitpost_freq):
-                        # passed timer check
-                        # try:
-                        shitpost.perform_text_to_butt(message)
+                    # message length check
+                    if len(message.content) < guild_configs[message.guild.id].max_sentence_length:
+                        if timer_module.check_timeout(str(message.guild.id) + 'shitpost',
+                                                      guild_configs[message.guild.id].shitpost_freq):
+                            # passed timer check
+                            # try:
+                            shitpost.perform_text_to_butt(message)
 
-                        if shitpost.successful_butting():
-                            # passes butt check
-                            msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
-                            phrase_weights.add_message(message, shitpost.get_noun())
+                            if shitpost.successful_butting():
+                                # passes butt check
+                                msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
+                                phrase_weights.add_message(message, shitpost.get_noun())
+                    else:
+                        log.debug("Message2Butt_Processor - sentence over character length.")
             else:
                 log.debug("not allowed to speak in channel")
                 if test_environment:
