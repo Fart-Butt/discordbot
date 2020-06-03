@@ -87,13 +87,18 @@ class VacuumCog(Cog):
     async def gaminggods(self, ctx: Context):
         """lets you know who is boss"""
         result = db["minecraft"].do_query(
-            "select T.player, format(sum(T.timedelta)/60/60, 1) as time "
+            "select ppv.player, format(sum(ppv.timedelta)/60/60, 1) as time "
+            "from progress_playertracker_v2 ppv "
+            "inner join "
+            "(select T.player, datetime "
             "FROM progress_playertracker_v2 as T "
             "left join(SELECT count(D.player) as deaths, D.player from progress_deaths D GROUP BY D.player) D "
             "ON T.player = D.player "
-            "where coalesce(deaths,0) = 0 "
+            "where coalesce(deaths,0) = 0 and datetime > DATE_SUB(CURDATE(), INTERVAL 7 DAY ) "
             "group by player "
-            "having sum(T.timedelta) > 18000 "
+            "having sum(T.timedelta) > 18000) t1 "
+            "on ppv.player = t1.player "
+            "group by player "
             "order by time DESC")
         if len(result) > 1:
             # normal return
