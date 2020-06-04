@@ -114,7 +114,7 @@ class VacuumCog(Cog):
                             "https://www.youtube.com/watch?v=m1xs14LwzBM"
                             ]
                 r = comments[random.randrange(0, len(comments)) - 1]
-            await ctx.send("only %s is left. %s" % (result['player'], r))
+            await ctx.send("only %s is left. %s" % (result[0], r))
         else:
             async with ctx.typing():
                 await asyncio.sleep(4)
