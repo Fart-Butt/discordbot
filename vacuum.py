@@ -36,7 +36,7 @@ class Vacuum:
     def playtime_scraper(self):
         log.debug("scraper started at %s" % str(time.time()))
         try:
-            with urllib.request.urlopen(self.updateurl) as url:
+            async with urllib.request.urlopen(self.updateurl, 5) as url:
                 data = json.loads(url.read().decode())
                 pl = data['players']
                 players = []
@@ -169,6 +169,7 @@ class Vacuum:
             return {'x': 0, 'y': 0, 'z': 0, 'world': 'Exception Handling'}
 
     def add_death_message(self, message):
+        log.debug("ADD_DEATH_MESSAGE: %s" % message.content)
         m = message.split()
         m[1] = m[1].lower()  # case insensitivity support for player name
         coords = self.get_player_coords(m[1])
