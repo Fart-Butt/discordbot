@@ -10,6 +10,15 @@ class ButtConfig:
         log.debug("Loading config for guid %d" % guid)
         shared.db["buttbot"].build()
         self.guid = guid
+        self.allowed_channels_query = dict()
+        self.stop_phrases_query = dict()
+        self.conf = dict()
+        self.allowed_bots_query = dict()
+        self.banned_user_query = dict()
+        self._load_config(self.guid)
+        log.debug("config loaded for guid %d" % guid)
+
+    def _load_config(self, guid):
         self.allowed_channels_query = shared.db["buttbot"].do_query("select channel_guid "
                                                                     "from allowed_channels ac "
                                                                     "inner join config "
@@ -28,7 +37,9 @@ class ButtConfig:
         self.conf = shared.db["buttbot"].do_query("select config.* from config where guid = %s", (guid,))[0]
         self.banned_user_query = shared.db["buttbot"].do_query("select user_guid from banned_users where"
                                                                " guid = %s or globally_banned = TRUE", (guid,))
-        log.debug("config loaded for guid %d" % guid)
+
+    def reload(self):
+        self._load_config(self.guid)
 
     @staticmethod
     def do_query(query: str, args=()):

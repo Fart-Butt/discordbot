@@ -36,7 +36,7 @@ class Vacuum:
     def playtime_scraper(self):
         log.debug("scraper started at %s" % str(time.time()))
         try:
-            with urllib.request.urlopen(self.updateurl, 5) as url:
+            with urllib.request.urlopen(self.updateurl) as url:
                 data = json.loads(url.read().decode())
                 pl = data['players']
                 players = []
