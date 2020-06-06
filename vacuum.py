@@ -169,7 +169,7 @@ class Vacuum:
             return {'x': 0, 'y': 0, 'z': 0, 'world': 'Exception Handling'}
 
     def add_death_message(self, message):
-        log.debug("ADD_DEATH_MESSAGE: %s" % message.content)
+        log.debug("ADD_DEATH_MESSAGE: %s" % message)
         m = message.split()
         m[1] = m[1].lower()  # case insensitivity support for player name
         coords = self.get_player_coords(m[1])
