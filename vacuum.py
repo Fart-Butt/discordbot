@@ -63,12 +63,16 @@ class Vacuum:
                         # player was not logged in, but is logged in now.
                         self.playtime_player_addplayer(p['name'])
                 # now we are going to find players that have logged out since the last check
-                log.debug("scraper found players %s" % players)
                 if self.NSA_module:
-                    shared.db['minecraft'].do_insertmany("INSERT INTO `{}_NSA_module`"
-                                                         "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
-                                                         "VALUES (%s, %s, %s, %s, %s, %s)".format(self.table_prefix),
-                                                         query_data)
+                    # 6/7/20: add check to ensure people are on the server.  skip insert if server is empty.
+                    if len(players) > 0:
+                        log.debug("scraper found players %s" % players)
+                        shared.db['minecraft'].do_insertmany("INSERT INTO `{}_NSA_module`"
+                                                             "(`datetime`, `player`, `dimension`, `x`, `y`, `z`) "
+                                                             "VALUES (%s, %s, %s, %s, %s, %s)"
+                                                             .format(self.table_prefix), query_data)
+                    else:
+                        log.debug("scraper: no players on server.")
                 self.playtime_player_checkplayers(players)
 
         except urllib.error.URLError:
