@@ -1,5 +1,6 @@
 import re
 from discord.ext.commands import Context, check
+from discord import Message
 import shared
 import logging
 from rfc3987 import parse
@@ -104,6 +105,33 @@ def can_speak_in_channel():
                   (ctx.message.channel.id in shared.guild_configs[ctx.message.guild.id].allowed_channels,
                    ctx.message.channel.id,
                    shared.guild_configs[ctx.message.guild.id].allowed_channels))
-        return ctx.message.channel.id in shared.guild_configs[ctx.message.guild.id].allowed_channels
+        return allowed_in_channel(ctx.message)
 
     return check(predicate)
+
+
+def allowed_in_channel(message: Message):
+    try:
+        if message.channel.id in shared.guild_configs[message.guild.id].allowed_channels:
+            log.debug("ALLOWED_IN_CHANNEL - True")
+            return True
+        else:
+            log.debug("ALLOWED_IN_CHANNEL - False - %d not in %s" % (
+                message.channel.id, str(shared.guild_configs[message.guild.id].allowed_channels)))
+            return False
+    except IndexError:
+        # todo: probably shouldnt happen but we might want to load a config here
+        print("didnt find config loaded for channel %d in guild %d" % (message.channel.id, message.guild.id))
+        return False
+
+
+def allowed_in_channel_direct(guild: int, channel: int):
+    try:
+        if channel in shared.guild_configs[guild].allowed_channels:
+            return True
+        else:
+            return False
+    except IndexError:
+        # todo: probably shouldnt happen but we might want to load a config here
+        print("didnt find config loaded for channel %d in guild %d" % (channel, guild))
+        return False
