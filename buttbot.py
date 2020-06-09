@@ -5,7 +5,7 @@ import logging
 from config import command_prefix
 
 import mojang as mj
-from butt_library import is_word_in_text
+from butt_library import is_word_in_text, allowed_in_channel, allowed_in_channel_direct
 from discord import Message
 
 from shared import guild_configs, test_environment, phrase_weights, shitpost, comms_instance, \
@@ -52,24 +52,25 @@ class ButtBot:
                 await asyncio.sleep(120)
             await self.check_stored_reactions()
 
-    async def docomms(self, message, channel, guild_id, bypass_for_test=False):
-        if self.allowed_in_channel_direct(guild_id, channel.id) or bypass_for_test is True:
+    @staticmethod
+    async def docomms(message, channel, guild_id, bypass_for_test=False):
+        """sends a message to a provided discord channel in guild."""
+        if allowed_in_channel_direct(guild_id, channel.id) or bypass_for_test is True:
             msg = await comms_instance.do_send_message(channel, message)
             return msg  # returns the message object of the message that was sent to discord
 
     async def doreact(self, message, emojis):
+        """adds a reaction to a message object."""
         # TODO: stats re-integration
-        if self.allowed_in_channel(message):
+        if allowed_in_channel(message):
             # self.stats.message_store(message.channel.id)
             # self.stats.disposition_store(message.guild.id, message.channel.id,
             #                             "React", emojis, message.content)
             await comms_instance.do_react(message, self.discordBot, emojis)
 
     async def chat_dispatch(self, message: Message):
-        # if not self.should_i_reply_to_user(message):
-        #    # user is either a bot not on whitelist or is a user on the ignore list
-        #    log.debug("reply to user negative for %s in guild %d" % (str(message.author), message.channel.id))
-        #    return
+        """master chat processing function. determines where to send message for processing (shitposting, reverse
+        shitposting, RIP, etc.)"""
         try:
             if str(message.content).partition(" ")[2][0] == command_prefix:
                 # command from inside of MC or other game server
@@ -107,6 +108,7 @@ class ButtBot:
 
     @staticmethod
     async def _process_command_interception(message: Message):
+        """process a command relayed by a bot from in-game."""
         # is this genius? is this not? time will tell.
         try:
             player, command = message.content.split(command_prefix, 1)
@@ -128,34 +130,8 @@ class ButtBot:
             await bot.invoke(ctx)
 
     @staticmethod
-    def allowed_in_channel(message: Message):
-        try:
-            if message.channel.id in guild_configs[message.guild.id].allowed_channels:
-                log.debug("ALLOWED_IN_CHANNEL - True")
-                return True
-            else:
-                log.debug("ALLOWED_IN_CHANNEL - False - %d not in %s" % (
-                    message.channel.id, str(guild_configs[message.guild.id].allowed_channels)))
-                return False
-        except IndexError:
-            # todo: probably shouldnt happen but we might want to load a config here
-            print("didnt find config loaded for channel %d in guild %d" % (message.channel.id, message.guild.id))
-            return False
-
-    @staticmethod
-    def allowed_in_channel_direct(guild: int, channel: int):
-        try:
-            if channel in guild_configs[guild].allowed_channels:
-                return True
-            else:
-                return False
-        except IndexError:
-            # todo: probably shouldnt happen but we might want to load a config here
-            print("didnt find config loaded for channel %d in guild %d" % (channel, guild))
-            return False
-
-    @staticmethod
     async def process_cached_reaction_message(message: Message, noun: str):
+        """process emoji reactions from a previously butted sentence."""
         # i know this looks dumb as hell but trust me on this one
         message = await message.channel.fetch_message(message.id)
         if test_environment:
@@ -165,6 +141,7 @@ class ButtBot:
         phrase_weights.adjust_weight(noun, votes)
 
     async def check_stored_reactions(self):
+        """check recent butted messages and process their reaction emojis."""
         for items in phrase_weights.get_messages():
             check_timer = 300
             if test_environment:
@@ -174,8 +151,12 @@ class ButtBot:
                 phrase_weights.remove_message(items[0], items[1], items[2])
 
     async def _process_rip_message(self, message: Message):
+        """process someone saying RIP in channel.
+        Permission: default on, can be toggled in table config, row "RIP"
+        TODO: add command to turn on or off."""
+
         log.debug("PROCESS_RIP_MESSAGE - recieved rip")
-        if self.allowed_in_channel(message) and \
+        if allowed_in_channel(message) and \
                 guild_configs[message.guild.id].rip:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'rip',
@@ -200,7 +181,7 @@ class ButtBot:
             vacuum[message.guild.id].add_death_message(message.content)
 
     async def _process_f_message(self, message):
-        if self.allowed_in_channel(message) and guild_configs[message.guild.id].f:
+        if allowed_in_channel(message) and guild_configs[message.guild.id].f:
             # self.stats.message_store(message.channel.id)
             if timer_module.check_timeout(str(message.channel.id) + 'f',
                                           guild_configs[message.guild.id].shitpost_freq):
@@ -215,7 +196,7 @@ class ButtBot:
 
     async def _process_butt_message(self, message):
         # TODO: stats module re-integration
-        if self.allowed_in_channel(message):
+        if allowed_in_channel(message):
             # self.stats.message_store(message.channel.id)
             if random.randint(1, 6) == 3:
                 if timer_module.check_timeout(str(message.channel.id) + 'rsp',
@@ -264,7 +245,7 @@ class ButtBot:
                     await self.docomms(hwsp, message.channel, message.guild.id)
 
         else:
-            if self.allowed_in_channel(message):
+            if allowed_in_channel(message):
                 log.debug("allowed to speak in channel")
                 # do not send to shitpost module if we aren't allowed to talk in the channel in question.
                 if test_environment:
