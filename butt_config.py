@@ -10,32 +10,37 @@ class ButtConfig:
         log.debug("Loading config for guid %d" % guid)
         shared.db["buttbot"].build()
         self.guid = guid
-        self.allowed_channels_query = dict()
-        self.stop_phrases_query = dict()
+        self.allowed_channels_query = set()
+        self.stop_phrases_query = set()
         self.conf = dict()
-        self.allowed_bots_query = dict()
-        self.banned_user_query = dict()
+        self.allowed_bots_query = set()
+        self.banned_user_query = set()
         self._load_config(self.guid)
 
     def _load_config(self, guid):
-        self.allowed_channels_query = shared.db["buttbot"].do_query("select channel_guid "
-                                                                    "from allowed_channels ac "
-                                                                    "inner join config "
-                                                                    "on config.guid = ac.guid "
-                                                                    "where ac.guid = %s", (guid,))
+        self.allowed_channels_query = self.reformat_query_to_set(
+            shared.db["buttbot"].do_query("select channel_guid "
+                                          "from allowed_channels ac "
+                                          "inner join config "
+                                          "on config.guid = ac.guid "
+                                          "where ac.guid = %s",
+                                          (guid,)), "channel_guid"
+        )
         self.stop_phrases_query = shared.db["buttbot"].do_query("select phrase "
                                                                 "from stop_processing_phrases spp "
                                                                 "inner join config "
                                                                 "on config.guid = spp.guid "
                                                                 "where spp.guid = %s", (guid,))
-        self.allowed_bots_query = shared.db["buttbot"].do_query("select bot_guid, minecraft_server "
-                                                                "from whitelisted_bots wb "
-                                                                "inner join config "
-                                                                "on config.guid = wb.guid "
-                                                                "where wb.guid = %s", (guid,))
+        self.allowed_bots_query = self.reformat_query_to_set(
+            shared.db["buttbot"].do_query("select bot_guid, minecraft_server "
+                                          "from whitelisted_bots wb "
+                                          "inner join config "
+                                          "on config.guid = wb.guid "
+                                          "where wb.guid = %s", (guid,)), "bot_guid")
         self.conf = shared.db["buttbot"].do_query("select config.* from config where guid = %s", (guid,))[0]
-        self.banned_user_query = shared.db["buttbot"].do_query("select user_guid from banned_users where"
-                                                               " guid = %s or globally_banned = TRUE", (guid,))
+        self.banned_user_query = self.reformat_query_to_set(
+            shared.db["buttbot"].do_query("select user_guid from banned_users where"
+                                          " guid = %s or globally_banned = TRUE", (guid,)), "user_guid")
         log.debug("config loaded for guid %d" % guid)
 
     def reload(self):
@@ -51,17 +56,26 @@ class ButtConfig:
         else:
             shared.db["buttbot"].do_query(query)
 
+    @staticmethod
+    def do_insert(query: str, args=()):
+        shared.db["buttbot"].build()
+        log.debug('running insert: %s' % query)
+        if args:
+            shared.db["buttbot"].do_insert(query, args)
+        else:
+            shared.db["buttbot"].do_insert(query)
+
     def update_property(self, prop: str, value):
         query = "update config set {0} = %s where guid = %s".format(prop)
-        shared.db["buttbot"].do_query(query, (value, self.guid))
+        shared.db["buttbot"].do_insert(query, (value, self.guid))
 
     def insert_new_value(self, tab: str, row: str, val):
         query = "insert into {0} ({1}, guid) values(%s, %s)".format(tab, row)
-        self.do_query(query, (val, self.guid))
+        self.do_insert(query, (val, self.guid))
 
     def delete_value(self, tab: str, row: str, val):
         query = "delete from {0} where {1} = %s and guid = %s".format(tab, row)
-        self.do_query(query, (val, self.guid))
+        self.do_insert(query, (val, self.guid))
 
     @property
     def name(self) -> str:
@@ -100,30 +114,37 @@ class ButtConfig:
         self.update_property("vacuum", setting)
 
     @property
-    def allowed_bots(self) -> list:
-        return self.reformat_query_to_list(self.allowed_bots_query, "bot_guid")
+    def allowed_bots(self) -> set:
+        return self.allowed_bots_query
 
     @property
-    def allowed_channels(self) -> list:
-        return self.reformat_query_to_list(self.allowed_channels_query, "channel_guid")
+    def allowed_channels(self) -> set:
+        return self.allowed_channels_query
 
     @property
     def emojis(self) -> list:
         return self.conf["butt_response_emojis"]
 
     @property
-    def banned_users(self) -> list:
-        return self.reformat_query_to_list(self.banned_user_query, "user_guid")
+    def banned_users(self) -> set:
+        return self.banned_user_query
 
     @property
-    def stop_phrases(self) -> list:
-        return self.reformat_query_to_list(self.stop_phrases_query, "phrase")
+    def stop_phrases(self) -> set:
+        return self.reformat_query_to_set(self.stop_phrases_query, "phrase")
 
     def add_channel_to_allowed_channel_list(self, channel: int):
+        self.allowed_channels_query.add(channel)
         self.insert_new_value("allowed_channels", "channel_guid", channel)
 
     def remove_channel_from_allowed_channel_list(self, channel: int):
-        self.delete_value("allowed_channels", "channel_guid", channel)
+        try:
+            self.allowed_channels_query.remove(channel)
+        except KeyError:
+            # this is fine.
+            pass
+        finally:
+            self.delete_value("allowed_channels", "channel_guid", channel)
 
     @property
     def rip(self) -> bool:
@@ -158,18 +179,31 @@ class ButtConfig:
         self.update_property("f", setting)
 
     def add_always_ignore(self, user_guid: int):
+        self.banned_user_query.add(user_guid)
         self.insert_new_value("banned_users", "user_guid", user_guid)
         pass
 
     def remove_always_ignore(self, user_guid: int):
-        self.delete_value("banned_users", "user_guid", user_guid)
-        pass
+        try:
+            self.banned_user_query.remove(user_guid)
+        except KeyError:
+            # this is fine.
+            pass
+        finally:
+            self.delete_value("banned_users", "user_guid", user_guid)
 
     def add_whitelisted_bots(self, user_guid: int):
+        self.allowed_bots_query.add(user_guid)
         self.insert_new_value("whitelisted_bots", "bot_guid", user_guid)
 
     def remove_whitelisted_bots(self, user_guid: int):
-        self.delete_value("whitelisted_bots", "bot_guid", user_guid)
+        try:
+            self.allowed_bots_query.remove(user_guid)
+        except KeyError:
+            # this is fine.
+            pass
+        finally:
+            self.delete_value("whitelisted_bots", "bot_guid", user_guid)
 
     def is_bot_minecraft_relay(self, bot_guid: int) -> bool:
         try:
@@ -188,10 +222,10 @@ class ButtConfig:
         return self.conf["wordreplacer"]
 
     @staticmethod
-    def reformat_query_to_list(data, field_name):
-        items = []
+    def reformat_query_to_set(data, field_name) -> set:
+        items = set()
         for i in data:
-            items.append(i[field_name])
+            items.add(i[field_name])
         return items
 
 
@@ -226,7 +260,7 @@ class Config(dict):
             self.create_config(guid)
 
     def all_configs(self):
-        print(str(self.configs))
+        log.debug(str(self.configs))
 
     def create_config(self, guid: int):
         log.info("creating configuration for guild %d" % guid)
@@ -243,7 +277,7 @@ class Config(dict):
         # load all configs saved in the table
         guids = shared.db["buttbot"].do_query("select guid from config where 1")
         for g in guids:
-            print("startup for %d" % g['guid'])
+            log.debug("startup for %d" % g['guid'])
             log.debug("STARTUP - found config for %d, building config" % g['guid'])
             self.configs[g['guid']] = ButtConfig(g['guid'])
             if self.configs[g['guid']].vacuum:
