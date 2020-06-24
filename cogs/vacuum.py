@@ -66,7 +66,7 @@ class VacuumCog(Cog):
                                          "on pnm.x between (t1.x-50) and (t1.x+50) where "
                                          "pnm.z between (t1.z-50) and (t1.z+50) "
                                          "group by player "
-                                         "having percent > 15 and co > 500"
+                                         "having percent > 15 and co > 1000"
                                          .format(guild_configs[ctx.message.guild.id].table_prefix),
                                          (requester, requester))
             if len(b) > 0:
