@@ -6,6 +6,7 @@ import urllib.request
 import random
 import logging
 import time
+import socket
 
 from collections import UserDict
 from dateutil.parser import parse
@@ -36,7 +37,7 @@ class Vacuum:
     def playtime_scraper(self):
         log.debug("scraper started at %s" % str(time.time()))
         try:
-            with urllib.request.urlopen(self.updateurl) as url:
+            with urllib.request.urlopen(self.updateurl, None, 5) as url:
                 data = json.loads(url.read().decode())
                 pl = data['players']
                 players = []
@@ -84,6 +85,10 @@ class Vacuum:
             # we are going to save all data here too
             self.playtime_player_saveall()
             log.warning("scraper lost connection with minecraft server")
+
+        except socket.timeout:
+            # we hit the timeout treshold - the minecraft server is probably locked up.
+            pass
 
         finally:
             pass

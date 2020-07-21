@@ -3,6 +3,7 @@ import random
 import time
 import logging
 from config import command_prefix
+import concurrent.futures
 
 import mojang as mj
 from butt_library import is_word_in_text, allowed_in_channel, allowed_in_channel_direct
@@ -26,10 +27,9 @@ class ButtBot:
         while not self.discordBot.is_closed():
             await asyncio.sleep(10)
             log.debug("SCRAPER - started")
-            for i in vacuum:
-                log.debug("scraping for server %d" % i)
-                vacuum[i].playtime_scraper()
-                log.debug("scraping complete for server %d" % i)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                for i in vacuum:
+                    executor.map(vacuum[i].playtime_scraper())
             log.debug("SCRAPER - ended")
 
     def is_played_time_loop_running(self):
