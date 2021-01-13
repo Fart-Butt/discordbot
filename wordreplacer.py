@@ -203,7 +203,10 @@ class WordReplacer:
                 # dont send anything, this word probably sucks
                 return False
             else:
-                return True
+                if len(self._selected_noun_pair_to_butt.text) > 1:
+                    return True
+                else:
+                    return False
         except AttributeError:
             # selected nouns to butt is empty
             return False
@@ -218,6 +221,8 @@ class WordReplacer:
 
     def __pick_word_pair_to_butt(self):
         """randomly selects a word pair to be the target of replacement."""
+        # remove all 1 length words
+        print(self._spacy_finalized_nouns)
         self._selected_noun_pair_to_butt = self.__pick_random_phrase_by_weight(self._spacy_finalized_nouns)
 
     def __pick_random_phrase_by_weight(self, word_list):
