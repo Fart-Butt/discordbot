@@ -6,12 +6,14 @@ from FinalizedButtChunk import FinalizedButtChunk
 import butt_library as buttlib
 from ButtClassifier import ButtClassifier
 import shared
+import logging
+
+log = logging.getLogger('bot.' + __name__)
 
 
 class WordReplacer:
 
-    def __init__(self, config, stat_module, phrase_weights, nlp_):
-        self.__config = config
+    def __init__(self, stat_module, phrase_weights, nlp_):
         self.__stats = stat_module
         self.__wlist = self.__load_word_list()
         self.__command = {"nltk": 'wordreplacer'}
@@ -38,6 +40,8 @@ class WordReplacer:
         self._spacy_finalized_nouns = []
         self._spacy_finalized_weights = []
         self._message_channel = 0
+        self._message_guild = 0
+        self._spacy_processed_nouns = ""
 
     def __state_reset(self):
         self.should_we_butt = False  # this is the state variable that means butting should continue
@@ -58,6 +62,8 @@ class WordReplacer:
         self._spacy_finalized_nouns = []
         self._spacy_finalized_weights = []
         self._message_channel = 0
+        self._message_guild = 0
+        self._spacy_processed_nouns = ""
 
     def __set_max_sentence_length(self, length):
         # DPT requested feature
@@ -78,15 +84,6 @@ class WordReplacer:
     def return_commands(self):
         return self.__command
 
-    ################################################################################
-    #                               commands                                       #
-    ################################################################################
-    def do_nlfffftk(self, message):
-        return self.__wordtagger(message)
-
-    ################################################################################
-    #                               end commands                                   #
-    ################################################################################
     def get_noun(self):
         return self._selected_noun_pair_to_butt.text
 
@@ -100,16 +97,11 @@ class WordReplacer:
             message = message.replace('butt', self.__wlist[randint(0, len(self.__wlist) - 1)], 1)
         return message
 
-    @staticmethod
-    def __wordtaggergggg(message):
-        pass
-        # todo: do we need this?
-
     def __get_phrase_weight(self, phrase):
         return self.__phraseweights.return_weight(phrase)
 
     def __is_user_an_allowed_bot(self, author):
-        if author in self.__config.get_all_allowed_bots():
+        if author in shared.guild_configs[self._message_channel].get_all_allowed_bots():
             return True
         else:
             return False
@@ -119,7 +111,7 @@ class WordReplacer:
         print("Original message: %s" % self._original_sentence)
         print("Message contain stop phrase? %s" % str(self.__does_message_contain_stop_phrases()))
         print("Message meet length requirement? (server setting: %i) %s" % (
-            shared.guild_configs[self._message_channel].max_sentence_length,
+            shared.guild_configs[self._message_guild].max_sentence_length,
             self.__check_length_of_sentence_to_butt(self._message_channel)))
         print("Spacy noun chunk(s): %s" % self._spacy_nouns)
         try:
@@ -135,9 +127,23 @@ class WordReplacer:
         print("Butted sentence: %s" % self.butted_sentence)
         print("--------------------------------------------------------------------------------------------")
 
+    def log_disposition(self):
+        log.debug("saving disposition")
+        self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
+                                       self.__does_message_contain_stop_phrases(),
+                                       self.__check_length_of_sentence_to_butt(self._message_channel),
+                                       str(self._spacy_nouns),
+                                       str(self._spacy_processed_nouns),
+                                       str(self._spacy_finalized_weights),
+                                       str(self._selected_noun_pair_to_butt.text) if isinstance(
+                                           self._selected_noun_pair_to_butt, str) else False,
+                                       self.__check_if_picked_phrase_weight_passes_minimum(),
+                                       self.butted_sentence
+                                       )
+
     def __does_message_contain_stop_phrases(self):
         if not any(
-                v for v in shared.guild_configs[self._message_channel].stop_phrases if
+                v for v in shared.guild_configs[self._message_guild].stop_phrases if
                 v in self._original_sentence) and not (
                 self._original_sentence.startswith("*") and self._original_sentence.endswith("*")):
             return False
@@ -153,6 +159,7 @@ class WordReplacer:
         # we are going to manipulate this version of the message before sending it to the processing functions.
         # we remove stuff that we dont want to be processed (banned phrases, banned people, banned bots)
         self.__state_reset()
+        self._message_guild = messageobject.guild.id
         self._original_sentence = messageobject.content
         self._message_author = str(messageobject.author)
         self._message_channel = messageobject.channel.id
@@ -298,11 +305,11 @@ class WordReplacer:
     def __make_butted_sentence(self):
         if self._selected_noun_pair_to_butt.tag == "NNS":
             self.butted_sentence = self.__replace_an_to_a_in_sentence(
-                self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
+                self._original_sentence.replace("%s " % self._selected_noun_pair_to_butt.text,
                                                 self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
                                                                            'butts')), "butts")
         else:
             self.butted_sentence = self.__replace_an_to_a_in_sentence(
-                self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
+                self._original_sentence.replace("%s " % self._selected_noun_pair_to_butt.text,
                                                 self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
                                                                            'butt')), "butt")

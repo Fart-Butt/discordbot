@@ -266,6 +266,7 @@ class ButtBot:
                                 # passes butt check
                                 msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
                                 phrase_weights.add_message(message, shitpost.get_noun())
+                                shitpost.log_disposition()
                     else:
                         log.debug("Message2Butt_Processor - sentence over character length.")
             else:
@@ -275,6 +276,7 @@ class ButtBot:
                     # we don't want to talk at all except in my test channel
                     shitpost.perform_text_to_butt(message)
                     shitpost.print_debug_message()
+                    shitpost.log_disposition()
                     if message.channel.id == 435348744016494592:
                         # blow this one up
                         if shitpost.successful_butting():

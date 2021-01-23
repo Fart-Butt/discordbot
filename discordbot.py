@@ -7,7 +7,7 @@ from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
 from cogs.mojang import MojangCog
 from buttbot import ButtBot
-from shared import guild_configs, bot
+from shared import guild_configs, bot, stat_module
 from discord.channel import DMChannel
 import logging
 
@@ -83,28 +83,34 @@ async def on_message(message):
             await buttbot.chat_dispatch(message)
 
 
-# async def send_stats_to_db():
-#    await bot.wait_until_ready()
-#    await asyncio.sleep(5)
-#    while not bot.is_closed:
-#        stat_module.send_stats_to_db()
-#        await asyncio.sleep(300)
-
-
-async def serialize_weights():
+async def send_stats_to_db():
+    log.info("send_stats_to_tb: initializing")
     await bot.wait_until_ready()
     await asyncio.sleep(5)
-    while not bot.is_closed:
+    while not bot.is_closed():
+        log.info("send_stats_to_db: starting to send stat data to db")
+        stat_module.send_stats_to_db()
+        log.info("send_stats_to_db: complete")
         if test_environment:
             await asyncio.sleep(10)
         else:
             await asyncio.sleep(300)
 
 
-# bot.loop.create_task(send_stats_to_db())
+async def serialize_weights():
+    await bot.wait_until_ready()
+    await asyncio.sleep(5)
+    while not bot.is_closed():
+        if test_environment:
+            await asyncio.sleep(10)
+        else:
+            await asyncio.sleep(300)
+
+
+bot.loop.create_task(send_stats_to_db())
 bot.add_cog(BotCommands(bot))
 bot.add_cog(BotConfig(bot))
 bot.add_cog(VacuumCog(bot))
 bot.add_cog(MojangCog(bot))
-# bot.loop.create_task(serialize_weights())
+bot.loop.create_task(serialize_weights())
 bot.run(secretkey)

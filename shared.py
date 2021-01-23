@@ -37,7 +37,7 @@ nlp = spacy.load('en_core_web_lg')
 phrase_weights = PhraseWeights(db["buttbot"])
 stat_module = ButtStatistics(db["statistics"])
 comms_instance = discord_comms.DiscordComms()
-shitpost = wordreplacer.WordReplacer(stat_module, phrase_weights, test_environment, nlp)
+shitpost = wordreplacer.WordReplacer(stat_module, phrase_weights, nlp)
 timer_instance = butt_timeout.Timeout()
 vacuum_instance = vacuum.VacuumManager()
 

@@ -1,7 +1,9 @@
 from butt_chunk import ButtChunk
 from FinalizedButtChunk import FinalizedButtChunk
 import shared
+import logging
 
+log = logging.getLogger('bot.' + __name__)
 
 class ButtClassifier:
     def __init__(self, phraseweights, nlp):
@@ -66,6 +68,9 @@ class ButtClassifier:
                             except IndexError:
                                 self._nouns_previous_word_tag.append(None)
                         i += 1
+                else:
+                    log.info("Did not find appropriate chunk: %s, chunks: %s" % (self.message, a))
+
             else:
                 if a.tag in noun_tags:
                     # chunk word count is less than 1. we need to account for this for some phrases
