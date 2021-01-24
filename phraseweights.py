@@ -1,6 +1,10 @@
 import time
+import logging
 
-class PhraseWeights():
+log = logging.getLogger('bot.' + __name__)
+
+
+class PhraseWeights:
     def __init__(self, db):
         # weighted phrases
         # butted messages we need to store
@@ -10,14 +14,14 @@ class PhraseWeights():
     def adjust_weight(self, word, weight):
         if weight == 0:
             # no further processing.
-            print("word %s: not adjusting weight since voted weight is %d" %
-                  (word, weight)
-                  )
+            log.debug("word %s: not adjusting weight since voted weight is %d" %
+                      (word, weight)
+                      )
             pass
         else:
             db_word_weight = self.return_weight(word)
             weight = db_word_weight + weight
-            print("word %s is getting weight %d adjusted to %d" % (word, db_word_weight, weight))
+            log.debug("word %s is getting weight %d adjusted to %d" % (word, db_word_weight, weight))
             self.db.do_insert(
                 "INSERT into phraseweights (word, weight) VALUES (%s, %s) ON DUPLICATE KEY UPDATE weight = weight + %s",
                 (word, weight, weight))
