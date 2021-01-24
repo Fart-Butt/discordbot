@@ -36,8 +36,13 @@ class BotCommands(Cog):
     @is_owner()
     async def reloadconfig(self, ctx: Context, *args):
         if args:
-            # reload specific guid
-            shared.guild_configs[args].reload()
+            if args == "all":
+                # reload all configurations
+                for i in shared.guild_configs:
+                    i.reload()
+            else:
+                # reload specific guid
+                shared.guild_configs[args].reload()
         else:
             shared.guild_configs[ctx.message.guild.id].reload()
 
