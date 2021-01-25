@@ -315,11 +315,11 @@ class WordReplacer:
     def __make_butted_sentence(self):
         if self._selected_noun_pair_to_butt.tag == "NNS":
             self.butted_sentence = self.__replace_an_to_a_in_sentence(
-                self._original_sentence.replace(" %s " % self._selected_noun_pair_to_butt.text,
+                self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
                                                 self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
                                                                            'butts')), "butts")
         else:
             self.butted_sentence = self.__replace_an_to_a_in_sentence(
-                self._original_sentence.replace(" %s " % self._selected_noun_pair_to_butt.text,
+                self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
                                                 self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
                                                                            'butt')), "butt")
