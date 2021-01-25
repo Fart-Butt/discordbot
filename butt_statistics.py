@@ -24,10 +24,6 @@ class ButtStatistics:
         # self._messages_build_insert_query()
 
     def _dispositions_build_insert_query(self):
-        for j in self.dispositions:
-            for i in j:
-                print("%s, type %s" % (str(i), type(i)))
-
         log.debug("inserting dispositions: %s" % str(self.dispositions))
         query = "INSERT into butted_phrases " \
                 "(`guild_guid`," \

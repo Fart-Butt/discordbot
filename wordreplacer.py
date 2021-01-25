@@ -1,6 +1,5 @@
 import json
 from random import *
-import spacy
 from FinalizedButtChunk import FinalizedButtChunk
 
 import butt_library as buttlib
@@ -129,17 +128,28 @@ class WordReplacer:
 
     def log_disposition(self):
         log.debug("saving disposition")
-        self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
-                                       self.__does_message_contain_stop_phrases(),
-                                       self.__check_length_of_sentence_to_butt(self._message_channel),
-                                       str(self._spacy_nouns),
-                                       str(self._spacy_processed_nouns),
-                                       str(self._spacy_finalized_weights),
-                                       str(self._selected_noun_pair_to_butt.text) if isinstance(
-                                           self._selected_noun_pair_to_butt, str) else False,
-                                       self.__check_if_picked_phrase_weight_passes_minimum(),
-                                       self.butted_sentence
-                                       )
+        try:
+            self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
+                                           self.__does_message_contain_stop_phrases(),
+                                           self.__check_length_of_sentence_to_butt(self._message_channel),
+                                           str(self._spacy_nouns),
+                                           str(self._spacy_processed_nouns),
+                                           str(self._spacy_finalized_weights),
+                                           str(self._selected_noun_pair_to_butt.text),
+                                           self.__check_if_picked_phrase_weight_passes_minimum(),
+                                           self.butted_sentence
+                                           )
+        except AttributeError:
+            self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
+                                           self.__does_message_contain_stop_phrases(),
+                                           self.__check_length_of_sentence_to_butt(self._message_channel),
+                                           str(self._spacy_nouns),
+                                           str(self._spacy_processed_nouns),
+                                           str(self._spacy_finalized_weights),
+                                           "None",
+                                           self.__check_if_picked_phrase_weight_passes_minimum(),
+                                           self.butted_sentence
+                                           )
 
     def __does_message_contain_stop_phrases(self):
         if not any(
