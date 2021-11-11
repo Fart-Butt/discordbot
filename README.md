@@ -22,8 +22,8 @@ You can give him permission to talk in a channel by typing ```&config allow``` i
 You can remove this by typing: ```&config remove```
 
 By default, buttbot also will not butt anything coming from other bots. You can enable this by
-typing ```&config allow <bot guid>``` in any channel in your guild. Note that he may mangle game chat relay systems (for
-example, a mod that puts your minecraft chat in your discord server).
+typing ```&config botallow <bot guid>``` in any channel in your guild. Note that he may mangle game chat relay systems (
+for example, a mod that puts your minecraft chat in your discord server).
 
 Contribution
 ------------
