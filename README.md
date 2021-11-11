@@ -10,7 +10,7 @@ Well, it says butt, sometimes.
 
 I want ButtBot on my server!
 ----------------------------
-Click this link - https://discord.com/oauth2/authorize?client_id=411041568980729856&permissions=264256&scope=bot
+Click this link - https://discord.com/oauth2/authorize?client_id=411041568980729856&permissions=93248&scope=bot
 
 
 Configuration
