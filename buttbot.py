@@ -2,6 +2,8 @@ import asyncio
 import random
 import time
 import logging
+
+import butt_library
 from config import command_prefix
 import concurrent.futures
 
@@ -175,10 +177,14 @@ class ButtBot:
     @staticmethod
     async def _process_death_message(message: Message):
         """recieved a notification from the minecraft interface bot that someone died on the server"""
-        log.debug("PROCESS_DEATH_MESSAGE - message recieved, %s" % message)
-        if (str(message.author) == 'Progress#6064' and message.content[:4] == 'RIP:') or \
-                (str(message.author) == '💩💩#4048' and message.content[:4] == 'RIP:'):
-            vacuum[message.guild.id].add_death_message(message.content)
+        message_ = butt_library.strip_discord_shitty_formatting(message.content)
+        log.debug("PROCESS_DEATH_MESSAGE - message recieved, %s" % message_)
+        if (str(message.author.id) == 249966240787988480 and message_[:4] == 'RIP:') or \
+                (str(message.author) == '💩💩#4048' and message_[:4] == 'RIP:'):
+            log.debug("PROCESS_DEATH_MESSAGE - passed author check")
+            vacuum[message.guild.id].add_death_message(message_)
+        else:
+            log.debug("PROCESS_DEATH_MESSAGE - FAILED author check")
 
     async def _process_f_message(self, message):
         if allowed_in_channel(message) and guild_configs[message.guild.id].f:
@@ -192,7 +198,7 @@ class ButtBot:
                 # self.stats.disposition_store(message.guild.id, message.channel.id,
                 #                             "F cooldown", "F cooldown")
                 if random.randint(1, 100) == 44:
-                    await self.docomms('suck my dick F under cooldown', message.channel, message.guild.id)
+                    await self.docomms('kiss my butt F under cooldown', message.channel, message.guild.id)
 
     async def _process_butt_message(self, message):
         # TODO: stats module re-integration
@@ -234,11 +240,12 @@ class ButtBot:
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
         if is_word_in_text("left the game", message.content) or is_word_in_text("joined the game", message.content):
-            player = message.content.split(" ")[0]
+            message_ = butt_library.strip_discord_shitty_formatting(message.content)
+            player = message_.split(" ")[0]
             await self.record_player_guid(player)
             # this is a join or part message and we are going to ignore it
             # welcome to progress
-            if message.author.id == 249966240787988480 and is_word_in_text("joined the game", message.content):
+            if message.author.id == 249966240787988480 and is_word_in_text("joined the game", message_):
                 hwsp = vacuum[message.guild.id].have_we_seen_player(player)
                 if hwsp:
                     log.debug("have not seen player before: %s" % player)

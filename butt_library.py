@@ -135,3 +135,12 @@ def allowed_in_channel_direct(guild: int, channel: int):
         # todo: probably shouldnt happen but we might want to load a config here
         print("didnt find config loaded for channel %d in guild %d" % (channel, guild))
         return False
+
+
+def strip_discord_shitty_formatting(message: str):
+    if message[:2] == "**":
+        return message[2:-2]
+    elif message[:1] == "_":
+        return message[1:-1]
+    else:
+        return message
