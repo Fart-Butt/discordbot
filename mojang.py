@@ -11,24 +11,6 @@ class Mojang:
     def __init__(self):
         pass
 
-    def mojang_status_loop(self):
-        # todo: probably should finish this
-        pass
-
-    @staticmethod
-    def mojang_status():
-        with urllib.request.urlopen("https://status.mojang.com/check") as url:
-            data = json.loads(url.read().decode())
-            yellow = []
-            red = []
-            for service in data:
-                for s, t in service.items():
-                    if t == "yellow":
-                        yellow.append(s)
-                    elif t == "red":
-                        red.append(s)
-        return [red, yellow]
-
     @staticmethod
     def mojang_user_to_uuid(username):
         with urllib.request.urlopen("https://api.mojang.com/users/profiles/minecraft/%s" % username) as url:
