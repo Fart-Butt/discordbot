@@ -5,7 +5,6 @@ import aiohttp
 from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
-from cogs.mojang import MojangCog
 from buttbot import ButtBot
 from shared import guild_configs, bot, stat_module
 from discord.channel import DMChannel
