@@ -179,12 +179,12 @@ class ButtBot:
         """recieved a notification from the minecraft interface bot that someone died on the server"""
         message_ = butt_library.strip_discord_shitty_formatting(message.content)
         log.debug("PROCESS_DEATH_MESSAGE - message recieved, %s" % message_)
-        if (str(message.author.id) == 249966240787988480 and message_[:4] == 'RIP:') or \
+        if (message.author.id == 249966240787988480 and message_[:4] == 'RIP:') or \
                 (str(message.author) == '💩💩#4048' and message_[:4] == 'RIP:'):
             log.debug("PROCESS_DEATH_MESSAGE - passed author check")
             vacuum[message.guild.id].add_death_message(message_)
         else:
-            log.debug("PROCESS_DEATH_MESSAGE - FAILED author check")
+            log.debug("PROCESS_DEATH_MESSAGE - FAILED author check, author id is %s" % str(message.author.id))
 
     async def _process_f_message(self, message):
         if allowed_in_channel(message) and guild_configs[message.guild.id].f:
