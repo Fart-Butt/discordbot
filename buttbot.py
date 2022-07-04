@@ -73,8 +73,10 @@ class ButtBot:
     async def chat_dispatch(self, message: Message):
         """master chat processing function. determines where to send message for processing (shitposting, reverse
         shitposting, RIP, etc.)"""
+        log.debug("CHAT_DISPATCH  - GUID %d -  %s " % (
+            message.guild.id, message.content))
         try:
-            if str(message.content).partition(" ")[2][0] == command_prefix:
+            if str(message.content)[0] == command_prefix:
                 # command from inside of MC or other game server
                 log.debug(
                     "CHAT_DISPATCH  - GUID %d - message is command from game server: %s " % (
@@ -113,9 +115,11 @@ class ButtBot:
         """process a command relayed by a bot from in-game."""
         # is this genius? is this not? time will tell.
         try:
-            player, command = message.content.split(command_prefix, 1)
+            # player, command = message.content.split(command_prefix, 1)
             # remove <> denoting message came from player
-            player = player[1:-2]
+            # player = player[1:-2]
+            player = message.author.name
+            command = message.content.split(command_prefix, 1)[1]
         except IndexError:
             log.debug("_PROCESS_COMMAND_INTERCEPTION - no special character found in message.")
             # no command prefix found in message.
@@ -180,6 +184,7 @@ class ButtBot:
         message_ = butt_library.strip_discord_shitty_formatting(message.content)
         log.debug("PROCESS_DEATH_MESSAGE - message recieved, %s" % message_)
         if (message.author.id == 249966240787988480 and message_[:4] == 'RIP:') or \
+                (message.author.id == 992866467903176765 and message_[:4] == 'RIP:') or \
                 (str(message.author) == '💩💩#4048' and message_[:4] == 'RIP:'):
             log.debug("PROCESS_DEATH_MESSAGE - passed author check")
             vacuum[message.guild.id].add_death_message(message_)
@@ -245,7 +250,11 @@ class ButtBot:
             await self.record_player_guid(player)
             # this is a join or part message and we are going to ignore it
             # welcome to progress
-            if message.author.id == 249966240787988480 and is_word_in_text("joined the game", message_):
+            if (
+                    (message.author.id == 249966240787988480 and is_word_in_text("joined the game", message_))
+                    or
+                    (message.author.id == 992866467903176765 and is_word_in_text("joined the game", message_))
+            ):
                 hwsp = vacuum[message.guild.id].have_we_seen_player(player)
                 if hwsp:
                     log.debug("have not seen player before: %s" % player)

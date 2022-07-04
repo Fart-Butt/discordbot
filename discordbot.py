@@ -72,8 +72,13 @@ async def on_message(message):
 
         try:
             if message.content[0] == command_prefix:
-                log.debug("sending message to command processor")
-                await bot.process_commands(message)
+                if message.author.id != 249966240787988480 and message.author.id != 992866467903176765:
+                    log.debug(
+                        "MAIN - ON_MESSAGE - sending message to command processor - author %s" % str(message.author.id))
+                    await bot.process_commands(message)
+                else:
+                    log.debug("MAIN - ON_MESSAGE - progress detected.")
+                    await buttbot.chat_dispatch(message)
             else:
                 # send to butterizer
                 await buttbot.chat_dispatch(message)
