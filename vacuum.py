@@ -194,6 +194,7 @@ class Vacuum:
                 dmsg = dmsg + " " + i
         dmsg = dmsg.strip()
         log.info((m[1], dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
+        
         try:
             shared.db["minecraft"].do_insert(
                 "INSERT INTO `{}_deaths` (`player_guid`, `player`,`message`,`world`,`x`,`y`,`z`,`datetime`)"
