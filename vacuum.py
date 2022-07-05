@@ -193,7 +193,7 @@ class Vacuum:
             for i in m[2:]:
                 dmsg = dmsg + " " + i
         dmsg = dmsg.strip()
-        log.info((player, dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), player)
+        log.info((player, dmsg, "Exception Handling", datetime.datetime.utcnow()), player)
 
         try:
             shared.db["minecraft"].do_insert(
