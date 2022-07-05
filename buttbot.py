@@ -247,6 +247,7 @@ class ButtBot:
         if is_word_in_text("left the game", message.content) or is_word_in_text("joined the game", message.content):
             message_ = butt_library.strip_discord_shitty_formatting(message.content)
             player = message_.split(" ")[0]
+            logging.info("_process_all_other_messages: join/part message from minecraft")
             await self.record_player_guid(player)
             # this is a join or part message and we are going to ignore it
             # welcome to progress
