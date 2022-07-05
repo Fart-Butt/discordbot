@@ -181,7 +181,7 @@ class Vacuum:
         log.info("ADD_DEATH_MESSAGE: %s" % message)
         m = message.split()
         log.info(m)
-        m[1] = m[1].lower()  # case insensitivity support for player name
+        player = m[1].lower()  # case insensitivity support for player name
         coords = self.get_player_coords(m[1])
         # now i need to combine the death reason into a string, which will be words in positions 2-n of the death
         # message 'm'
@@ -194,14 +194,15 @@ class Vacuum:
                 dmsg = dmsg + " " + i
         dmsg = dmsg.strip()
         log.info((m[1], dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
-        
+
         try:
             shared.db["minecraft"].do_insert(
                 "INSERT INTO `{}_deaths` (`player_guid`, `player`,`message`,`world`,`x`,`y`,`z`,`datetime`)"
                 "select player_guid, %s as player, %s as message, %s as world, %s as x, %s as y, %s as z, "
                 "%s as datetime "
                 "from minecraft_players where player_name = %s".format(self.table_prefix),
-                (m[1], dmsg, coords['world'], coords['x'], coords['y'], coords['z'], datetime.datetime.utcnow(), m[1]))
+                (
+                player, dmsg, coords['world'], coords['x'], coords['y'], coords['z'], datetime.datetime.utcnow(), m[1]))
         except TypeError:
             # catch this error, something that i dont believe should be possible with how this is set up but?????
             shared.db["minecraft"].do_insert(
@@ -209,7 +210,7 @@ class Vacuum:
                 "select player_guid, %s as player, %s as message, %s as world, %s as x, %s as y, %s as z, "
                 "%s as datetime "
                 "from minecraft_players where player_name = %s".format(self.table_prefix),
-                (m[1], dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
+                (player, dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
         shared.db["minecraft"].close()
 
     def have_we_seen_player(self, player):
