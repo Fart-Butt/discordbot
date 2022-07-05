@@ -193,7 +193,7 @@ class Vacuum:
             for i in m[2:]:
                 dmsg = dmsg + " " + i
         dmsg = dmsg.strip()
-        log.info((m[1], dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
+        log.info((player, dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), player)
 
         try:
             shared.db["minecraft"].do_insert(
@@ -202,7 +202,8 @@ class Vacuum:
                 "%s as datetime "
                 "from minecraft_players where player_name = %s".format(self.table_prefix),
                 (
-                player, dmsg, coords['world'], coords['x'], coords['y'], coords['z'], datetime.datetime.utcnow(), m[1]))
+                    player, dmsg, coords['world'], coords['x'], coords['y'], coords['z'], datetime.datetime.utcnow(),
+                    player))
         except TypeError:
             # catch this error, something that i dont believe should be possible with how this is set up but?????
             shared.db["minecraft"].do_insert(
@@ -210,7 +211,7 @@ class Vacuum:
                 "select player_guid, %s as player, %s as message, %s as world, %s as x, %s as y, %s as z, "
                 "%s as datetime "
                 "from minecraft_players where player_name = %s".format(self.table_prefix),
-                (player, dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), m[1])
+                (player, dmsg, "Exception Handling", 0, 0, 0, datetime.datetime.utcnow()), player)
         shared.db["minecraft"].close()
 
     def have_we_seen_player(self, player):
