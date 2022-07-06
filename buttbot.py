@@ -87,20 +87,21 @@ class ButtBot:
             # not in here, skip it and keep going
             pass
 
-        if is_word_in_text("RIP:", message.content):
+        if butt_library.is_word_in_text("RIP:", message.content):
             log.info("CHAT_DISPATCH - GUID %d - message is death alert from game server: %s " % (
                 message.guild.id, message.content))
             await self._process_death_message(message)
 
-        elif is_word_in_text("rip", message.content):
+        elif butt_library.is_word_in_text("rip", message.content):
             log.info("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % (message.guild.id, message.content))
             await self._process_rip_message(message)
 
-        elif is_word_in_text("F", message.content):
+        elif butt_library.is_word_in_text("F", message.content):
             log.info("CHAT_DISPATCH - GUID %d - message is F from player" % message.guild.id)
             await self._process_f_message(message)
 
-        elif is_word_in_text('butt', message.content) is True or is_word_in_text('butts', message.content) is True:
+        elif butt_library.is_word_in_text('butt', message.content) is True or butt_library.is_word_in_text('butts',
+                                                                                                           message.content) is True:
             log.info("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % (
                 message.guild.id, message.content))
             await self._process_butt_message(message)
@@ -233,6 +234,7 @@ class ButtBot:
             (player,)
         )
         if players[0]['c'] == 0:
+            logging.info("%s is new player, saving to db" % player)
             # we dont see this player in the db, let's record the guid
             db["minecraft"].do_insert("insert into progress.minecraft_players "
                                       "(player_name, player_guid)"
@@ -244,22 +246,25 @@ class ButtBot:
 
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
-        if is_word_in_text("left the game", message.content) or is_word_in_text("joined the game", message.content):
+        if "left the game" in message.content or "joined the game" in message.content:
             message_ = butt_library.strip_discord_shitty_formatting(message.content)
             player = message_.split(" ")[0]
-            logging.info("_process_all_other_messages: join/part message from minecraft")
+            print(message_)
+            logging.info("_process_all_other_messages: join/part message from minecraft - %s" % player)
             await self.record_player_guid(player)
             # this is a join or part message and we are going to ignore it
             # welcome to progress
-            if (
-                    (message.author.id == 249966240787988480 and is_word_in_text("joined the game", message_))
-                    or
-                    (message.author.id == 992866467903176765 and is_word_in_text("joined the game", message_))
-            ):
+            if message.author.id == 249966240787988480 and "joined the game" in message_:
+                print("_process_all_other_messages: starting hwsp for %s" % player)
+
                 hwsp = vacuum[message.guild.id].have_we_seen_player(player)
+                print(hwsp)
                 if hwsp:
-                    log.debug("have not seen player before: %s" % player)
+                    log.info("have not seen player before: %s" % player)
                     await self.docomms(hwsp, message.channel, message.guild.id)
+            else:
+                print(message.author.id)
+                print(message_)
 
         else:
             if allowed_in_channel(message):

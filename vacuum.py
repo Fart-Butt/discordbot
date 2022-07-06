@@ -193,7 +193,7 @@ class Vacuum:
             for i in m[2:]:
                 dmsg = dmsg + " " + i
         dmsg = dmsg.strip()
-        log.info((player, dmsg, "Exception Handling", datetime.datetime.utcnow()), player)
+        log.info("%s %s %s %s %s" % (player, dmsg, "Exception Handling", datetime.datetime.utcnow(), player))
 
         try:
             shared.db["minecraft"].do_insert(
@@ -215,11 +215,14 @@ class Vacuum:
         shared.db["minecraft"].close()
 
     def have_we_seen_player(self, player):
+        logging.info("VACUUM - HWSP")
         current_server_result = shared.db["minecraft"].do_query(
             "select count(datetime) from {}_playertracker_v2 where player=%s".format(self.table_prefix), (player,))
         previous_server_result = shared.db["minecraft"].do_query(
             "select count(datetime) from {}_playertracker_v2_old where player=%s".format(self.table_prefix), (player,))
         shared.db["minecraft"].close()
+        print(current_server_result)
+        print(previous_server_result)
         if current_server_result[0]['count(datetime)'] == 0:
             # new player
             if previous_server_result[0]['count(datetime)'] > 0:
@@ -230,10 +233,14 @@ class Vacuum:
                     "who gave %s the new IP address?",
                     "%s is back to top ouchies!"
                 ]
-                message = random.randrange(0, len(comments) - 1)
-                return message % player
+                message = comments[random.randrange(0, len(comments) - 1)]
+                logging.debug(message % player)
+                return (message % player)
             else:
                 return "welcome to progress %s" % player
+
+        else:
+            logging.debug("not new player")
 
 
 class VacuumManager(UserDict):
