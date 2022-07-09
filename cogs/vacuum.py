@@ -455,3 +455,31 @@ class VacuumCog(Cog):
         async with ctx.typing():
             await asyncio.sleep(3)
         await ctx.send("uuid is %s" % str(uid))
+
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    @valid_user_or_bot()
+    @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
+    async def basewaypoint(self, ctx: Context, *args):
+        requester = args
+        a = db["minecraft"].do_query("select x, z, player from progress.progress_NSA_POI where player=%s"
+                                     .format(guild_configs[ctx.message.guild.id].table_prefix), (requester,))
+
+        players = len(a)
+        print(a)
+        if players > 0:
+            # 1 or more players registered at this location
+            player = list()
+            for lines in a:
+                player.append(lines['player'])
+            message = '[name:"Home of %s", x:%s, y:64, z:%s, dim:minecraft:overworld]' % \
+                      (", ".join(player),
+                       a[0]['x'],
+                       a[0]['z'])
+        else:
+            message = "this player does not have their base registered with buttbot"
+        print(message)
+        async with ctx.typing():
+            await asyncio.sleep(3)
+        await ctx.send(message)
