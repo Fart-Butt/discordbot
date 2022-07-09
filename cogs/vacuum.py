@@ -2,6 +2,7 @@ import logging
 from discord.ext.commands import Bot, Cog, Context, command, BucketType
 from discord.ext import commands
 from shared import db, shitpost, guild_configs
+import mojang
 import datetime
 import random
 import asyncio
@@ -442,3 +443,15 @@ class VacuumCog(Cog):
             cmsg = cmsg + d[t1] + "(%s%s)" % (str(d[t2]), t3)
             i = i + 1
         return cmsg
+
+    @command()
+    @commands.cooldown(1, 10, BucketType.guild)
+    @valid_user_or_bot()
+    @vacuum_enabled_in_guild()
+    @can_speak_in_channel()
+    async def uuid(self, ctx: Context, *args):
+        a = mojang.Mojang
+        uid = a.mojang_user_to_uuid(args[0])
+        async with ctx.typing():
+            await asyncio.sleep(3)
+        await ctx.send("uuid is %s" % str(uid))
