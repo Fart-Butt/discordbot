@@ -281,7 +281,7 @@ class VacuumCog(Cog):
         """here's whats killing you"""
         log.debug("HOWCHIES - triggered")
         if args:
-            r = self.howchies_profile(args[0], ctx.message.guid.id)
+            r = self.howchies_profile(args[0], ctx.message.guild.id)
             log.debug("HOWCHIES - search mode - returned: 'people who died to %s: %s" % (args, r))
             async with ctx.typing():
                 await asyncio.sleep(3)
@@ -462,6 +462,7 @@ class VacuumCog(Cog):
     @vacuum_enabled_in_guild()
     @can_speak_in_channel()
     async def basewaypoint(self, ctx: Context, *args):
+        """will give you a waypoint for a registered player's base"""
         requester = args
         a = db["minecraft"].do_query("select x, z, player from progress.progress_NSA_POI where player=%s"
                                      .format(guild_configs[ctx.message.guild.id].table_prefix), (requester,))
