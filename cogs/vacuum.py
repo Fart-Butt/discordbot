@@ -282,7 +282,7 @@ class VacuumCog(Cog):
         log.debug("HOWCHIES - triggered")
         if args:
             r = self.howchies_profile(args[0], ctx.message.guild.id)
-            log.debug("HOWCHIES - search mode - returned: 'people who died to %s: %s" % (args, r))
+            log.debug("HOWCHIES - search mode - returned: 'people who died to %s: %s" % (" ".join(args), r))
             async with ctx.typing():
                 await asyncio.sleep(3)
             await ctx.send("People who died to %s: %s" % (args, r))
