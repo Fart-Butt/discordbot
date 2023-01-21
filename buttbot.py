@@ -43,9 +43,9 @@ class ButtBot:
                 await asyncio.sleep(10)
             else:
                 await asyncio.sleep(120)
-            log.debug("Butted Message Processing - started")
+            log.info("Butted Message Processing - started")
             await self.check_stored_reactions()
-            log.debug("Butted Message Processing - ended")
+            log.info("Butted Message Processing - ended")
 
     @staticmethod
     async def docomms(message, channel, guild_id, bypass_for_test=False):
