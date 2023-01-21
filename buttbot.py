@@ -8,7 +8,7 @@ from config import command_prefix
 import concurrent.futures
 
 import mojang as mj
-from butt_library import is_word_in_text, allowed_in_channel, allowed_in_channel_direct
+from butt_library import allowed_in_channel, allowed_in_channel_direct
 from discord import Message
 
 from shared import guild_configs, test_environment, phrase_weights, shitpost, comms_instance, \
@@ -21,38 +21,31 @@ class ButtBot:
     def __init__(self):
         self.discordBot = bot
         self.mojang = mj.Mojang()
-        self.discordBot.loop.create_task(self.scraper_subscription_task())
+        self.discordBot.loop.create_task(self.minecraft_scraper_subscription_task())
+        self.discordBot.loop.create_task(self.butt_message_processing())
 
-    async def scraper_subscription_task(self):
+    async def minecraft_scraper_subscription_task(self):
         await self.discordBot.wait_until_ready()
-        log.debug("SCRAPER - starting scraper task")
+        log.debug("MINECRAFT SCRAPER - starting scraper task")
         while not self.discordBot.is_closed():
             await asyncio.sleep(10)
-            log.debug("SCRAPER - started")
+            log.debug("MINECRAFT SCRAPER - started")
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 for i in vacuum:
                     executor.map(vacuum[i].playtime_scraper())
-            log.debug("SCRAPER - ended")
-
-    def is_played_time_loop_running(self):
-        pass
-        # if self.config.getboolean('vacuum', 'enabled') is True:
-        #    print("")
-        #    d = self._played_time_loop_last_ran - datetime.datetime.utcnow()
-        #    d = abs(int(d.total_seconds()))
-        #    if d > 30:
-        #        # has not run in 30 or more seconds
-        #        self.do_info_log("I'm a broken piece of shit and had to reboot the background task")
-        #        self.discordBot.loop.create_task(self.my_background_task())
+            log.debug("MINECRAFT SCRAPER - ended")
 
     async def butt_message_processing(self):
+        log.debug("Butted Message Processing - starting task")
         await self.discordBot.wait_until_ready()
         while not self.discordBot.is_closed():
             if test_environment:
                 await asyncio.sleep(10)
             else:
                 await asyncio.sleep(120)
+            log.debug("Butted Message Processing - started")
             await self.check_stored_reactions()
+            log.debug("Butted Message Processing - ended")
 
     @staticmethod
     async def docomms(message, channel, guild_id, bypass_for_test=False):
