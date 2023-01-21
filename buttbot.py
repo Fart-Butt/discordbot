@@ -288,7 +288,7 @@ class ButtBot:
                                 # passes butt check
                                 msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
                                 phrase_weights.add_message(message, shitpost.get_noun())
-                                shitpost.log_disposition()
+                            shitpost.log_disposition()
                     else:
                         log.debug("Message2Butt_Processor - sentence over character length.")
             else:
