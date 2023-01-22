@@ -18,15 +18,15 @@ class PhraseWeights:
         if weight == 0:
             count_ignored += 1
             # no further processing.
-            log.debug("word %s: not adjusting weight since voted weight is %d" %
-                      (word, weight)
-                      )
+            log.info("word %s: not adjusting weight since voted weight is %d" %
+                     (word, weight)
+                     )
             pass
         else:
             count_update += 1
             db_word_weight = self.return_weight(word)
             weight = db_word_weight + weight
-            log.debug("word %s is getting weight %d adjusted to %d" % (word, db_word_weight, weight))
+            log.info("word %s is getting weight %d adjusted to %d" % (word, db_word_weight, weight))
             self.db.do_insert(
                 "INSERT into phraseweights (word, weight) VALUES (%s, %s) ON DUPLICATE KEY UPDATE weight = weight + %s",
                 (word, weight, weight))
