@@ -63,17 +63,17 @@ class PhraseWeights:
         negative_emoji_guid = ['504537001845063680']
         downvotes = 0
         upvotes = 0
-        log.debug("processing reactions")
-        log.debug(reactions)
+        log.info("processing reactions")
+        log.info(reactions)
         for items in reactions:
-            log.debug("new reaction")
-            log.debug(items.emoji)
+            log.info("new reaction")
+            log.info(items.emoji)
             try:
                 if items.emoji in negativeemojis or items.emoji.id in negative_emoji_guid:
-                    log.debug("downdoot")
+                    log.info("downdoot")
                     downvotes = downvotes + items.count
                 else:
-                    log.debug("updoot")
+                    log.info("updoot")
                     upvotes = upvotes + items.count
             except AttributeError:
                 # items.emoji.id not defined
