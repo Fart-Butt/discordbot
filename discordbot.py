@@ -6,10 +6,9 @@ from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
-from shared import guild_configs, bot, stat_module
+from shared import guild_configs, bot, stat_module, PhraseWeights
 from discord.channel import DMChannel
 import logging
-
 
 from config import *
 
@@ -22,9 +21,9 @@ def setup_logger() -> logging.Logger:
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
     logfile = LOGDIR / f'{timestamp}.log'
     logger = logging.getLogger('bot')  # the actual logger instance
-    logger.setLevel(logging.INFO)  # capture all log levels
+    logger.setLevel(logging.DEBUG)  # capture all log levels
     console_log = logging.StreamHandler()
-    console_log.setLevel(logging.INFO)  # log levels to be shown at the console
+    console_log.setLevel(logging.DEBUG)  # log levels to be shown at the console
     file_log = logging.FileHandler(logfile)
     file_log.setLevel(logging.DEBUG)  # log levels to be written to file
     formatter = logging.Formatter('{asctime} - {name} - {levelname} - {message}', style='{')
@@ -111,9 +110,15 @@ async def serialize_weights():
             await asyncio.sleep(300)
 
 
+modules = ("cogs.scraper", "cogs.cloner", "cogs.compressor", "cogs.utils", "cogs.batch")
+if __name__ == "__main__":
+    for module in modules:
+        bot.load_extension(module)
+
 bot.loop.create_task(send_stats_to_db())
 bot.add_cog(BotCommands(bot))
 bot.add_cog(BotConfig(bot))
 bot.add_cog(VacuumCog(bot))
 bot.loop.create_task(serialize_weights())
 bot.run(secretkey)
+# bot.scraper.archive(channel=154337182717444096, limit=100)
