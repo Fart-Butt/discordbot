@@ -78,10 +78,10 @@ class PhraseWeights:
             except AttributeError:
                 # items.emoji.id not defined
                 if items.emoji in negativeemojis:
-                    log.critical("downdoot and also it blew up")
+                    log.debug("downdoot and also it blew up")
                     downvotes = downvotes + items.count
                 else:
-                    log.critical("updoot and also it blew up")
+                    log.debug("updoot and also it blew up")
                     upvotes = upvotes + items.count
         return (upvotes - downvotes) * 20  # set weight change to 20 for each vote
 
