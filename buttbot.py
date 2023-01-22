@@ -135,7 +135,8 @@ class ButtBot:
         # i know this looks dumb as hell but trust me on this one
         message = await message.channel.fetch_message(message.id)
         if test_environment:
-            log.debug("running cached reaction on id %s" % message.id)
+            log.debug("running cached reaction on id %s - message %s" % (message.id, message.content))
+
         votes = phrase_weights.process_reactions(message.reactions)
         log.debug("votes tallied to %d" % votes)
         phrase_weights.adjust_weight(noun, votes)
@@ -280,7 +281,7 @@ class ButtBot:
                             if shitpost.successful_butting():
                                 # passes butt check
                                 msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
-                                phrase_weights.add_message(message, shitpost.get_noun())
+                                phrase_weights.add_message(msg, shitpost.get_noun())
                             shitpost.log_disposition()
                     else:
                         log.debug("Message2Butt_Processor - sentence over character length.")
