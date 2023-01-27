@@ -221,8 +221,8 @@ class Vacuum:
         previous_server_result = shared.db["minecraft"].do_query(
             "select count(datetime) from {}_playertracker_v2_old where player=%s".format(self.table_prefix), (player,))
         shared.db["minecraft"].close()
-        print(current_server_result)
-        print(previous_server_result)
+        log.debug(current_server_result)
+        log.debug(previous_server_result)
         if current_server_result[0]['count(datetime)'] == 0:
             # new player
             if previous_server_result[0]['count(datetime)'] > 0:

@@ -121,7 +121,7 @@ def allowed_in_channel(message: Message):
             return False
     except IndexError:
         # todo: probably shouldnt happen but we might want to load a config here
-        print("didnt find config loaded for channel %d in guild %d" % (message.channel.id, message.guild.id))
+        log.error("didnt find config loaded for channel %d in guild %d" % (message.channel.id, message.guild.id))
         return False
 
 
@@ -133,7 +133,7 @@ def allowed_in_channel_direct(guild: int, channel: int):
             return False
     except IndexError:
         # todo: probably shouldnt happen but we might want to load a config here
-        print("didnt find config loaded for channel %d in guild %d" % (channel, guild))
+        log.error("didnt find config loaded for channel %d in guild %d" % (channel, guild))
         return False
 
 

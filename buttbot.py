@@ -43,9 +43,9 @@ class ButtBot:
                 await asyncio.sleep(10)
             else:
                 await asyncio.sleep(120)
-            log.info("Butted Message Processing - started")
+            log.debug("Butted Message Processing - started")
             await self.check_stored_reactions()
-            log.info("Butted Message Processing - ended")
+            log.debug("Butted Message Processing - ended")
 
     @staticmethod
     async def docomms(message, channel, guild_id, bypass_for_test=False):
@@ -243,22 +243,21 @@ class ButtBot:
         if "left the game" in message.content or "joined the game" in message.content:
             message_ = butt_library.strip_discord_shitty_formatting(message.content)
             player = message_.split(" ")[0]
-            print(message_)
             logging.info("_process_all_other_messages: join/part message from minecraft - %s" % player)
             await self.record_player_guid(player)
             # this is a join or part message and we are going to ignore it
             # welcome to progress
             if message.author.id == 249966240787988480 and "joined the game" in message_:
-                print("_process_all_other_messages: starting hwsp for %s" % player)
+                log.debug("_process_all_other_messages: starting hwsp for %s" % player)
 
                 hwsp = vacuum[message.guild.id].have_we_seen_player(player)
-                print(hwsp)
+                log.debug(hwsp)
                 if hwsp:
                     log.info("have not seen player before: %s" % player)
                     await self.docomms(hwsp, message.channel, message.guild.id)
             else:
-                print(message.author.id)
-                print(message_)
+                log.debug(message.author.id)
+                log.debug(message_)
 
         else:
             if allowed_in_channel(message):
