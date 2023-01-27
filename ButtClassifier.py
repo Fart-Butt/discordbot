@@ -5,6 +5,7 @@ import logging
 
 log = logging.getLogger('bot.' + __name__)
 
+
 class ButtClassifier:
     def __init__(self, phraseweights, nlp):
         self.message = ""
@@ -17,6 +18,7 @@ class ButtClassifier:
         self.nouns = []
         self._spacy = nlp
         self._similarities = {}
+        self._processed_sentence = []
 
     def classify_butts(self, message):
         self.message = message
@@ -34,11 +36,14 @@ class ButtClassifier:
             for x in self._nouns:
                 weight = self._get_word_weight(self._nouns[i], self._nouns_previous_word_tag[i])
                 self.nouns.append(FinalizedButtChunk(self._nouns[i], weight, self._nouns_previous_word_tag[i],
-                                  self._similarities[x]))
+                                                     self._similarities[x]))
                 i += 1
 
     def get_nouns(self):
         return self.nouns
+
+    def get_processed_sentence(self):
+        return self._processed_sentence
 
     def get_pretty_noun_format(self):
         tags = []
@@ -52,9 +57,11 @@ class ButtClassifier:
         # retrieve the nouns from the chunker, and nuke the bad chunks found.
         # the chunker pulls the 'subjects' out of the sentence and returns the full word data for each subject chunk.
         # right now we are blocking single word chunks because most of them are "I, he, we, etc".
-        noun_tags = ["NN", "NNS", "NNP"]
+        noun_tags = ["NN", "NNS", "NNP", "NNPS"]
+        chunks = []
         for chunk in self._starting_chunks:
             a = ButtChunk(self.message, chunk)
+            chunks.append("{} ({})".format(a.text, a.tag))
             if len(chunk.text.split()) > 1:
                 if any(x in noun_tags for x in a.tag):
                     self._chunks_to_investigate.append(a)
@@ -69,18 +76,19 @@ class ButtClassifier:
                                 self._nouns_previous_word_tag.append(None)
                         i += 1
                 else:
-                    log.info("Did not find appropriate chunk: %s, chunks: %s" % (self.message, a))
+                    log.debug("Did not find appropriate chunk: %s, chunks: %s" % (self.message, a))
 
             else:
                 if a.tag in noun_tags:
                     # chunk word count is less than 1. we need to account for this for some phrases
-                    print("chunk word length is 1 and contains noun: %s" % chunk.text)
+                    log.debug("chunk word length is 1 and contains noun: %s" % chunk.text)
+        self._processed_sentence = chunks
 
     def _butt_vector_analyser(self, word):
         """check noun vector similarity to spatially funny objects/words/concepts."""
         # TODO: consider reducing weight value for not funny words/objects/concepts
         spatially_funny_objects = self._spacy("animal people structure machine car")
-        #not_funny_objects = ["time", ]
+        # not_funny_objects = ["time", ]
         starting_weight = shared.phrase_weights.return_weight(word.text)
         working_weight = starting_weight
         self._similarities[word] = []

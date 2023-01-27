@@ -114,6 +114,10 @@ class WordReplacer:
             self.__check_length_of_sentence_to_butt(self._message_channel)))
         print("Spacy noun chunk(s): %s" % self._spacy_nouns)
         try:
+            print("Spacy processed sentence: %s " % self._spacy_tagged_sentence)
+        except AttributeError:
+            print("Spacy processed sentence: None")
+        try:
             print("Spacy processed chunk(s): %s " % self._spacy_processed_nouns)
             print("weights: %s" % self._spacy_finalized_weights)
         except AttributeError:
@@ -230,6 +234,7 @@ class WordReplacer:
 
     def __get_word_pairs_from_all_sources(self):
         self.butt_classifier.classify_butts(self._tagged_sentence)
+        self._spacy_tagged_sentence = self.butt_classifier.get_processed_sentence()
         self._spacy_finalized_nouns = self.butt_classifier.get_nouns()
         self._spacy_processed_nouns = self.butt_classifier.get_pretty_noun_format()
         for a in self._spacy_finalized_nouns:
@@ -239,7 +244,6 @@ class WordReplacer:
     def __pick_word_pair_to_butt(self):
         """randomly selects a word pair to be the target of replacement."""
         # remove all 1 length words
-        print(self._spacy_finalized_nouns)
         self._selected_noun_pair_to_butt = self.__pick_random_phrase_by_weight(self._spacy_finalized_nouns)
 
     def __pick_random_phrase_by_weight(self, word_list):
