@@ -1,34 +1,73 @@
+import logging
+
+log = logging.getLogger('bot.' + __name__)
+
+
 class ButtChunk:
     def __init__(self, sentence, chunk):
         self._original_sentence = sentence
-        self.chunk_tags = []
-        self.chunk = []
         self.text = []
         self.tag = []
         self.lemma = []
         self.shape = []
         self.original_spacy_object = []
+        self.passes_noun_check = False
+        self.passes_chunk_length_check = False
+        self.passes_noun_length_check = False
+        self.usable_chunk = False
+        self.previous_word = ""
+        self.previous_word_tag = ""
+        self.noun = ""
         self.build_chunk_word_list(chunk)
 
     def build_chunk_word_list(self, chunk):
-        characters_to_strip = ['"', "'"]
-        chunk_stripped = ''.join(i for i in chunk.text if i not in characters_to_strip)
-        chunk_num_words = len(chunk_stripped.split(' '))
-        first_word = str(chunk).split(" ")[0]
-        last_word = str(chunk).split(" ")[-1]
-        original_sentence = str(self._original_sentence).split(' ')
-        first_word_matches = (i for i, e in enumerate(original_sentence) if e == first_word)
-        for starting_index in first_word_matches:
-            possible_last_chunk_word_index = starting_index + chunk_num_words - 1
-            try:
-                if original_sentence[possible_last_chunk_word_index] == last_word:
-                    # found the chunk position in the sentence. it is from starting
-                    # index to possible_last_chunk_word
-                    for i in range(starting_index, possible_last_chunk_word_index + 1):
-                        self.text.append(self._original_sentence[i].text)
-                        self.tag.append(self._original_sentence[i].tag_)
-                        self.lemma.append(self._original_sentence[i].lemma_)
-                        self.shape.append(self._original_sentence[i].shape_)
-                        self.original_spacy_object.append(self._original_sentence[i])
-            except IndexError:
-                pass
+        if len(chunk.text.split(" ")) > 1:
+            self.passes_chunk_length_check = True
+            noun_tags = ["NN", "NNS", "NNP", "NNPS"]
+            characters_to_strip = ["'", '"', '*', ".", "..."]
+            for i in range(chunk.start, chunk.end):
+                # if self._original_sentence[i].text in characters_to_strip:
+                #    continue
+                self.text.append(self._original_sentence[i].text)
+                self.tag.append(self._original_sentence[i].tag_)
+                if self._original_sentence[i].tag_ in noun_tags:
+                    self.passes_noun_check = True
+                    self.noun = self._original_sentence[i].text
+                    try:
+                        self.previous_word = self._original_sentence[i - 1].text
+                    except IndexError:
+                        self.previous_word = None
+                    try:
+                        self.previous_word_tag = self._original_sentence[i - 1].tag_
+                    except IndexError:
+                        self.previous_word_tag = None
+                self.lemma.append(self._original_sentence[i].lemma_)
+                self.shape.append(self._original_sentence[i].shape_)
+                self.original_spacy_object.append(self._original_sentence[i])
+
+    def __repr__(self):
+        return """
+        butt_chunk
+        text: {}
+        tag: {}
+        lemma: {}
+        shape: {} 
+        original spacy object: {}
+        Previous Word: {}
+        Previous Word Tag: {}
+        Noun: {}
+        N: {} NL {} CL {} UC {}
+        """.format(
+            self.text,
+            self.tag,
+            self.lemma,
+            self.shape,
+            self.original_spacy_object,
+            self.previous_word,
+            self.previous_word_tag,
+            self.noun,
+            self.passes_noun_check,
+            self.passes_noun_length_check,
+            self.passes_chunk_length_check,
+            self.usable_chunk
+        )

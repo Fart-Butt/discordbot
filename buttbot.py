@@ -249,7 +249,6 @@ class ButtBot:
             # welcome to progress
             if message.author.id == 249966240787988480 and "joined the game" in message_:
                 log.debug("_process_all_other_messages: starting hwsp for %s" % player)
-
                 hwsp = vacuum[message.guild.id].have_we_seen_player(player)
                 log.debug(hwsp)
                 if hwsp:
@@ -289,7 +288,7 @@ class ButtBot:
                 if test_environment:
                     # send to shitpost module for testing.
                     # we don't want to talk at all except in my test channel
-                    shitpost.perform_text_to_butt(message)
+                    shitpost.do_butting_raw_sentence(message)
                     shitpost.print_debug_message()
                     shitpost.log_disposition()
                     if message.channel.id == 435348744016494592:

@@ -1,6 +1,7 @@
 import json
 from random import *
 from FinalizedButtChunk import FinalizedButtChunk
+from ButtStatement import ButtStatement
 
 import butt_library as buttlib
 from ButtClassifier import ButtClassifier
@@ -118,10 +119,10 @@ class WordReplacer:
         except AttributeError:
             print("Spacy processed sentence: None")
         try:
-            print("Spacy processed chunk(s): %s " % self._spacy_processed_nouns)
+            print("Spacy noun chunk(s): %s " % self._spacy_processed_nouns)
             print("weights: %s" % self._spacy_finalized_weights)
         except AttributeError:
-            print("Spacy processed chunk(s): None")
+            print("Spacy noun chunk(s): None")
         try:
             print("Selected noun pair: %s" % str(self._selected_noun_pair_to_butt.text))
         except AttributeError:
@@ -182,9 +183,11 @@ class WordReplacer:
             if not self.__does_message_contain_stop_phrases():
                 # message contains no stop phrases, let's proceed
                 if messageobject.author.bot:
-                    self.__tag_sentence(True)
+                    pass
+                    # self.__tag_sentence(True)
                 else:
-                    self.__tag_sentence()
+                    pass
+                    #self.__tag_sentence()
                 if self._tagged_sentence and self.__check_length_of_sentence_to_butt(messageobject.guild.id):
                     # TODO: modify the above two functions for spacy
                     # message is below length limit set on a per-guild basis
@@ -198,11 +201,14 @@ class WordReplacer:
         """always makes butted sentence.  skip all sanity checks that perform_text_to_butt does."""
         self.__state_reset()
         self._original_sentence = str(message)
-        self.__tag_sentence()
-        self.__get_word_pairs_from_all_sources()
-        self.__pick_word_pair_to_butt()
-        self.__make_butted_sentence()
-        return self.butted_sentence
+        print("yes")
+        bs = ButtStatement(message, self.nlp, self.__phraseweights)
+        print(bs)
+
+    #        self.__get_word_pairs_from_all_sources()
+    #        self.__pick_word_pair_to_butt()
+    #        self.__make_butted_sentence()
+    #        return self.butted_sentence
 
     def __tag_sentence(self, split_for_bot=False):
         """tags sentence properly based if user is a bot. we assume these bots are relaying chat message from
