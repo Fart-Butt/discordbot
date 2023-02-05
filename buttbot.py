@@ -2,6 +2,7 @@ import asyncio
 import random
 import time
 import logging
+import datetime
 
 import butt_library
 from config import command_prefix
@@ -240,6 +241,12 @@ class ButtBot:
 
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
+        if "has made the advancement [" and message.author.id == 249966240787988480:
+            # progress cheevo
+            cheevo = db["minecraft"].do_insert(
+                "insert into progress.progres_cheevos (`player`, `cheevo_text`, `datetime`, `playtime` ) values (%s, %s, %s, 1)",
+                (message.content.split(" ")[0], message.content.split("[")[1][:-1], datetime.datetime.utcnow())
+            )
         if "left the game" in message.content or "joined the game" in message.content:
             message_ = butt_library.strip_discord_shitty_formatting(message.content)
             player = message_.split(" ")[0]
