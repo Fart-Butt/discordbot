@@ -56,7 +56,8 @@ class Db:
             pass
 
     def close(self):
-        self.connection.close()
+        pass
+        # self.connection.close()
 
     def do_insertmany(self, query, args):
         self.build()

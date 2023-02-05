@@ -468,7 +468,6 @@ class VacuumCog(Cog):
                                      .format(guild_configs[ctx.message.guild.id].table_prefix), (requester,))
 
         players = len(a)
-        print(a)
         if players > 0:
             # 1 or more players registered at this location
             player = list()

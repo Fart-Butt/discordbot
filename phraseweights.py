@@ -12,6 +12,7 @@ class PhraseWeights:
         self.db = db
 
     def adjust_weight(self, word, weight):
+        # TODO - adopt for lemma, tag weight system
         log.info("PhraseWeights - updating phrase database")
         count_update = 0
         count_ignored = 0
