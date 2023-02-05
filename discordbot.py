@@ -110,10 +110,6 @@ async def serialize_weights():
             await asyncio.sleep(300)
 
 
-modules = ("cogs.scraper", "cogs.cloner", "cogs.compressor", "cogs.utils", "cogs.batch")
-if __name__ == "__main__":
-    for module in modules:
-        bot.load_extension(module)
 
 bot.loop.create_task(send_stats_to_db())
 bot.add_cog(BotCommands(bot))
