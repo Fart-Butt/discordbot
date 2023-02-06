@@ -43,8 +43,8 @@ class ButtChunk:
             characters_to_strip = ["'", '"', '*', ".", "..."]
             for i in range(chunk.start, chunk.end):
                 # filter out shit chunks
-                w = parse(self._original_sentence[i].text, rule="IRI")
                 try:
+                    w = parse(self._original_sentence[i].text, rule="IRI")
                     if w is dict:
                         continue
                 except ValueError:
