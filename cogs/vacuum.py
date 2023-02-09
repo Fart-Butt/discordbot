@@ -484,3 +484,25 @@ class VacuumCog(Cog):
         async with ctx.typing():
             await asyncio.sleep(3)
         await ctx.send(message)
+
+        @command()
+        @commands.cooldown(1, 10, BucketType.guild)
+        @valid_user_or_bot()
+        @vacuum_enabled_in_guild()
+        @can_speak_in_channel()
+        async def cheevo(self, ctx: Context, *args):
+            """returns cheevo info for a specified cheevo"""
+            cheevo = args
+            a = db["minecraft"].do_query('''select o.oldest, n.newest, p.percent_players from
+                (select player as oldest from {0}.progres_cheevos where cheevo_text = %s order by datetime asc limit 1) as o,
+                (select player as newest from {0}.progres_cheevos where cheevo_text = %s order by datetime desc limit 1) as n,
+                (select ch.total_w_cheevo/ppv.total_players*100 as percent_players from
+                (select count(distinct player) total_players from {0}.progress_playertracker_v2) as ppv,
+                (select count(distinct player) as total_w_cheevo from {0}.progres_cheevos where cheevo_text = %s) as ch) as p'''
+                                         .format(guild_configs[ctx.message.guild.id].table_prefix), (cheevo,))
+            print(a)
+            message = "first post: {}  most recent{}  %of players with achievement: {}".format(a['oldest'], a['newest'],
+                                                                                               a['percent_players'])
+            async with ctx.typing():
+                await asyncio.sleep(3)
+            await ctx.send(message)
