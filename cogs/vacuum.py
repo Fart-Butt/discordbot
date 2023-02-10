@@ -499,7 +499,8 @@ class VacuumCog(Cog):
             (select ch.total_w_cheevo/ppv.total_players*100 as percent_players from
             (select count(distinct player) total_players from {0}.progress_playertracker_v2) as ppv,
             (select count(distinct player) as total_w_cheevo from {0}.progres_cheevos where cheevo_text = %s) as ch) as p'''
-                                     .format(guild_configs[ctx.message.guild.id].table_prefix), (cheevo,))
+                                     .format(guild_configs[ctx.message.guild.id].table_prefix),
+                                     (cheevo, cheevo, cheevo))
         print(a)
         message = "first post: {}  most recent{}  %of players with achievement: {}".format(a['oldest'], a['newest'],
                                                                                            a['percent_players'])
