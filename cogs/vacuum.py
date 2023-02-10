@@ -502,8 +502,9 @@ class VacuumCog(Cog):
                                      .format(guild_configs[ctx.message.guild.id].table_prefix),
                                      (cheevo, cheevo, cheevo))
         print(a)
-        message = "first post: {}  most recent{}  %of players with achievement: {}".format(a['oldest'], a['newest'],
-                                                                                           a['percent_players'])
+        message = "first post: {}  most recent{}  %of players with achievement: {}".format(a[0]['oldest'],
+                                                                                           a[0]['newest'],
+                                                                                           a[0]['percent_players'])
         async with ctx.typing():
             await asyncio.sleep(3)
         await ctx.send(message)
