@@ -492,7 +492,7 @@ class VacuumCog(Cog):
     @can_speak_in_channel()
     async def cheevo(self, ctx: Context, *args):
         """returns cheevo info for a specified cheevo"""
-        cheevo = args
+        cheevo = " ".join(args)
         a = db["minecraft"].do_query('''select o.oldest, n.newest, p.percent_players from
             (select player as oldest from {0}.progres_cheevos where cheevo_text = %s order by datetime asc limit 1) as o,
             (select player as newest from {0}.progres_cheevos where cheevo_text = %s order by datetime desc limit 1) as n,
