@@ -1,5 +1,6 @@
 import logging
 from rfc3987 import parse
+from shared import minecraft_db
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -205,39 +206,21 @@ class ButtChunk:
         )
 
     def __repr__(self):
-        return """
+        return f"""
         butt_chunk
-        text: {}
-        text weight: {}
-        tag: {}
-        tag weight: {}
-        normalized tags: {}
-        lemma: {}
-        lemma weight: {}
-        shape: {} 
-        original spacy object: {}
-        Previous Word: {}
-        Previous Word Tag: {}
-        Noun: {}
-        N: {} CL {} UC {}
-        weight: {}
-        similarities: {}
-        """.format(
-            self.text,
-            self.text_weight,
-            self.tag,
-            self.tag_weight,
-            self.normalized_tags,
-            self.lemma,
-            self.lemma_weight,
-            self.shape,
-            self.original_spacy_object,
-            self.previous_word,
-            self.previous_word_tag,
-            self.noun,
-            self.passes_noun_check,
-            self.passes_chunk_length_check,
-            self.usable_chunk,
-            self.weight,
-            self._similarities,
-        )
+        text: {self.text}
+        text weight: {self.text_weight}
+        tag: {self.tag}
+        tag weight: {self.tag_weight}
+        normalized tags: {self.normalized_tags}
+        lemma: {self.lemma}
+        lemma weight: {self.lemma_weight}
+        shape: {self.shape} 
+        original spacy object: {self.original_spacy_object}
+        Previous Word: {self.previous_word}
+        Previous Word Tag: {self.previous_word_tag}
+        Noun: {self.noun}
+        N: {self.passes_noun_check} CL {self.passes_chunk_length_check} UC {self.usable_chunk}
+        weight: {self.weight}
+        similarities: {self._similarities}
+        """
