@@ -5,42 +5,42 @@ log = logging.getLogger('bot.' + __name__)
 
 
 class ButtChunk:
-    def __init__(self, phraseweights, db, spacy, sentence, chunk):
-        self._spacy = spacy
-        self.db = db
-        self.phraseweights = phraseweights
-        self._original_sentence = sentence
-        self.text = []
+
+    def __init__(self, db, spacy, sentence, chunk):
+        self.text = ""
         self.tag = []
+        self.normalized_tags = ""
         self.lemma = []
         self.shape = []
+        self.text_weight = 0
+        self.tag_weight = 0
+        self.lemma_weight = 0
+        self.weight = 0
+        self.usable_chunk = False
+        self._spacy = spacy
+        self.db = db
+        # self.phraseweights = phraseweights
+        self._original_sentence = sentence
         self.original_spacy_object = []
         self.passes_noun_check = False
         self.passes_chunk_length_check = False
-        self.usable_chunk = False
         self.previous_word = []
         self.previous_word_tag = []
         self.noun = []
         self._similarities = []
-        self.weight = []
-        self.tag_weight = 0
-        self.lemma_weight = 0
+        self.text_list = []
 
         # Processing
         self.build_chunk_word_list(chunk)
         if self.usable_chunk:
-            for n in self.noun:
-                self.weight.append(self._butt_vector_analyser(n))
             self.normalized_tags = self.normalize_tags(self.tag)
-            self.get_weights(self.normalized_tags, " ".join(self.lemma))
-            self.store_tag(self.normalized_tags, self.tag_weight)
-            self.store_lemma(" ".join(self.lemma), self.normalized_tags, self.lemma_weight)
+            self.get_weights(self.normalized_tags, self.lemma, self.text)
 
     def build_chunk_word_list(self, chunk):
         if len(chunk.text.split(" ")) > 1:
             self.passes_chunk_length_check = True
             noun_tags = ["NN", "NNS", "NNP", "NNPS"]
-            characters_to_strip = ["'", '"', '*', ".", "..."]
+            # characters_to_strip = ["'", '"', '*', ".", "..."]
             for i in range(chunk.start, chunk.end):
                 # filter out shit chunks
                 try:
@@ -50,9 +50,7 @@ class ButtChunk:
                 except ValueError:
                     # not an IRI, continue processing:
                     pass
-                # if self._original_sentence[i].text in characters_to_strip:
-                #    continue
-                self.text.append(self._original_sentence[i].text)
+                self.text_list.append(self._original_sentence[i])
                 self.tag.append(self._original_sentence[i].tag_)
                 if self._original_sentence[i].tag_ in noun_tags:
                     self.passes_noun_check = True
@@ -68,25 +66,29 @@ class ButtChunk:
                 self.lemma.append(self._original_sentence[i].lemma_)
                 self.shape.append(self._original_sentence[i].shape_)
                 self.original_spacy_object.append(self._original_sentence[i])
-                if self.passes_noun_check and self.passes_chunk_length_check:
-                    self.usable_chunk = True
+            self.text = chunk.text
+            if self.passes_noun_check and self.passes_chunk_length_check:
+                self.usable_chunk = True
 
-    def _butt_vector_analyser(self, word):
+    def _butt_vector_analyser(self, phrase) -> int:
         """check noun vector similarity to spatially funny objects/words/concepts."""
         # TODO: consider reducing weight value for not funny words/objects/concepts
         spatially_funny_objects = self._spacy("animal people structure machine car")
+        phrase = self._spacy(phrase)
         # not_funny_objects = ["time", ]
-        starting_weight = self.phraseweights.return_weight(word)
+        starting_weight = self.__get_text_weight(self.text)
         working_weight = starting_weight
         for s in spatially_funny_objects:
-            similarity = s.similarity(word)
-            if similarity > .43:
+            similarity = s.similarity(phrase)
+            if similarity > .5:
                 self._similarities.append("%s: %f" % (s, similarity))
                 working_weight = int(working_weight + starting_weight * similarity)
         return working_weight
 
     @staticmethod
-    def normalize_tags(tags):
+    def normalize_tags(tags: list) -> str:
+        """intended for db storage/retrieval - collapses tags of similar type to a master type.
+        example: collapses all noun POS tags (NNS,NNP,NNPS) to NN."""
         # tag map lists the tag and then the tag that we are normalizing it to.
         normalized_tags = []
         tag_map = [
@@ -114,7 +116,7 @@ class ButtChunk:
                 normalized_tags.append(t)
         return " ".join(normalized_tags)
 
-    def store_lemma(self, normalized_lemma, normalized_tag, weight):
+    def _store_lemma(self, normalized_lemma: str, normalized_tag: str, weight: int):
         self.db.do_insert("""insert into lemma_weights(`tag`, `lemma`, `frequency`, `weight`)
                           values ((select tag from tag_weights where tag = %s), %s, 1, %s)
                           on duplicate key update 
@@ -122,37 +124,91 @@ class ButtChunk:
                           weight = %s""",
                           (normalized_tag, normalized_lemma, weight, normalized_lemma, weight))
 
-    def store_tag(self, tag, weight):
+    def _store_tag(self, tag: str, weight: int):
         self.db.do_insert(
             "INSERT into tag_weights (tag, weight) VALUES (%s, %s) ON DUPLICATE KEY UPDATE weight=%s",
             (tag, weight, weight))
 
-    def get_weights(self, tag, lemma):
-        self.tag_weight = self.__get_tag_weight(tag)
-        self.lemma_weight = self.__get_lemma_weight(lemma)
+    def _store_phrase(self, word: str, weight: int, pos: str):
+        self.db.do_insert(
+            "INSERT into phraseweights (phrase, weight, pos) "
+            "VALUES (%s, %s, %s) "
+            "ON DUPLICATE KEY UPDATE weight = weight + %s",
+            (word, weight, pos, weight)
+        )
 
-    def __get_lemma_weight(self, lemma):
+    def get_weights(self, normalized_tag: str, lemma: list, text: str):
+        self.text_weight = self._butt_vector_analyser(text)
+        self.tag_weight = self.__get_tag_weight(normalized_tag)
+        self.lemma_weight = self.__get_lemma_weight(" ".join(lemma))
+
+        if self.text_weight == 0 or self.tag_weight == 0 or self.lemma_weight == 0:
+            # block crap
+            self.weight = 0
+            self.usable_chunk = False
+        else:
+            self.weight = self.text_weight + self.tag_weight + self.lemma_weight
+
+    def __get_lemma_weight(self, lemma: str) -> int:
         try:
             db_weight = self.db.do_query("select weight from lemma_weights where lemma=%s", (lemma,))[0]["weight"]
         except IndexError:
             db_weight = 1000
         return db_weight
 
-    def __get_tag_weight(self, tag):
+    def __get_tag_weight(self, tag: str) -> int:
         try:
             db_weight = self.db.do_query("select weight from tag_weights where tag=%s", (tag,))[0]["weight"]
         except IndexError:
             db_weight = 1000
         return db_weight
 
+    def __get_text_weight(self, text: str) -> int:
+        try:
+            db_weight = self.db.do_query("select weight from phraseweights where phrase=%s", (text,))[0]["weight"]
+        except IndexError:
+            # not in db
+            db_weight = 1000
+        if not db_weight:
+            return 1000
+        elif db_weight < 0:
+            return 1
+        else:
+            return db_weight
+
     @staticmethod
-    def list_to_string(list_):
+    def list_to_string(list_: list) -> str:
         return " ".join(list_)
+
+    def adjust_weight(self, voted_weight: int):
+        log.info("PhraseWeights - updating phrase database")
+        count_update = 0
+        count_ignored = 0
+        if voted_weight == 0:
+            count_ignored += 1
+            # no further processing.
+            log.info("word %s: not adjusting weight since voted weight is %d" %
+                     (self.text, voted_weight)
+                     )
+            pass
+        else:
+            count_update += 1
+            db_word_weight = self.text_weight
+            calculated_weight = db_word_weight + voted_weight
+            log.info("word %s is getting weight %d adjusted to %d" % (self.text, db_word_weight, calculated_weight))
+            self._store_phrase(self.text, calculated_weight, " ".join(self.tag))
+            self._store_tag(self.normalized_tags, calculated_weight)
+            self._store_lemma(" ".join(self.lemma), self.normalized_tags, calculated_weight)
+        log.info(
+            "PhraseWeights - updating phrase database completed.  Updated: {} Ignored: {}"
+            .format(count_update, count_ignored)
+        )
 
     def __repr__(self):
         return """
         butt_chunk
         text: {}
+        text weight: {}
         tag: {}
         tag weight: {}
         normalized tags: {}
@@ -168,6 +224,7 @@ class ButtChunk:
         similarities: {}
         """.format(
             self.text,
+            self.text_weight,
             self.tag,
             self.tag_weight,
             self.normalized_tags,
@@ -182,5 +239,5 @@ class ButtChunk:
             self.passes_chunk_length_check,
             self.usable_chunk,
             self.weight,
-            self._similarities
+            self._similarities,
         )
