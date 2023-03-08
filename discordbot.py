@@ -6,7 +6,7 @@ from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
-from shared import guild_configs, bot, stat_module, PhraseWeights
+from shared import guild_configs, bot, stat_module
 from discord.channel import DMChannel
 import logging
 

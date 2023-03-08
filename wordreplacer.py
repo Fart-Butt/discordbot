@@ -1,10 +1,9 @@
 import json
 from random import *
-from FinalizedButtChunk import FinalizedButtChunk
 from ButtStatement import ButtStatement
+from butt_chunk import ButtChunk
 
 import butt_library as buttlib
-from ButtClassifier import ButtClassifier
 import shared
 import logging
 
@@ -13,11 +12,10 @@ log = logging.getLogger('bot.' + __name__)
 
 class WordReplacer:
 
-    def __init__(self, stat_module, phrase_weights, nlp_):
+    def __init__(self, stat_module):
         self.__stats = stat_module
         self.__wlist = self.__load_word_list()
         self.__command = {"nltk": 'wordreplacer'}
-        self.__phraseweights = phrase_weights
 
         # state variables
         self.should_we_butt = False  # this is the state variable that means butting should continue
@@ -30,13 +28,10 @@ class WordReplacer:
         self._word_passed_weight_check = False
         self._final_sentence = ""
         self._sentence_contains_stop_words = False
-        self._selected_noun_pair_to_butt = FinalizedButtChunk
         self.butted_sentence = ""
         self._spacy_nouns = []
         self._message_author = ""
         self._spacy_tagged_sentence = ""
-        self.nlp = nlp_
-        self.butt_classifier = ButtClassifier(self.__phraseweights, self.nlp)
         self._spacy_finalized_nouns = []
         self._spacy_finalized_weights = []
         self._message_channel = 0
@@ -54,7 +49,7 @@ class WordReplacer:
         self._word_passed_weight_check = False
         self._final_sentence = ""
         self._sentence_contains_stop_words = False
-        self._selected_noun_pair_to_butt = FinalizedButtChunk
+        self._selected_noun_pair_to_butt = ButtChunk
         self.butted_sentence = ""
         self._spacy_nouns = []
         self._message_author = ""
@@ -93,12 +88,13 @@ class WordReplacer:
 
     def rspeval(self, message):
         message = message.lower()
-        for t in self.__wlist:  # replace everything aaaaaaa
+        for _ in self.__wlist:  # replace everything aaaaaaa
             message = message.replace('butt', self.__wlist[randint(0, len(self.__wlist) - 1)], 1)
         return message
 
-    def __get_phrase_weight(self, phrase):
-        return self.__phraseweights.return_weight(phrase)
+    # def __get_phrase_weight(self, phrase):
+    # TODO: needed?
+    #    return self.__phraseweights.return_weight(phrase)
 
     def __is_user_an_allowed_bot(self, author):
         if author in shared.guild_configs[self._message_channel].get_all_allowed_bots():
@@ -172,7 +168,7 @@ class WordReplacer:
         """takes a messageobject from discord and sanity checks the butted phrase to determine if we should butt
         the sentence"""
         # we are going to manipulate this version of the message before sending it to the processing functions.
-        # we remove stuff that we dont want to be processed (banned phrases, banned people, banned bots)
+        # we remove stuff that we don't want to be processed (banned phrases, banned people, banned bots)
         self.__state_reset()
         self._message_guild = messageobject.guild.id
         self._original_sentence = messageobject.content
@@ -182,14 +178,8 @@ class WordReplacer:
             # passes code block test
             if not self.__does_message_contain_stop_phrases():
                 # message contains no stop phrases, let's proceed
-                if messageobject.author.bot:
-                    pass
-                    # self.__tag_sentence(True)
-                else:
-                    pass
-                    #self.__tag_sentence()
+                self._tagged_sentence = ButtStatement(messageobject)
                 if self._tagged_sentence and self.__check_length_of_sentence_to_butt(messageobject.guild.id):
-                    # TODO: modify the above two functions for spacy
                     # message is below length limit set on a per-guild basis
                     self.__get_word_pairs_from_all_sources()
                     self.__pick_word_pair_to_butt()
@@ -202,7 +192,7 @@ class WordReplacer:
         self.__state_reset()
         self._original_sentence = str(message)
         print("yes")
-        bs = ButtStatement(message, self.nlp, self.__phraseweights)
+        bs = ButtStatement(message)
         print(bs)
 
     #        self.__get_word_pairs_from_all_sources()
@@ -210,24 +200,11 @@ class WordReplacer:
     #        self.__make_butted_sentence()
     #        return self.butted_sentence
 
-    def __tag_sentence(self, split_for_bot=False):
-        """tags sentence properly based if user is a bot. we assume these bots are relaying chat message from
-        games such as minecraft or factorio."""
-        if split_for_bot:
-            # message sender is allowed bot, we should separate the first word out of the message since that
-            # is the user the bot is relaying for
-            # support for DPT Omnibot
-            if self._message_author == "Omnibot#0741" or self._message_author == "Spaigbot#7382":
-                self._tagged_sentence = self.nlp(buttlib.strip_IRI(self._original_sentence.split(" ", 1)[1]))
-            else:
-                self._tagged_sentence = self.nlp(buttlib.strip_IRI(self._original_sentence.split(" ", 1)[1]))
-        else:
-            self._tagged_sentence = self.nlp(buttlib.strip_IRI(self._original_sentence))
 
     def __check_if_picked_phrase_weight_passes_minimum(self):
         try:
             if self._selected_noun_pair_to_butt.weight <= 501:
-                # dont send anything, this word probably sucks
+                # don't send anything, this word probably sucks
                 return False
             else:
                 if len(self._selected_noun_pair_to_butt.text) > 1:

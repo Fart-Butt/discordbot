@@ -3,7 +3,7 @@ import random
 import time
 import logging
 import datetime
-
+from phraseweights import PhraseWeights
 import butt_library
 from config import command_prefix
 import concurrent.futures
@@ -12,10 +12,11 @@ import mojang as mj
 from butt_library import allowed_in_channel, allowed_in_channel_direct
 from discord import Message
 
-from shared import guild_configs, test_environment, phrase_weights, shitpost, comms_instance, \
+from shared import guild_configs, test_environment, shitpost, comms_instance, \
     timer_instance as timer_module, vacuum_instance as vacuum, db, bot
 
 log = logging.getLogger('bot.' + __name__)
+phrase_weights = PhraseWeights()
 
 
 class ButtBot:
@@ -241,7 +242,8 @@ class ButtBot:
 
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
-        if "has made the advancement [" in message.content and message.author.id == 249966240787988480:
+        if "has made the advancement [" in message.content and message.author.id == 249966240787988480 and \
+                guild_configs[message.guild.id].vacuum:
             # progress cheevo
             print(message.content)
             print(message.content.split(" "))
@@ -251,7 +253,8 @@ class ButtBot:
             #    "insert into progress.progres_cheevos (`player`, `cheevo_text`, `datetime`, `play_time` ) values (%s, %s, %s, 1)",
             #    (message.content.split(" ")[0], message.content.split("[")[1][:-1], datetime.datetime.utcnow())
             # )
-        if "left the game" in message.content or "joined the game" in message.content:
+        elif ("left the game" in message.content or "joined the game" in message.content) and \
+                guild_configs[message.guild.id].vacuum:
             message_ = butt_library.strip_discord_shitty_formatting(message.content)
             player = message_.split(" ")[0]
             logging.info("_process_all_other_messages: join/part message from minecraft - %s" % player)
@@ -289,7 +292,8 @@ class ButtBot:
 
                             if shitpost.successful_butting():
                                 # passes butt check
-                                msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id)
+                                msg = await self.docomms(shitpost.butted_sentence, message.channel,
+                                                         message.guild.id)
                                 phrase_weights.add_message(msg, shitpost.get_noun())
                             shitpost.log_disposition()
                     else:
@@ -305,5 +309,6 @@ class ButtBot:
                     if message.channel.id == 435348744016494592:
                         # blow this one up
                         if shitpost.successful_butting():
-                            msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id, True)
+                            msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id,
+                                                     True)
                             phrase_weights.add_message(msg, shitpost.get_noun())
