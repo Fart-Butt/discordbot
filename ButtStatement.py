@@ -46,12 +46,9 @@ class ButtStatement:
             return self.__nlp(buttlib.strip_IRI(message.content))
 
     def __repr__(self):
-        return """
+        return f"""
         ButtStatement
-        original message: {}
+        original message: {self.message.content}
         chunks: 
-            {}
-        """.format(
-            self.message.content,
-            self.chunks
-        )
+            {self.chunks}
+        """
