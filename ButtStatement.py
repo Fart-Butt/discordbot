@@ -9,16 +9,13 @@ log = logging.getLogger('bot.' + __name__)
 
 class ButtStatement:
 
-    def __init__(self, message):
+    def __init__(self, message: str):
         self.db = shared.db["buttbot"]
         self.message = message
         self.__nlp = spacy.load('en_core_web_lg')
         self.chunks = []
         # process message
-        if self.message.author.bot:
-            self.__processed_message = self.process_bot_message(self.message)
-        else:
-            self.__processed_message = self.__nlp(buttlib.strip_IRI(self.message.content))
+        self.__processed_message = self.__nlp(buttlib.strip_IRI(message))
         # extract noun chunks
         self.__processed_message_noun_chunks = self.__processed_message.noun_chunks
         for x in self.__processed_message.noun_chunks:
@@ -48,7 +45,7 @@ class ButtStatement:
     def __repr__(self):
         return f"""
         ButtStatement
-        original message: {self.message.content}
+        original message: {self.message}
         chunks: 
             {self.chunks}
         """
