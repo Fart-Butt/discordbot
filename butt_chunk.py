@@ -1,6 +1,5 @@
 import logging
 from rfc3987 import parse
-from shared import minecraft_db
 
 log = logging.getLogger('bot.' + __name__)
 
