@@ -34,14 +34,6 @@ class ButtStatement:
                 )
         return chunks
 
-    def process_bot_message(self, message):
-        """tags sentence properly based if user is a bot. we assume these bots are relaying chat message from
-        games such as minecraft or factorio."""
-        if str(message.author) == "Omnibot#0741" or str(message.author) == "Spaigbot#7382":
-            return self.__nlp(buttlib.strip_IRI(message.content.split(" ", 1)[1]))
-        else:
-            return self.__nlp(buttlib.strip_IRI(message.content))
-
     def __repr__(self):
         return f"""
         ButtStatement

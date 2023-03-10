@@ -200,7 +200,6 @@ class WordReplacer:
     #        self.__make_butted_sentence()
     #        return self.butted_sentence
 
-
     def __check_if_picked_phrase_weight_passes_minimum(self):
         try:
             if self._selected_noun_pair_to_butt.weight <= 501:
@@ -310,3 +309,11 @@ class WordReplacer:
                 self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
                                                 self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
                                                                            'butt')), "butt")
+
+    def process_bot_message(self, message):
+        """tags sentence properly based if user is a bot. we assume these bots are relaying chat message from
+        games such as minecraft or factorio."""
+        if str(message.author) == "Omnibot#0741" or str(message.author) == "Spaigbot#7382":
+            return self.__nlp(buttlib.strip_IRI(message.content.split(" ", 1)[1]))
+        else:
+            return self.__nlp(buttlib.strip_IRI(message.content))
