@@ -1,24 +1,9 @@
 import MySQLdb
+import MySQLdb.constants.ER
 from MySQLdb.cursors import DictCursor
 import logging
 
 log = logging.getLogger('bot.' + __name__)
-
-
-class Singleton(type):
-    """
-    Define an Instance operation that lets clients access its unique
-    instance.
-    """
-
-    def __init__(cls, name, bases, attrs, **kwargs):
-        super().__init__(name, bases, attrs)
-        cls._instance = None
-
-    def __call__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__call__(*args, **kwargs)
-        return cls._instance
 
 
 class Db:
@@ -26,6 +11,10 @@ class Db:
         self._db = _db
         self.user = username
         self.passw = password
+        self.connection = MySQLdb.connect(host='127.0.0.1', user=self.user, passwd=self.passw, db=self._db,
+                                          cursorclass=DictCursor)
+
+    def connect(self):
         self.connection = MySQLdb.connect(host='127.0.0.1', user=self.user, passwd=self.passw, db=self._db,
                                           cursorclass=DictCursor)
 
@@ -39,9 +28,15 @@ class Db:
                 else:
                     cursor.execute(query)
                 result = cursor.fetchall()
-                cursor.close()
-        finally:
-            pass
+        except MySQLdb.OperationalError:
+            self.connect()
+            with self.connection.cursor() as cursor:
+                # Read a single record
+                if args:
+                    cursor.execute(query, args)
+                else:
+                    cursor.execute(query)
+                result = cursor.fetchall()
         return result
 
     def do_insert(self, query, args):
@@ -51,7 +46,12 @@ class Db:
                 log.debug("executing query: %s with arguments %s" % (query, args))
                 cursor.execute(query, args)
                 self.connection.commit()
-                cursor.close()
+        except MySQLdb.OperationalError:
+            self.connect()
+            with self.connection.cursor() as cursor:
+                log.debug("executing query: %s with arguments %s" % (query, args))
+                cursor.execute(query, args)
+                self.connection.commit()
         finally:
             pass
 
@@ -62,24 +62,39 @@ class Db:
                 log.info("running query: %s" % str(query))
                 cursor.execute(query)
                 self.connection.commit()
-                cursor.close()
+        except MySQLdb.OperationalError:
+            with self.connection.cursor() as cursor:
+                log.info("running query: %s" % str(query))
+                cursor.execute(query)
+                self.connection.commit()
         finally:
             pass
 
     def close(self):
-        pass
-        # self.connection.close()
+        self.connection.close()
 
     def do_insertmany(self, query, args):
         log.debug("INSERTMANY - executing query %s with args %s" % (query, args))
-        with self.connection.cursor() as cursor:
-            try:
-                log.debug("executing manyquery: %s with arguments %s" % (query, args))
-                cursor.executemany(query, args)
-                self.connection.commit()
-                cursor.close()
-            except:
-                log.critical("Error executing this mysql query: %s" % cursor._last_executed)
-                raise
-            finally:
-                pass
+        try:
+            with self.connection.cursor() as cursor:
+                try:
+                    log.debug("executing manyquery: %s with arguments %s" % (query, args))
+                    cursor.executemany(query, args)
+                    self.connection.commit()
+                except:
+                    log.critical("Error executing this mysql query: %s" % cursor._last_executed)
+                    raise
+                finally:
+                    pass
+        except MySQLdb.OperationalError:
+            self.connect()
+            with self.connection.cursor() as cursor:
+                try:
+                    log.debug("executing manyquery: %s with arguments %s" % (query, args))
+                    cursor.executemany(query, args)
+                    self.connection.commit()
+                except:
+                    log.critical("Error executing this mysql query: %s" % cursor._last_executed)
+                    raise
+                finally:
+                    pass
