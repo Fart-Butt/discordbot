@@ -1,4 +1,5 @@
 import MySQLdb
+import MySQLdb.constants.ER
 from MySQLdb.cursors import DictCursor
 import logging
 
@@ -13,6 +14,10 @@ class Db:
         self.connection = MySQLdb.connect(host='127.0.0.1', user=self.user, passwd=self.passw, db=self._db,
                                           cursorclass=DictCursor)
 
+    def connect(self):
+        self.connection = MySQLdb.connect(host='127.0.0.1', user=self.user, passwd=self.passw, db=self._db,
+                                          cursorclass=DictCursor)
+
     def do_query(self, query, args=''):
         log.debug("QUERY - executing query %s with args %s" % (query, args))
         try:
@@ -23,13 +28,26 @@ class Db:
                 else:
                     cursor.execute(query)
                 result = cursor.fetchall()
-        finally:
-            pass
+        except MySQLdb.OperationalError:
+            self.connect()
+            with self.connection.cursor() as cursor:
+                # Read a single record
+                if args:
+                    cursor.execute(query, args)
+                else:
+                    cursor.execute(query)
+                result = cursor.fetchall()
         return result
 
     def do_insert(self, query, args):
         log.debug("INSERT - executing query %s with args %s" % (query, args))
         try:
+            with self.connection.cursor() as cursor:
+                log.debug("executing query: %s with arguments %s" % (query, args))
+                cursor.execute(query, args)
+                self.connection.commit()
+        except MySQLdb.OperationalError:
+            self.connect()
             with self.connection.cursor() as cursor:
                 log.debug("executing query: %s with arguments %s" % (query, args))
                 cursor.execute(query, args)
@@ -44,6 +62,11 @@ class Db:
                 log.info("running query: %s" % str(query))
                 cursor.execute(query)
                 self.connection.commit()
+        except MySQLdb.OperationalError:
+            with self.connection.cursor() as cursor:
+                log.info("running query: %s" % str(query))
+                cursor.execute(query)
+                self.connection.commit()
         finally:
             pass
 
@@ -52,13 +75,26 @@ class Db:
 
     def do_insertmany(self, query, args):
         log.debug("INSERTMANY - executing query %s with args %s" % (query, args))
-        with self.connection.cursor() as cursor:
-            try:
-                log.debug("executing manyquery: %s with arguments %s" % (query, args))
-                cursor.executemany(query, args)
-                self.connection.commit()
-            except:
-                log.critical("Error executing this mysql query: %s" % cursor._last_executed)
-                raise
-            finally:
-                pass
+        try:
+            with self.connection.cursor() as cursor:
+                try:
+                    log.debug("executing manyquery: %s with arguments %s" % (query, args))
+                    cursor.executemany(query, args)
+                    self.connection.commit()
+                except:
+                    log.critical("Error executing this mysql query: %s" % cursor._last_executed)
+                    raise
+                finally:
+                    pass
+        except MySQLdb.OperationalError:
+            self.connect()
+            with self.connection.cursor() as cursor:
+                try:
+                    log.debug("executing manyquery: %s with arguments %s" % (query, args))
+                    cursor.executemany(query, args)
+                    self.connection.commit()
+                except:
+                    log.critical("Error executing this mysql query: %s" % cursor._last_executed)
+                    raise
+                finally:
+                    pass
