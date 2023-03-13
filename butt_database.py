@@ -23,7 +23,6 @@ class Db:
                 else:
                     cursor.execute(query)
                 result = cursor.fetchall()
-                cursor.close()
         finally:
             pass
         return result
@@ -35,7 +34,6 @@ class Db:
                 log.debug("executing query: %s with arguments %s" % (query, args))
                 cursor.execute(query, args)
                 self.connection.commit()
-                cursor.close()
         finally:
             pass
 
@@ -46,7 +44,6 @@ class Db:
                 log.info("running query: %s" % str(query))
                 cursor.execute(query)
                 self.connection.commit()
-                cursor.close()
         finally:
             pass
 
@@ -60,7 +57,6 @@ class Db:
                 log.debug("executing manyquery: %s with arguments %s" % (query, args))
                 cursor.executemany(query, args)
                 self.connection.commit()
-                cursor.close()
             except:
                 log.critical("Error executing this mysql query: %s" % cursor._last_executed)
                 raise
