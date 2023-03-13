@@ -6,7 +6,7 @@ log = logging.getLogger('bot.' + __name__)
 
 class ButtChunk:
 
-    def __init__(self, db, spacy, sentence, chunk):
+    def __init__(self, db, spacy, sentence, chunk, focusword=''):
         self.text = ""
         self.tag = []
         self.normalized_tags = ""
@@ -24,19 +24,23 @@ class ButtChunk:
         self.original_spacy_object = []
         self.passes_noun_check = False
         self.passes_chunk_length_check = False
-        self.previous_word = []
-        self.previous_word_tag = []
-        self.noun = []
+        self.previous_word: str = ""
+        self.previous_word_tag: str = ""
+        self.noun = ""
         self._similarities = []
         self.text_list = []
+        self.focusword = focusword
 
         # Processing
-        self.build_chunk_word_list(chunk)
+        if self.focusword:
+            self.build_chunk_word_list(chunk, fw=True)
+        else:
+            self.build_chunk_word_list(chunk)
         if self.usable_chunk:
             self.normalized_tags = self.normalize_tags(self.tag)
             self.get_weights(self.normalized_tags, self.lemma, self.text)
 
-    def build_chunk_word_list(self, chunk):
+    def build_chunk_word_list(self, chunk, fw=False):
         if len(chunk.text.split(" ")) > 1:
             self.passes_chunk_length_check = True
             noun_tags = ["NN", "NNS", "NNP", "NNPS"]
@@ -54,15 +58,26 @@ class ButtChunk:
                 self.tag.append(self._original_sentence[i].tag_)
                 if self._original_sentence[i].tag_ in noun_tags:
                     self.passes_noun_check = True
-                    self.noun.append(self._original_sentence[i])
-                    try:
-                        self.previous_word.append(self._original_sentence[i - 1].text)
-                    except IndexError:
-                        self.previous_word = []
-                    try:
-                        self.previous_word_tag.append(self._original_sentence[i - 1].tag_)
-                    except IndexError:
-                        self.previous_word_tag = []
+                    if fw and self.focusword == self._original_sentence[i].text:
+                        self.noun = self._original_sentence[i]
+                        try:
+                            self.previous_word = self._original_sentence[i - 1].text
+                        except IndexError:
+                            self.previous_word = ""
+                        try:
+                            self.previous_word_tag = self._original_sentence[i - 1].tag_
+                        except IndexError:
+                            self.previous_word_tag = []
+                    elif not fw:
+                        self.noun = self._original_sentence[i]
+                        try:
+                            self.previous_word = self._original_sentence[i - 1].text
+                        except IndexError:
+                            self.previous_word = ""
+                        try:
+                            self.previous_word_tag = self._original_sentence[i - 1].tag_
+                        except IndexError:
+                            self.previous_word_tag = []
                 self.lemma.append(self._original_sentence[i].lemma_)
                 self.shape.append(self._original_sentence[i].shape_)
                 self.original_spacy_object.append(self._original_sentence[i])

@@ -25,11 +25,22 @@ class ButtStatement:
         """takes nlp processed message and creates ButtChunk objects for each identified spacy chunk that has more
         than one word."""
         chunks = []
+        nouns = ["NN", "NNS", "NNP", "NNPS"]
         for chunk in self.__processed_message_noun_chunks:
+            noun = []
             if len(chunk.text.split(" ")) > 1:
-                chunks.append(
-                    ButtChunk(self.db, self.__nlp, self.__processed_message, chunk)
-                )
+                for j in range(chunk.start, chunk.end):
+                    if self.__processed_message[j].tag_ in nouns:
+                        noun.append(self.__processed_message[j].text)
+                if len(noun) > 1:
+                    for n in noun:
+                        chunks.append(
+                            ButtChunk(self.db, self.__nlp, self.__processed_message, chunk, focusword=n)
+                        )
+                else:
+                    chunks.append(
+                        ButtChunk(self.db, self.__nlp, self.__processed_message, chunk)
+                    )
         return chunks
 
     def get_good_chunks(self):
