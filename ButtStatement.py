@@ -11,15 +11,13 @@ class ButtStatement:
 
     def __init__(self, message: str):
         self.db = shared.db["buttbot"]
-        self.message = message
+        self.message: str = message
         self.__nlp = spacy.load('en_core_web_lg')
         self.chunks = []
         # process message
         self.__processed_message = self.__nlp(buttlib.strip_IRI(message))
         # extract noun chunks
         self.__processed_message_noun_chunks = self.__processed_message.noun_chunks
-        for x in self.__processed_message.noun_chunks:
-            print("chunk: {}".format(x))
         # create message chunk objects
         self.chunks = self._create_buttchunks()
 
@@ -33,6 +31,13 @@ class ButtStatement:
                     ButtChunk(self.db, self.__nlp, self.__processed_message, chunk)
                 )
         return chunks
+
+    def get_good_chunks(self):
+        good_chunks = []
+        for a in self.chunks:
+            if a.usable_chunk:
+                good_chunks.append(a)
+        return good_chunks
 
     def __repr__(self):
         return f"""
