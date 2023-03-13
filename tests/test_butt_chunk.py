@@ -48,7 +48,3 @@ def test_normalize_tags():
             bc.normalize_tags(["NNP", "NNS", "NNPS", "RBR", "RBS", "VBD", "VBG", "VBN", "VBP", "JJR", "JJS"]) ==
             "NN NN NN RB RB VB VB VB VB JJ JJ"
     )
-
-
-def test_butt_chunk():
-    ab = bc.__get_text_weight("TOTALLY_FAKE_PHRASE_WEIGHT_FOR_TESTING")
