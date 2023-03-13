@@ -8,7 +8,6 @@ class ButtConfig:
 
     def __init__(self, guid: int):
         log.debug("Loading config for guid %d" % guid)
-        shared.db["buttbot"].build()
         self.guid = guid
         self.allowed_channels_query = set()
         self.stop_phrases_query = set()
