@@ -27,9 +27,11 @@ class ButtChunk:
         self.previous_word: str = ""
         self.previous_word_tag: str = ""
         self.noun = ""
+        self.noun_shape = ""
         self._similarities = []
         self.text_list = []
         self.focusword = focusword
+        self.noun_tag = ""
 
         # Processing
         if self.focusword:
@@ -60,6 +62,8 @@ class ButtChunk:
                     self.passes_noun_check = True
                     if fw and self.focusword == self._original_sentence[i].text:
                         self.noun = self._original_sentence[i]
+                        self.noun_shape = self._original_sentence[i].shape_
+                        self.noun_tag = self._original_sentence[i].tag_
                         try:
                             self.previous_word = self._original_sentence[i - 1].text
                         except IndexError:
@@ -70,6 +74,8 @@ class ButtChunk:
                             self.previous_word_tag = []
                     elif not fw:
                         self.noun = self._original_sentence[i]
+                        self.noun_shape = self._original_sentence[i].shape_
+                        self.noun_tag = self._original_sentence[i].tag_
                         try:
                             self.previous_word = self._original_sentence[i - 1].text
                         except IndexError:
@@ -234,6 +240,7 @@ class ButtChunk:
         Previous Word: {self.previous_word}
         Previous Word Tag: {self.previous_word_tag}
         Noun: {self.noun}
+        Noun Tag: {self.noun_tag}
         N: {self.passes_noun_check} CL {self.passes_chunk_length_check} UC {self.usable_chunk}
         weight: {self.weight}
         similarities: {self._similarities}
