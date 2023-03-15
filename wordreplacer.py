@@ -4,7 +4,7 @@ from ButtStatement import ButtStatement
 from butt_chunk import ButtChunk
 from discord import Message
 from spacy.tokens import doc
-from typing import List
+from typing import List, Union
 
 import butt_library as buttlib
 import shared
@@ -21,9 +21,11 @@ class WordReplacer:
         self.__command = {"nltk": 'wordreplacer'}
 
         # state variables
-        self.message = Message
+        self.message = ""
         self.original_sentence = ""
-        self._tagged_sentence = doc
+        self.buttstatementobject = ""
+        self.usable_chunks = []
+        self.butted_sentence = ""
         # self.should_we_butt = False  # this is the state variable that means butting should continue
         # self._priority_nouns = []
         # self._non_priority_nouns = []
@@ -85,12 +87,6 @@ class WordReplacer:
         except Exception:
             pass
 
-    def return_commands(self):
-        return self.__command
-
-    def get_noun(self):
-        return self._selected_noun_pair_to_butt.text
-
     def __save(self):
         with open('wordlist.txt', 'w') as f:
             json.dump(self.__wlist, f, ensure_ascii=False)
@@ -105,8 +101,8 @@ class WordReplacer:
     # TODO: needed?
     #    return self.__phraseweights.return_weight(phrase)
 
-    def __is_user_an_allowed_bot(self, author):
-        if author in shared.guild_configs[self._message_channel].get_all_allowed_bots():
+    def __is_user_an_allowed_bot(self, mo: Message) -> bool:
+        if mo.message.author.id in shared.guild_configs[mo.guild.id].get_all_allowed_bots():
             return True
         else:
             return False
@@ -114,28 +110,10 @@ class WordReplacer:
     def print_debug_message(self):
         print("--------------------------------------------------------------------------------------------")
         print("Original message: %s" % self._original_sentence)
-        print("Message contain stop phrase? %s" % str(self.__does_message_contain_stop_phrases()))
-        print("Message meet length requirement? (server setting: %i) %s" % (
-            shared.guild_configs[self._message_guild].max_sentence_length,
-            self.__check_length_of_sentence_to_butt(self._message_channel)))
-        print("Spacy noun chunk(s): %s" % self._spacy_nouns)
-        try:
-            print("Spacy processed sentence: %s " % self._spacy_tagged_sentence)
-        except AttributeError:
-            print("Spacy processed sentence: None")
-        try:
-            print("Spacy noun chunk(s): %s " % self._spacy_processed_nouns)
-            print("weights: %s" % self._spacy_finalized_weights)
-        except AttributeError:
-            print("Spacy noun chunk(s): None")
-        try:
-            print("Selected noun pair: %s" % str(self._selected_noun_pair_to_butt.text))
-        except AttributeError:
-            print("Selected noun pair: None")
-        print("Passes weight minimum? %s" % str(self.__check_if_picked_phrase_weight_passes_minimum()))
-        print("Butted sentence: %s" % self.butted_sentence)
+        print("buttstatement: %s" % self.buttstatementobject)
         print("--------------------------------------------------------------------------------------------")
 
+    '''
     def log_disposition(self):
         log.debug("saving disposition")
         try:
@@ -160,6 +138,7 @@ class WordReplacer:
                                            self.__check_if_picked_phrase_weight_passes_minimum(),
                                            self.butted_sentence
                                            )
+    '''
 
     def __does_message_contain_stop_phrases(self, messageobject: Message) -> bool:
         if not any(v for v in shared.guild_configs[messageobject.guild.id].stop_phrases if
@@ -168,9 +147,6 @@ class WordReplacer:
             return False
         else:
             return True
-
-    def successful_butting(self):
-        return self.__check_if_picked_phrase_weight_passes_minimum()
 
     def perform_text_to_butt(self, messageobject):
         """takes a messageobject from discord and sanity checks the butted phrase to determine if we should butt
@@ -185,20 +161,25 @@ class WordReplacer:
             if not self.__does_message_contain_stop_phrases(messageobject):
                 # message contains no stop phrases, let's proceed
                 if self.message.author.bot:
-                    self._tagged_sentence = self.process_bot_message(messageobject.content)
+                    if self.__is_user_an_allowed_bot(messageobject):
+                        self.buttstatementobject = self.process_bot_message(messageobject.content)
                 else:
-                    self._tagged_sentence = ButtStatement(buttlib.strip_IRI(messageobject.content))
-                if self._tagged_sentence and self.__check_length_of_sentence_to_butt(messageobject.guild.id):
+                    self.buttstatementobject = ButtStatement(buttlib.strip_IRI(messageobject.content))
+                if len(self.buttstatementobject.get_good_chunks()) > 1 and \
+                        self.__check_length_of_sentence_to_butt(messageobject):
                     # message is below length limit set on a per-guild basis
-                    self.usable_chunks = self.__process_chunks(self._tagged_sentence)
-                    self.__pick_word_pair_to_butt()
-                    if self.__check_if_picked_phrase_weight_passes_minimum():
-                        # let's butt
-                        self.__make_butted_sentence()
+                    lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
+                    # let's butt
+                    self.butted_sentence = self._make_butted_sentence(lets_butt_this_chunk)
+
+    def process_bot_message(self, mo: Message) -> str:
+        if str(mo.content.author) == "Omnibot#0741" or str(mo.message.author) == "Spaigbot#7382":
+            return buttlib.strip_IRI(mo.content.split(" ", 1)[1])
+        else:
+            return buttlib.strip_IRI(mo.content.split(" ", 1)[1])
 
     def do_butting_raw_sentence(self, message):
         """always makes butted sentence.  skip all sanity checks that perform_text_to_butt does."""
-        self.__state_reset()
         self._original_sentence = str(message)
         print("yes")
         bs = ButtStatement(message)
@@ -209,40 +190,15 @@ class WordReplacer:
     #        self.__make_butted_sentence()
     #        return self.butted_sentence
 
-    def __check_if_picked_phrase_weight_passes_minimum(self):
-        try:
-            if self._selected_noun_pair_to_butt.weight <= 501:
-                # don't send anything, this word probably sucks
-                return False
-            else:
-                if len(self._selected_noun_pair_to_butt.text) > 1:
-                    return True
-                else:
-                    return False
-        except AttributeError:
-            # selected nouns to butt is empty
-            return False
-
-    def get_chunks(self, buttstatement: ButtStatement) -> List[ButtChunk]:
-        chunks = []
-        self._spacy_tagged_sentence = self.butt_classifier.get_processed_sentence()
-        self._spacy_finalized_nouns = self.butt_classifier.get_nouns()
-        self._spacy_processed_nouns = self.butt_classifier.get_pretty_noun_format()
-        for a in self._spacy_finalized_nouns:
-            self._spacy_finalized_weights.append(
-                "%s (%s, %s). Similarities: %s" % (a.text, a.tag, a.weight, a.similarities))
-        return chunks
-
-    def __pick_word_pair_to_butt(self):
+    def __pick_word_pair_to_butt(self, statement: ButtStatement) -> ButtChunk:
         """randomly selects a word pair to be the target of replacement."""
-        # remove all 1 length words
-        self._selected_noun_pair_to_butt = self.__pick_random_phrase_by_weight(self._spacy_finalized_nouns)
+        return self.__pick_random_phrase_by_weight(statement.get_good_chunks())
 
-    def __pick_random_phrase_by_weight(self, word_list):
-        total_sum_of_weights = self.__sum_all_weights(word_list)
+    def __pick_random_phrase_by_weight(self, chunks: List[ButtChunk]) -> Union[ButtChunk, None]:
         try:
+            total_sum_of_weights = sum(c.weight for c in chunks)
             randomweight = randrange(1, total_sum_of_weights)
-            for i in word_list:
+            for i in chunks:
                 randomweight = randomweight - i.weight
                 if randomweight <= 0:
                     return i
@@ -250,52 +206,19 @@ class WordReplacer:
             # no words to pick
             return None
 
-    @staticmethod
-    def __sum_all_weights(word_list):
-        return sum(word.weight for word in word_list)
-
-    @staticmethod
-    def __butt_in_proper_case(wordtobutt, buttoreplace):
-        # todo: check if needed for new system
-        if wordtobutt.istitle():
-            return buttoreplace.title()
-        elif wordtobutt.isupper():
-            return buttoreplace.upper()
-        else:
-            return buttoreplace
-
-    @staticmethod
-    def __word_passes_stop_word_check(word):
-        """checks to see if selected word passes stopword check - eliminates common crappy words and internet slang
-         that are tagged as nouns but either aren't funny to replace or aren't nouns."""
-        stopwords = ['gon', 'dont', 'lol', 'yeah', 'tho', 'lmao', 'yes', 'way']
-        if len(word) < 2 or word in stopwords:
-            return False
-        else:
-            return True
-
-    def __does_message_have_prioritized_parts_of_speech(self):
-        """takes a tagged sentence and checks if it contains a personal posessive pronoun - we want to specially
-        target that for funny replaces like "my butt" """
-        wordtagstocheckprioritized = ['PRP$']  # posessive personal pronoun
-        if any(t for t in self._tagged_sentence if t[1] in wordtagstocheckprioritized):
-            return True
-        else:
-            return False
-
-    def __check_length_of_sentence_to_butt(self, message_guid: int):
+    def __check_length_of_sentence_to_butt(self, messageobject: Message) -> bool:
         """checks to see if the tagged message length is lower than the limit set in the guild configuration file.
         this feature was originally requested by DPT."""
-        if len(self._original_sentence) > shared.guild_configs[message_guid].max_sentence_length:
+        if len(messageobject.content) > shared.guild_configs[messageobject.guild.id].max_sentence_length:
             return False
         else:
             return True
 
     @staticmethod
-    def __replace_an_to_a_in_sentence(message, butt_word):
+    def _replace_an_to_a_in_sentence(message: str, word_to_butt: str) -> str:
         """replaces an to a in a sentence, such as in the case where we replace "an apple" with "a butt" """
         message = message.split(" ")
-        indexes = buttlib.get_indexes(message, butt_word)
+        indexes = buttlib.get_indexes(message, word_to_butt)
         if indexes:
             # we found one or more instances of butt, we need to check the list index i-1 of that butt word to see if we
             # need to replace an with a.
@@ -308,22 +231,36 @@ class WordReplacer:
                     pass
         return " ".join(message)
 
-    def __make_butted_sentence(self):
-        if self._selected_noun_pair_to_butt.tag == "NNS":
-            self.butted_sentence = self.__replace_an_to_a_in_sentence(
-                self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
-                                                self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
-                                                                           'butts')), "butts")
+    def _make_butted_sentence(self, chunk: ButtChunk) -> str:
+        if chunk.noun_tag == "NNS":
+            return self._replace_an_to_a_in_sentence(
+                chunk.noun_tag.replace(
+                    chunk.noun,
+                    self._butt_in_proper_case(chunk.text, 'butts')
+                ),
+                "butts")
         else:
-            self.butted_sentence = self.__replace_an_to_a_in_sentence(
-                self._original_sentence.replace(self._selected_noun_pair_to_butt.text,
-                                                self.__butt_in_proper_case(self._selected_noun_pair_to_butt.text,
-                                                                           'butt')), "butt")
+            return self._replace_an_to_a_in_sentence(
+                chunk.noun_tag.replace(
+                    chunk.noun,
+                    self._butt_in_proper_case(chunk.text, 'butt')
+                ),
+                "butt")
 
-    def process_bot_message(self, message):
-        """tags sentence properly based if user is a bot. we assume these bots are relaying chat message from
-        games such as minecraft or factorio."""
-        if str(message.author) == "Omnibot#0741" or str(message.author) == "Spaigbot#7382":
-            return self.__nlp(buttlib.strip_IRI(message.content.split(" ", 1)[1]))
+    def _butt_in_proper_case(self, selected_chunk: ButtChunk, word: str) -> str:
+        returnword = []
+        if selected_chunk.noun.text.isupper():
+            return word.upper()
+        elif selected_chunk.noun.text.islower():
+            return word
         else:
-            return self.__nlp(buttlib.strip_IRI(message.content))
+            for i in range(0, len(word)):
+                try:
+                    if selected_chunk.noun.text[i].isupper():
+                        returnword.append(word[i].upper())
+                    else:
+                        returnword.append(word[i].lower())
+                except IndexError:
+                    # chunk noun is shorter than word, we can ignore this
+                    returnword.append(word[i])
+            return "".join(returnword)
