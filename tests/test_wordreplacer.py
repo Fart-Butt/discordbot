@@ -2,6 +2,7 @@ from wordreplacer import WordReplacer
 from butt_chunk import ButtChunk
 import spacy
 from shared import db
+import pytest
 
 # nlp = spacy.load('en_core_web_lg')
 
@@ -9,20 +10,24 @@ ab = ""
 wp = WordReplacer(ab)
 
 
+class SimulatedClass:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+
 class SimulatedDiscordAuthorObject:
     def __init__(self, bot=False):
         self.bot = bot
 
 
-class SimulatedDiscordMessageObject:
-    def __init__(self, bot=False):
-        self.content = "They can just require the gm tier to require all points! It's not hard!"
+class SimulatedDiscordMessage:
+    def __init__(self, bot=False, message_content=""):
+        if message_content:
+            self.content = message_content
+        else:
+            self.content = "They can just require the gm tier to require all points! It's not hard!"
         self.author = SimulatedDiscordAuthorObject(bot=bot)
-
-
-class SimulatedClass:
-    def __init__(self, **kwargs):
-        self.__dict__.update(kwargs)
+        self.guild = SimulatedClass(id=154337182717444096)
 
 
 def test__butt_in_proper_case():
@@ -38,5 +43,40 @@ def test__butt_in_proper_case():
     assert (wp._butt_in_proper_case(bc, "butts") == "BuTtS")
 
 
-def test__make_butted_sentence():
-    assert False
+nlp_sentences = [
+    ("They can just require the gm tier to require all points! It's not hard!",
+     [
+         "They can just require the gm butt to require all points! It's not hard!",
+         "They can just require the butt tier to require all points! It's not hard!",
+         "They can just require the gm tier to require all butts! It's not hard!"
+     ]),
+    ("They can just require an apple to require all points! It's not hard!",
+     [
+         "They can just require a butt to require all points! It's not hard!",
+         "They can just require an apple to require all butts! It's not hard!"
+     ]),
+    ("crap",
+     [
+         ""
+     ]),
+
+]
+
+
+@pytest.mark.parametrize("test_input,expected_possible_returns", nlp_sentences)
+def test_word_replacer_comprehensive(test_input, expected_possible_returns):
+    sdo = SimulatedDiscordMessage(bot=False, message_content=test_input)
+    bs = wp.perform_text_to_butt(sdo)
+    print(f"original sentence: {wp.original_sentence}")
+    print(f"butted message: {bs}")
+    assert (bs in expected_possible_returns)
+
+
+def test__replace_an_to_a_in_sentence():
+    sentence = "They can just require an apple to require all points! It's not hard!"
+    word = "apple"
+    print(wp._replace_an_to_a_in_sentence(sentence, word))
+
+# def test__make_butted_sentence():
+#    sentence = "They can just require an apple to require all points! It's not hard!"
+#    print(wp._make_butted_sentence(sentence))
