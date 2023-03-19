@@ -161,7 +161,6 @@ class WordReplacer:
         # we are going to manipulate this version of the message before sending it to the processing functions.
         # we remove stuff that we don't want to be processed (banned phrases, banned people, banned bots)
         self.message = messageobject
-        print(messageobject)
         self.original_sentence = messageobject.content
         if not buttlib.detect_code_block(self.original_sentence):
             # passes code block test
@@ -179,6 +178,7 @@ class WordReplacer:
                     # let's butt
                     self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk,
                                                                       self.buttstatementobject.message)
+
         if self.butted_sentence:
             return self.butted_sentence
         else:
@@ -199,9 +199,6 @@ class WordReplacer:
             self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(bs)
             # let's butt
             self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk, str(message.content))
-            print(str(message.guild))
-            print(self.butted_sentence)
-            print(bs)
             if self.butted_sentence:
                 return self.butted_sentence
             else:
@@ -240,7 +237,7 @@ class WordReplacer:
     def __check_length_of_sentence_to_butt(self, messageobject: Message) -> bool:
         """checks to see if the tagged message length is lower than the limit set in the guild configuration file.
         this feature was originally requested by DPT."""
-        if len(messageobject.content) > shared.guild_configs[messageobject.guild.id].max_sentence_length:
+        if len(messageobject.content.split(" ")) > shared.guild_configs[messageobject.guild.id].max_sentence_length:
             return False
         else:
             return True
