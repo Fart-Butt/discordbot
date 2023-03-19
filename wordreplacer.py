@@ -207,6 +207,20 @@ class WordReplacer:
             else:
                 return ""
 
+    def do_butting_text(self, message: str) -> str:
+        """always makes butted sentence.  skip all sanity checks that perform_text_to_butt does."""
+        self.original_sentence = message
+        bs = ButtStatement(message)
+        if len(bs.get_good_chunks()) > 1:
+            # message is below length limit set on a per-guild basis
+            self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(bs)
+            # let's butt
+            self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk, str(message))
+            if self.butted_sentence:
+                return self.butted_sentence
+            else:
+                return ""
+
     def __pick_word_pair_to_butt(self, statement: ButtStatement) -> ButtChunk:
         """randomly selects a word pair to be the target of replacement."""
         return self.__pick_random_phrase_by_weight(statement.get_good_chunks())
