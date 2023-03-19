@@ -3,7 +3,6 @@ from random import *
 from ButtStatement import ButtStatement
 from butt_chunk import ButtChunk
 from discord import Message
-from spacy.tokens import doc
 from typing import List, Union
 
 import butt_library as buttlib
@@ -26,6 +25,7 @@ class WordReplacer:
         self.buttstatementobject = ""
         self.usable_chunks = []
         self.butted_sentence = ""
+        self.lets_butt_this_chunk = ''
         # self.should_we_butt = False  # this is the state variable that means butting should continue
         # self._priority_nouns = []
         # self._non_priority_nouns = []
@@ -52,6 +52,7 @@ class WordReplacer:
         self.buttstatementobject = ""
         self.usable_chunks = []
         self.butted_sentence = ""
+        self.lets_butt_this_chunk = ''
         '''
         self.should_we_butt = False  # this is the state variable that means butting should continue
         self._priority_nouns = []
@@ -117,8 +118,9 @@ class WordReplacer:
         print("buttstatement: %s" % self.buttstatementobject)
         print("--------------------------------------------------------------------------------------------")
 
-    '''
     def log_disposition(self):
+        pass
+        '''
         log.debug("saving disposition")
         try:
             self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
@@ -142,7 +144,7 @@ class WordReplacer:
                                            self.__check_if_picked_phrase_weight_passes_minimum(),
                                            self.butted_sentence
                                            )
-    '''
+        '''
 
     def __does_message_contain_stop_phrases(self, messageobject: Message) -> bool:
         if not any(v for v in shared.guild_configs[messageobject.guild.id].stop_phrases if
@@ -173,9 +175,9 @@ class WordReplacer:
                 if len(self.buttstatementobject.get_good_chunks()) > 1 and \
                         self.__check_length_of_sentence_to_butt(messageobject):
                     # message is below length limit set on a per-guild basis
-                    lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
+                    self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
                     # let's butt
-                    self.butted_sentence = self._make_butted_sentence(lets_butt_this_chunk,
+                    self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk,
                                                                       self.buttstatementobject.message)
         if self.butted_sentence:
             return self.butted_sentence
@@ -188,22 +190,22 @@ class WordReplacer:
         else:
             return buttlib.strip_IRI(mo.content.split(" ", 1)[1])
 
-    def do_butting_raw_sentence(self, message):
+    def do_butting_raw_sentence(self, message: Message) -> str:
         """always makes butted sentence.  skip all sanity checks that perform_text_to_butt does."""
-        self.original_sentence = str(message)
+        self.original_sentence = str(message.content)
         bs = ButtStatement(message.content)
         if len(bs.get_good_chunks()) > 1:
             # message is below length limit set on a per-guild basis
-            lets_butt_this_chunk = self.__pick_word_pair_to_butt(message)
+            self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(bs)
             # let's butt
-            self.butted_sentence = self._make_butted_sentence(lets_butt_this_chunk, message.message)
+            self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk, str(message.content))
+            print(str(message.guild))
             print(self.butted_sentence)
             print(bs)
-
-    #        self.__get_word_pairs_from_all_sources()
-    #        self.__pick_word_pair_to_butt()
-    #        self.__make_butted_sentence()
-    #        return self.butted_sentence
+            if self.butted_sentence:
+                return self.butted_sentence
+            else:
+                return ""
 
     def __pick_word_pair_to_butt(self, statement: ButtStatement) -> ButtChunk:
         """randomly selects a word pair to be the target of replacement."""

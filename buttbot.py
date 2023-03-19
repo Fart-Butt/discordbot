@@ -7,6 +7,7 @@ from phraseweights import PhraseWeights
 import butt_library
 from config import command_prefix
 import concurrent.futures
+from butt_chunk import ButtChunk
 
 import mojang as mj
 from butt_library import allowed_in_channel, allowed_in_channel_direct
@@ -132,7 +133,7 @@ class ButtBot:
             await bot.invoke(ctx)
 
     @staticmethod
-    async def process_cached_reaction_message(message: Message, noun: str):
+    async def process_cached_reaction_message(message: Message, chunk: ButtChunk):
         """process emoji reactions from a previously butted sentence."""
         # i know this looks dumb as hell but trust me on this one
         message = await message.channel.fetch_message(message.id)
@@ -141,7 +142,7 @@ class ButtBot:
 
         votes = phrase_weights.process_reactions(message.reactions)
         log.debug("votes tallied to %d" % votes)
-        phrase_weights.adjust_weight(noun, votes)
+        chunk.adjust_weight(votes)
 
     async def check_stored_reactions(self):
         """check recent butted messages and process their reaction emojis."""
@@ -290,11 +291,11 @@ class ButtBot:
                             # try:
                             shitpost.perform_text_to_butt(message)
 
-                            if shitpost.successful_butting():
+                            if shitpost.butted_sentence:
                                 # passes butt check
                                 msg = await self.docomms(shitpost.butted_sentence, message.channel,
                                                          message.guild.id)
-                                phrase_weights.add_message(msg, shitpost.get_noun())
+                                phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
                             shitpost.log_disposition()
                     else:
                         log.debug("Message2Butt_Processor - sentence over character length.")
@@ -304,11 +305,11 @@ class ButtBot:
                     # send to shitpost module for testing.
                     # we don't want to talk at all except in my test channel
                     shitpost.do_butting_raw_sentence(message)
-                    shitpost.print_debug_message()
-                    shitpost.log_disposition()
+                    # shitpost.print_debug_message()
+                    # shitpost.log_disposition()
                     if message.channel.id == 435348744016494592:
                         # blow this one up
-                        if shitpost.successful_butting():
+                        if shitpost.butted_sentence:
                             msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id,
                                                      True)
-                            phrase_weights.add_message(msg, shitpost.get_noun())
+                            phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
