@@ -48,7 +48,6 @@ class ButtConfig:
 
     @staticmethod
     def do_query(query: str, args=()):
-        shared.db["buttbot"].build()
         log.debug('running query: %s' % query)
         if args:
             shared.db["buttbot"].do_query(query, args)
@@ -57,7 +56,6 @@ class ButtConfig:
 
     @staticmethod
     def do_insert(query: str, args=()):
-        shared.db["buttbot"].build()
         log.debug('running insert: %s' % query)
         if args:
             shared.db["buttbot"].do_insert(query, args)
