@@ -107,7 +107,7 @@ class WordReplacer:
     #    return self.__phraseweights.return_weight(phrase)
 
     def __is_user_an_allowed_bot(self, mo: Message) -> bool:
-        if mo.message.author.id in shared.guild_configs[mo.guild.id].get_all_allowed_bots():
+        if mo.author.id in shared.guild_configs[mo.guild.id].get_all_allowed_bots():
             return True
         else:
             return False
