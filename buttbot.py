@@ -246,14 +246,10 @@ class ButtBot:
         if "has made the advancement [" in message.content and message.author.id == 249966240787988480 and \
                 guild_configs[message.guild.id].vacuum:
             # progress cheevo
-            print(message.content)
-            print(message.content.split(" "))
-            print("{} {}".format(message.content.split(" ")[0][1:], message.content.split("[")[1][:-2],
-                                 datetime.datetime.utcnow()))
-            # cheevo = db["minecraft"].do_insert(
-            #    "insert into progress.progres_cheevos (`player`, `cheevo_text`, `datetime`, `play_time` ) values (%s, %s, %s, 1)",
-            #    (message.content.split(" ")[0], message.content.split("[")[1][:-1], datetime.datetime.utcnow())
-            # )
+            cheevo = db["minecraft"].do_insert(
+                "insert into progress.progres_cheevos (`player`, `cheevo_text`, `datetime`, `play_time` ) values (%s, %s, %s, 1)",
+                (message.content.split(" ")[0], message.content.split("[")[1][:-1], datetime.datetime.utcnow())
+            )
         elif ("left the game" in message.content or "joined the game" in message.content) and \
                 guild_configs[message.guild.id].vacuum:
             message_ = butt_library.strip_discord_shitty_formatting(message.content)
@@ -290,7 +286,6 @@ class ButtBot:
                             # passed timer check
                             # try:
                             shitpost.perform_text_to_butt(message)
-                            print('----------- %s' % shitpost.butted_sentence)
 
                             if shitpost.butted_sentence:
                                 # passes butt check
