@@ -290,6 +290,7 @@ class ButtBot:
                             # passed timer check
                             # try:
                             shitpost.perform_text_to_butt(message)
+                            print('----------- %s' % shitpost.butted_sentence)
 
                             if shitpost.butted_sentence:
                                 # passes butt check
