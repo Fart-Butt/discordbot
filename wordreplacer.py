@@ -219,7 +219,7 @@ class WordReplacer:
             if self.butted_sentence:
                 return self.butted_sentence
             else:
-                return ""
+                return message
 
     def __pick_word_pair_to_butt(self, statement: ButtStatement) -> ButtChunk:
         """randomly selects a word pair to be the target of replacement."""
