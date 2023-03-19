@@ -36,7 +36,10 @@ def strip_IRI(sentence: str) -> str:
 
 
 def detect_code_block(text):
-    words = text.split(" ")
+    try:
+        words = text.split(" ")
+    except AttributeError:
+        return False
     for w in words:
         if w == "```" or w[:3] == "```" or w[-3:] == "```":
             return True
