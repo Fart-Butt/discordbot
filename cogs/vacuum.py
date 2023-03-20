@@ -98,7 +98,7 @@ class VacuumCog(Cog):
             "FROM {0}_playertracker_v2 as T "
             "left join(SELECT count(D.player) as deaths, D.player from {0}_deaths D GROUP BY D.player) D "
             "ON T.player = D.player "
-            "where coalesce(deaths,0) = 0 and datetime > DATE_SUB(CURDATE(), INTERVAL 7 DAY ) "
+            "where coalesce(deaths,0) = 0 and T.datetime > DATE_SUB(CURDATE(), INTERVAL 7 DAY ) "
             "group by player "
             "having sum(T.timedelta) > 18000) t1 "
             "on ppv.player = t1.player "
