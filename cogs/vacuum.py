@@ -94,7 +94,7 @@ class VacuumCog(Cog):
             "select ppv.player, format(sum(ppv.timedelta)/60/60, 1) as time "
             "from {0}_playertracker_v2 ppv "
             "inner join "
-            "(select T.player, datetime "
+            "(select T.player"
             "FROM {0}_playertracker_v2 as T "
             "left join(SELECT count(D.player) as deaths, D.player from {0}_deaths D GROUP BY D.player) D "
             "ON T.player = D.player "
