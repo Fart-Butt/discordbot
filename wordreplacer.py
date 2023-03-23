@@ -193,10 +193,10 @@ class WordReplacer:
     def do_butting_raw_sentence(self, message: Message) -> str:
         """always makes butted sentence.  skip all sanity checks that perform_text_to_butt does."""
         self.original_sentence = str(message.content)
-        bs = ButtStatement(message.content)
-        if len(bs.get_good_chunks()) > 1:
+        self.buttstatementobject = ButtStatement(message.content)
+        if len(self.buttstatementobject.get_good_chunks()) > 1:
             # message is below length limit set on a per-guild basis
-            self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(bs)
+            self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
             # let's butt
             self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk, str(message.content))
             if self.butted_sentence:
