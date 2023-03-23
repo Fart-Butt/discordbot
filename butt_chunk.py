@@ -179,6 +179,10 @@ class ButtChunk:
             db_weight = self.db.do_query("select weight from lemma_weights where lemma=%s", (lemma,))[0]["weight"]
         except IndexError:
             db_weight = 1000
+        if not db_weight:
+            return 0
+        elif db_weight < 0:
+            return 1
         return db_weight
 
     def __get_tag_weight(self, tag: str) -> int:
@@ -186,6 +190,10 @@ class ButtChunk:
             db_weight = self.db.do_query("select weight from tag_weights where tag=%s", (tag,))[0]["weight"]
         except IndexError:
             db_weight = 1000
+        if not db_weight:
+            return 0
+        elif db_weight < 0:
+            return 1
         return db_weight
 
     def __get_text_weight(self, text: str) -> int:
@@ -194,6 +202,10 @@ class ButtChunk:
         except IndexError:
             # not in db
             db_weight = 1000
+        if not db_weight:
+            return 0
+        elif db_weight < 0:
+            return 1
         else:
             return db_weight
 
