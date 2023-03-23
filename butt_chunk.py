@@ -99,13 +99,16 @@ class ButtChunk:
         phrase = self._spacy(phrase)
         # not_funny_objects = ["time", ]
         starting_weight = self.__get_text_weight(self.text)
-        working_weight = starting_weight
-        for s in spatially_funny_objects:
-            similarity = s.similarity(phrase)
-            if similarity > .5:
-                self._similarities.append("%s: %f" % (s, similarity))
-                working_weight = int(working_weight + starting_weight * similarity)
-        return working_weight
+        if starting_weight == 0:
+            return 0
+        else:
+            working_weight = starting_weight
+            for s in spatially_funny_objects:
+                similarity = s.similarity(phrase)
+                if similarity > .5:
+                    self._similarities.append("%s: %f" % (s, similarity))
+                    working_weight = int(working_weight + starting_weight * similarity)
+            return working_weight
 
     @staticmethod
     def normalize_tags(tags: list) -> str:
@@ -191,10 +194,6 @@ class ButtChunk:
         except IndexError:
             # not in db
             db_weight = 1000
-        if not db_weight:
-            return 1000
-        elif db_weight < 0:
-            return 1
         else:
             return db_weight
 
