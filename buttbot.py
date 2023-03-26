@@ -243,8 +243,11 @@ class ButtBot:
 
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
-        if "has made the advancement [" in message.content and message.author.id == 249966240787988480 and \
-                guild_configs[message.guild.id].vacuum:
+        if ("has made the advancement [" in message.content or
+            "has reached the goal [" in message.content or
+            "has made the advancement [" in message.content) \
+                and message.author.id == 249966240787988480 \
+                and guild_configs[message.guild.id].vacuum:
             # progress cheevo
             cheevo = db["minecraft"].do_insert(
                 "insert into progress.progres_cheevos (`player`, `cheevo_text`, `datetime`, `play_time` ) values (%s, %s, %s, 1)",
@@ -301,7 +304,7 @@ class ButtBot:
                     # send to shitpost module for testing.
                     # we don't want to talk at all except in my test channel
                     shitpost.do_butting_raw_sentence(message)
-                    print(shitpost.buttstatementobject)
+                    print(shitpost.buttstatementobject.get_good_chunks())
                     # shitpost.print_debug_message()
                     # shitpost.log_disposition()
                     if message.channel.id == 435348744016494592:
