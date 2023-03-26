@@ -62,7 +62,7 @@ class ButtChunk:
                 if self._original_sentence[i].tag_ in noun_tags:
                     self.passes_noun_check = True
                     if fw and self.focusword == self._original_sentence[i].text:
-                        self.noun = self._original_sentence[i]
+                        self.noun = self._original_sentence[i].text
                         self.noun_shape = self._original_sentence[i].shape_
                         self.noun_tag = self._original_sentence[i].tag_
                         try:
@@ -74,7 +74,7 @@ class ButtChunk:
                         except IndexError:
                             self.previous_word_tag = []
                     elif not fw:
-                        self.noun = self._original_sentence[i]
+                        self.noun = self._original_sentence[i].text
                         self.noun_shape = self._original_sentence[i].shape_
                         self.noun_tag = self._original_sentence[i].tag_
                         try:
