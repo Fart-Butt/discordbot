@@ -171,7 +171,7 @@ class WordReplacer:
                         self.buttstatementobject = self.process_bot_message(messageobject.content)
                 else:
                     self.buttstatementobject = ButtStatement(buttlib.strip_IRI(messageobject.content))
-                if len(self.buttstatementobject.get_good_chunks()) > 1 and \
+                if len(self.buttstatementobject.get_good_chunks()) > 0 and \
                         self.__check_length_of_sentence_to_butt(messageobject):
                     # message is below length limit set on a per-guild basis
                     self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
@@ -192,6 +192,7 @@ class WordReplacer:
 
     def do_butting_raw_sentence(self, message: Message) -> str:
         """always makes butted sentence.  skip all sanity checks that perform_text_to_butt does."""
+        self.__state_reset()
         self.original_sentence = str(message.content)
         self.buttstatementobject = ButtStatement(message.content)
         if len(self.buttstatementobject.get_good_chunks()) > 1:
@@ -262,23 +263,23 @@ class WordReplacer:
         if chunk.noun_tag == "NNS":
             return self._replace_an_to_a_in_sentence(
                 sentence.replace(
-                    chunk.noun.text,
+                    chunk.noun,
                     self._butt_in_proper_case(chunk, 'butts')
                 ),
                 "butts")
         else:
             return self._replace_an_to_a_in_sentence(
                 sentence.replace(
-                    chunk.noun.text,
+                    chunk.noun,
                     self._butt_in_proper_case(chunk, 'butt')
                 ),
                 "butt")
 
     def _butt_in_proper_case(self, selected_chunk: ButtChunk, word: str) -> str:
         returnword = []
-        if selected_chunk.noun.text.isupper():
+        if selected_chunk.noun.isupper():
             return word.upper()
-        elif selected_chunk.noun.text.islower():
+        elif selected_chunk.noun.islower():
             return word
         else:
             for i in range(0, len(word)):
