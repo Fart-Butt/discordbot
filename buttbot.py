@@ -251,7 +251,7 @@ class ButtBot:
             # progress cheevo
             cheevo = db["minecraft"].do_insert(
                 "insert into progress.progres_cheevos (`player`, `cheevo_text`, `datetime`, `play_time` ) values (%s, %s, %s, 1)",
-                (message.content.split(" ")[0][1:], message.content.split("[")[1][1:-2], datetime.datetime.utcnow())
+                (message.content.split(" ")[0], message.content.split("[")[1][1:-2], datetime.datetime.utcnow())
             )
         elif ("left the game" in message.content or "joined the game" in message.content) and \
                 guild_configs[message.guild.id].vacuum:
