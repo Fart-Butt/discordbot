@@ -245,7 +245,7 @@ class ButtBot:
         # here's where im going to evaluate all other sentences for shitposting
         if ("has made the advancement [" in message.content or
             "has reached the goal [" in message.content or
-            "has made the advancement [" in message.content) \
+            "has completed the challenge [" in message.content) \
                 and message.author.id == 249966240787988480 \
                 and guild_configs[message.guild.id].vacuum:
             # progress cheevo
