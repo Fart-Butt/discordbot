@@ -3,6 +3,7 @@ import shared
 import logging
 import butt_library as buttlib
 import spacy
+import decompound
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -25,23 +26,50 @@ class ButtStatement:
         """takes nlp processed message and creates ButtChunk objects for each identified spacy chunk that has more
         than one word."""
         chunks = []
-        nouns = ["NN", "NNS", "NNP", "NNPS"]
+        nouns = ["NN", "NNS", "NNP", "NNPS", "NOUN"]
         for chunk in self.__processed_message_noun_chunks:
             noun = []
+            corrected_noun = ""
             if len(chunk.text.split(" ")) > 1:
+                # detect chunks that have more than 1 noun.  If there are more than 1 noun, create multiple
+                # butt_chunks per noun.
                 for j in range(chunk.start, chunk.end):
-                    if self.__processed_message[j].tag_ in nouns:
+                    if self.__processed_message[j].pos_ in nouns:
                         noun.append(self.__processed_message[j].text)
                 if len(noun) > 1:
                     for n in noun:
+                        if len(n) > 10:
+                            # checking for compound closed word:
+                            corrected_noun = self.compound_closed_noun(self.message, n)
                         chunks.append(
                             ButtChunk(self.db, self.__nlp, self.__processed_message, chunk, focusword=n)
                         )
+                        if corrected_noun:
+                            chunks[-1].noun = corrected_noun
+
                 else:
                     chunks.append(
                         ButtChunk(self.db, self.__nlp, self.__processed_message, chunk)
                     )
+                    if len(chunks[-1].noun) > 10:
+                        # checking for compound closed word:
+                        corrected_noun = self.compound_closed_noun(self.message, chunks[-1].noun)
+                    if corrected_noun:
+                        chunks[-1].noun = corrected_noun
+
         return chunks
+
+    def compound_closed_noun(self, original_sentence: str, suspected_word: str):
+        """hander for compound closed nouns. example: skullcrusher->buttcrusher"""
+        processed_suspected_word = " ".join(
+            list(decompound.sentence_to_words(str(suspected_word), use_common=True, top_limit=1).values())[0][0]
+        )
+        processed_sentence = self.__nlp(original_sentence.replace(str(suspected_word), processed_suspected_word))
+        processed_nouns = ""
+        for i in processed_sentence:
+            if i.pos_ in ["NOUN", "NN", "NNS", "NNP", "NNPS"] and len(i.text) > 3:
+                processed_nouns = i.text
+        return processed_nouns
 
     def get_good_chunks(self):
         good_chunks = []

@@ -304,6 +304,7 @@ class ButtBot:
                     # send to shitpost module for testing.
                     # we don't want to talk at all except in my test channel
                     shitpost.do_butting_raw_sentence(message)
+                    print(shitpost.original_sentence)
                     print(shitpost.buttstatementobject.get_good_chunks())
                     # shitpost.print_debug_message()
                     # shitpost.log_disposition()

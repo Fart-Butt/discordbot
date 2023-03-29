@@ -1,10 +1,5 @@
 from wordreplacer import WordReplacer
-from butt_chunk import ButtChunk
-import spacy
-from shared import db
 import pytest
-
-# nlp = spacy.load('en_core_web_lg')
 
 ab = ""
 wp = WordReplacer(ab)
@@ -55,15 +50,16 @@ nlp_sentences = [
          "They can just require a butt to require all points! It's not hard!",
          "They can just require an apple to require all butts! It's not hard!"
      ]),
-    ("crap",
+    ("I want to touch the skullcrusher",
      [
-         ""
+         "I want to touch the buttcrusher"
      ]),
-    (
-        "how do they force feed you, ive seen some japanese anime videos on the internet and depending on how they do affects how quickly im booking a trip to japan",
-        [
-            ""
-        ]),
+    # (
+    # "how do they force feed you, ive seen some japanese anime videos on the internet and depending on how they do affects how quickly im booking a trip to japan"
+    # "because i aint gonna lie, blightfal tickles my pickle even if its jank as fuck multiplay"
+    # [
+    #    ""
+    # ]),
 
 ]
 
@@ -82,6 +78,9 @@ def test__replace_an_to_a_in_sentence():
     word = "apple"
     print(wp._replace_an_to_a_in_sentence(sentence, word))
 
+
 # def test__make_butted_sentence():
 #    sentence = "They can just require an apple to require all points! It's not hard!"
 #    print(wp._make_butted_sentence(sentence))
+def test_word_replacer():
+    assert False

@@ -46,7 +46,7 @@ class ButtChunk:
     def build_chunk_word_list(self, chunk, fw=False):
         if len(chunk.text.split(" ")) > 1:
             self.passes_chunk_length_check = True
-            noun_tags = ["NN", "NNS", "NNP", "NNPS"]
+            noun_tags = ["NN", "NNS", "NNP", "NNPS", "NOUN"]
             # characters_to_strip = ["'", '"', '*', ".", "..."]
             for i in range(chunk.start, chunk.end):
                 # filter out shit chunks
@@ -58,8 +58,8 @@ class ButtChunk:
                     # not an IRI, continue processing:
                     pass
                 self.text_list.append(self._original_sentence[i])
-                self.tag.append(self._original_sentence[i].tag_)
-                if self._original_sentence[i].tag_ in noun_tags:
+                self.tag.append(self._original_sentence[i].pos_)
+                if self._original_sentence[i].pos_ in noun_tags:
                     self.passes_noun_check = True
                     if fw and self.focusword == self._original_sentence[i].text:
                         self.noun = self._original_sentence[i].text
@@ -70,7 +70,7 @@ class ButtChunk:
                         except IndexError:
                             self.previous_word = ""
                         try:
-                            self.previous_word_tag = self._original_sentence[i - 1].tag_
+                            self.previous_word_tag = self._original_sentence[i - 1].pos_
                         except IndexError:
                             self.previous_word_tag = []
                     elif not fw:
@@ -89,8 +89,11 @@ class ButtChunk:
                 self.shape.append(self._original_sentence[i].shape_)
                 self.original_spacy_object.append(self._original_sentence[i])
             self.text = chunk.text
-            if self.passes_noun_check and self.passes_chunk_length_check:
-                self.usable_chunk = True
+            if len(self.noun) > 3:
+                if self.passes_noun_check and self.passes_chunk_length_check:
+                    self.usable_chunk = True
+            else:
+                self.usable_chunk = False
 
     def _butt_vector_analyser(self, phrase) -> int:
         """check noun vector similarity to spatially funny objects/words/concepts."""
