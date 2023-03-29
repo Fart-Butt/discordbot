@@ -168,7 +168,7 @@ class WordReplacer:
                 # message contains no stop phrases, let's proceed
                 if self.message.author.bot:
                     if self.__is_user_an_allowed_bot(messageobject):
-                        self.buttstatementobject = self.process_bot_message(messageobject.content)
+                        self.buttstatementobject = self.process_bot_message(messageobject)
                 else:
                     self.buttstatementobject = ButtStatement(buttlib.strip_IRI(messageobject.content))
                 if len(self.buttstatementobject.get_good_chunks()) > 0 and \
