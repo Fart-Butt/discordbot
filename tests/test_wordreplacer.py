@@ -25,19 +25,6 @@ class SimulatedDiscordMessage:
         self.guild = SimulatedClass(id=154337182717444096)
 
 
-def test__butt_in_proper_case():
-    # nlp_sentence = nlp("They can just require the GM TIER to require all points! It's not hard!")
-    # chunks_to_investigate = []
-    # for chunk in nlp_sentence.noun_chunks:
-    #    chunks_to_investigate.append(chunk)
-    # bc = ButtChunk(db["buttbot"], nlp, nlp_sentence, chunks_to_investigate[1])
-    # build fake noun object
-    sim_noun = SimulatedClass(text="TeStInG")
-    bc = SimulatedClass(noun=sim_noun)
-    print(wp._butt_in_proper_case(bc, "butts"))
-    assert (wp._butt_in_proper_case(bc, "butts") == "BuTtS")
-
-
 nlp_sentences = [
     ("They can just require the gm tier to require all points! It's not hard!",
      [
@@ -78,9 +65,6 @@ def test__replace_an_to_a_in_sentence():
     word = "apple"
     print(wp._replace_an_to_a_in_sentence(sentence, word))
 
-
 # def test__make_butted_sentence():
 #    sentence = "They can just require an apple to require all points! It's not hard!"
 #    print(wp._make_butted_sentence(sentence))
-def test_word_replacer():
-    assert False

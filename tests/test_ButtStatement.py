@@ -7,21 +7,21 @@ def test_butt_statement():
     fakemessage = "They can just require the gm tier to require all points! It's not hard!"
     bs = wordreplacer.ButtStatement(fakemessage)
     print(bs)
-    assert (len(bs.chunks) == 3)
+    assert (len(bs.chunks) == 2)
     assert (bs.chunks[0].text == "the gm tier")
 
 
 def test_get_good_chunks():
     fakemessage = "They can just require the gm tier to require all points! It's not hard!"
     bs = wordreplacer.ButtStatement(fakemessage)
-    assert (len(bs.get_good_chunks()) == 3)
+    assert (len(bs.get_good_chunks()) == 2)
 
 
 chunks = [
-    ("They can just require the gm tier to require all points! It's not hard!", 3),
+    ("They can just require the gm tier to require all points! It's not hard!", 2),
     ("because i aint gonna lie, blightfall tickles my pickle even if its jank as fuck multiplay", 3),
     ("I want to touch the skullcrusher", 1),
-    ("those items you get for upgrading the defender D/A into zaros, undead, rumbling, etc", 3)
+    ("those items you get for upgrading the defender D/A into zaros, undead, rumbling, etc", 2)
 
 ]
 

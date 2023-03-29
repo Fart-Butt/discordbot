@@ -12,28 +12,11 @@ bc = ButtChunk(db["buttbot"], nlp, nlp_sentence, chunks_to_investigate[1])
 
 
 def test_build_chunk_wordlist():
-    """expected output:
-    text: the gm tier
-        text weight: 1500
-        tag: ['DT', 'NNP', 'NN']
-        tag weight: 1000
-        normalized tags: DT NN NN
-        lemma: ['the', 'gm', 'tier']
-        lemma weight: 1000
-        shape: ['xxx', 'xx', 'xxxx'] 
-        original spacy object: [the, gm, tier]
-        Previous Word: ['the', 'gm']
-        Previous Word Tag: ['DT', 'NNP']
-        Noun: [gm, tier]
-        N: True CL True UC True
-        weight: 3500
-        similarities: ['structure: 0.500237']
-        """
     assert (len(bc.tag) == 3)
-    assert (bc.tag[0] == 'DT')
-    assert (bc.tag[1] == 'NNP')
-    assert (bc.tag[2] == 'NN')
-    assert (bc.normalized_tags == "DT NN NN")
+    assert (bc.tag[0] == 'DET')
+    assert (bc.tag[1] == 'PROPN')
+    assert (bc.tag[2] == 'NOUN')
+    assert (bc.normalized_tags == "DET PROPN NOUN")
     assert (bc.text == "the gm tier")
     # assert False
 
@@ -48,3 +31,8 @@ def test_normalize_tags():
             bc.normalize_tags(["NNP", "NNS", "NNPS", "RBR", "RBS", "VBD", "VBG", "VBN", "VBP", "JJR", "JJS"]) ==
             "NN NN NN RB RB VB VB VB VB JJ JJ"
     )
+
+
+def test__time_vector_analyser():
+    test_word = nlp("minutes")
+    print(bc._butt_vector_analyser(test_word))
