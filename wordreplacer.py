@@ -185,7 +185,7 @@ class WordReplacer:
             return ""
 
     def process_bot_message(self, mo: Message) -> str:
-        if str(mo.content.author) == "Omnibot#0741" or str(mo.message.author) == "Spaigbot#7382":
+        if str(mo.author) == "Omnibot#0741" or str(mo.author) == "Spaigbot#7382":
             return buttlib.strip_IRI(mo.content.split(" ", 1)[1])
         else:
             return buttlib.strip_IRI(mo.content.split(" ", 1)[1])
