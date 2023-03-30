@@ -285,7 +285,7 @@ class ButtBot:
                     # message length check
                     if len(message.content.split()) < guild_configs[message.guild.id].max_sentence_length:
                         if timer_module.check_timeout(str(message.guild.id) + 'shitpost',
-                                                      guild_configs[message.guild.id].shitpost_freq):
+                                                      guild_configs[message.guild.id].shitpost_freq, commit=False):
                             # passed timer check
                             # try:
                             shitpost.perform_text_to_butt(message)
@@ -295,6 +295,8 @@ class ButtBot:
                                 msg = await self.docomms(shitpost.butted_sentence, message.channel,
                                                          message.guild.id)
                                 phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
+                                timer_module.commit_timeout(str(message.guild.id) + 'shitpost',
+                                                            guild_configs[message.guild.id].shitpost_freq)
                             shitpost.log_disposition()
                     else:
                         log.debug("Message2Butt_Processor - sentence over character length.")
