@@ -288,16 +288,21 @@ class ButtBot:
                                                       guild_configs[message.guild.id].shitpost_freq, commit=False):
                             # passed timer check
                             # try:
-                            shitpost.perform_text_to_butt(message)
+                            try:
+                                shitpost.perform_text_to_butt(message)
 
-                            if shitpost.butted_sentence:
-                                # passes butt check
-                                msg = await self.docomms(shitpost.butted_sentence, message.channel,
-                                                         message.guild.id)
-                                phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
-                                timer_module.commit_timeout(str(message.guild.id) + 'shitpost',
-                                                            guild_configs[message.guild.id].shitpost_freq)
-                            shitpost.log_disposition()
+                                if shitpost.butted_sentence:
+                                    # passes butt check
+                                    msg = await self.docomms(shitpost.butted_sentence, message.channel,
+                                                             message.guild.id)
+                                    phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
+                                    timer_module.commit_timeout(str(message.guild.id) + 'shitpost',
+                                                                guild_configs[message.guild.id].shitpost_freq)
+                                shitpost.log_disposition()
+                            except AttributeError:
+                                # no butted sentence
+                                pass
+
                     else:
                         log.debug("Message2Butt_Processor - sentence over character length.")
             else:
