@@ -23,7 +23,7 @@ class PhraseWeights:
 
     @staticmethod
     def process_reactions(reactions):
-        negativeemojis = ['😕', '🙁', '☹', '😨', '😦', '😧', '👎', '😠', '😭', '😖', '👎', '💤', '🚫', '🔫', '❎']
+        negativeemojis = ['😕', '🙁', '☹', '😨', '😦', '😧', '👎', '😠', '😭', '😖', '👎', '💤', '🚫', '🔫', '❎', '😪']
         negative_emoji_guid = ['504537001845063680']
         downvotes = 0
         upvotes = 0
