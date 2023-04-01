@@ -264,14 +264,14 @@ class WordReplacer:
             return self._replace_an_to_a_in_sentence(
                 sentence.replace(
                     chunk.noun,
-                    self._butt_in_proper_case(chunk, 'business')
+                    self._butt_in_proper_case(chunk, 'butts')
                 ),
                 "butts")
         else:
             return self._replace_an_to_a_in_sentence(
                 sentence.replace(
                     chunk.noun,
-                    self._butt_in_proper_case(chunk, 'business')
+                    self._butt_in_proper_case(chunk, 'butt')
                 ),
                 "butt")
 
