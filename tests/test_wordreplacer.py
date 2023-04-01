@@ -1,8 +1,8 @@
-from wordreplacer import WordReplacer
+from shared import shitpost
 import pytest
 
 ab = ""
-wp = WordReplacer(ab)
+wp = shitpost
 
 
 class SimulatedClass:
