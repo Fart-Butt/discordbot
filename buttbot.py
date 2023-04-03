@@ -24,8 +24,6 @@ class ButtBot:
     def __init__(self):
         self.discordBot = bot
         self.mojang = mj.Mojang()
-        self.discordBot.loop.create_task(self.minecraft_scraper_subscription_task())
-        self.discordBot.loop.create_task(self.butt_message_processing())
 
     async def minecraft_scraper_subscription_task(self):
         await self.discordBot.wait_until_ready()

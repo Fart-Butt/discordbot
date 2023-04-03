@@ -10,8 +10,16 @@ import vacuum
 from discord.ext.commands import Bot
 import aiohttp
 import asyncio
+import discord
 
-bot = Bot(description="a bot for farts", command_prefix=command_prefix, pm_help=False)
+intents = discord.Intents.default()
+intents.reactions = True
+intents.messages = True
+intents.guilds = True
+intents.message_content = True
+intents.emojis_and_stickers = True
+
+bot = Bot(description="a bot for farts", command_prefix=command_prefix, pm_help=False, intents=intents)
 
 log = logging.getLogger('bot.' + __name__)
 
@@ -29,7 +37,6 @@ tables = {
     "deaths": "deaths",
     "playertracker": "playertracker_v2"
 }
-
 
 stat_module = ButtStatistics(db["statistics"])
 comms_instance = discord_comms.DiscordComms()

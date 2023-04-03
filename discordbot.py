@@ -2,6 +2,8 @@ import asyncio
 from pathlib import Path
 import datetime
 import aiohttp
+
+import config
 from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
@@ -35,8 +37,6 @@ def setup_logger() -> logging.Logger:
 
 
 log = setup_logger()
-buttbot = ButtBot()
-bot.aiohttp_session = aiohttp.ClientSession()
 
 
 @bot.event
@@ -110,11 +110,22 @@ async def serialize_weights():
             await asyncio.sleep(300)
 
 
+buttbot = ButtBot()
 
-bot.loop.create_task(send_stats_to_db())
-bot.add_cog(BotCommands(bot))
-bot.add_cog(BotConfig(bot))
-bot.add_cog(VacuumCog(bot))
-bot.loop.create_task(serialize_weights())
-bot.run(secretkey)
-# bot.scraper.archive(channel=154337182717444096, limit=100)
+
+async def main():
+    # do other async things
+    # start the client
+    async with bot:
+        await bot.start(config.secretkey)
+        await bot.loop.create_task(buttbot.minecraft_scraper_subscription_task())
+        await bot.loop.create_task(buttbot.butt_message_processing())
+        await bot.loop.create_task(send_stats_to_db())
+        await bot.add_cog(BotCommands(bot))
+        await bot.add_cog(BotConfig(bot))
+        await bot.add_cog(VacuumCog(bot))
+        await bot.loop.create_task(serialize_weights())
+        bot.aiohttp_session = aiohttp.ClientSession()
+
+
+asyncio.run(main())
