@@ -9,7 +9,7 @@ from cogs.botconfig import BotConfig
 from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
 from shared import guild_configs, bot, stat_module
-from groups.bot import ButtbotCommands
+# from groups.bot import ButtbotCommands
 from discord.channel import DMChannel
 from discord import app_commands
 import logging
@@ -128,10 +128,12 @@ async def main():
         await bot.add_cog(VacuumCog(bot))
         await bot.loop.create_task(serialize_weights())
         bot.aiohttp_session = aiohttp.ClientSession()
-        tree = app_commands.CommandTree(bot)
-        tree.add_command(ButtbotCommands())
-        bot.tree.copy_global_to(guild=507477640375042049)
-        # await tree.sync(guild=bot.Object(id=507477640375042049))
+
+
+#        tree = app_commands.CommandTree(bot)
+#        tree.add_command(ButtbotCommands())
+#        bot.tree.copy_global_to(guild=507477640375042049)
+# await tree.sync(guild=bot.Object(id=507477640375042049))
 
 
 asyncio.run(main())
