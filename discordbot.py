@@ -119,7 +119,6 @@ async def main():
     # do other async things
     # start the client
     async with bot:
-        await bot.start(config.secretkey)
         await bot.loop.create_task(buttbot.minecraft_scraper_subscription_task())
         await bot.loop.create_task(buttbot.butt_message_processing())
         await bot.loop.create_task(send_stats_to_db())
@@ -127,6 +126,7 @@ async def main():
         await bot.add_cog(BotConfig(bot))
         await bot.add_cog(VacuumCog(bot))
         await bot.loop.create_task(serialize_weights())
+        await bot.start(config.secretkey)
         bot.aiohttp_session = aiohttp.ClientSession()
 
 
