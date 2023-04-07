@@ -1,5 +1,5 @@
 import logging
-from discord.ext.commands import Bot, Cog, Context, command, BucketType
+from discord.ext.commands import Bot, Cog, Context, BucketType
 from discord.ext import commands
 from shared import db, shitpost, guild_configs
 import mojang
@@ -16,7 +16,7 @@ class VacuumCog(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @command()
+    @commands.command()
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
     @can_speak_in_channel()
@@ -31,7 +31,7 @@ class VacuumCog(Cog):
             await asyncio.sleep(4)
         await ctx.send("your butt is now registered with buttbot")
 
-    @command()
+    @commands.command()
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
     @can_speak_in_channel()
@@ -83,7 +83,7 @@ class VacuumCog(Cog):
             await asyncio.sleep(4)
         await ctx.send(message)
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -124,7 +124,7 @@ class VacuumCog(Cog):
             await ctx.send(shitpost.do_butting_raw_sentence("this world is without any gaming gods"))
             # no one left
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 5, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -138,7 +138,7 @@ class VacuumCog(Cog):
                 lastseen = db["minecraft"].do_query(
                     "select datetime from {0}_playertracker_v2 "
                     "where player=%s order by datetime desc limit 1"
-                        .format(guild_configs[ctx.message.guild.id].table_prefix),
+                    .format(guild_configs[ctx.message.guild.id].table_prefix),
                     (player,)
                 )
                 db["minecraft"].close()
@@ -167,7 +167,7 @@ class VacuumCog(Cog):
                 await asyncio.sleep(3)
             await ctx.send("who am i looking for?")
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 5, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -196,7 +196,7 @@ class VacuumCog(Cog):
         players = db["minecraft"].do_query(
             "select abs(sum(timedelta)) as seconds, count(timedelta)"
             " as sessions, player from {0}_playertracker_v2 group by player"
-                .format(guild_configs[guild_guid].table_prefix))
+            .format(guild_configs[guild_guid].table_prefix))
         db["minecraft"].close()
         total_seconds = 0
         total_sessions = 0
@@ -216,7 +216,7 @@ class VacuumCog(Cog):
             "from {0}_playertracker_v2 where player in "
             "(select player_name from progress.minecraft_players "
             "where player_guid = (select player_guid as guid from progress.minecraft_players where player_name = %s))"
-                .format(guild_configs[guild_guid].table_prefix),
+            .format(guild_configs[guild_guid].table_prefix),
             (player,))
         db["minecraft"].close()
         return [time[0]['seconds'], time[0]['sessions']]
@@ -250,7 +250,7 @@ class VacuumCog(Cog):
         result = db["minecraft"].do_query(
             "SELECT player, count(*) as `count` FROM `{0}_deaths` where match(message) against (%s)"
             "GROUP BY player ORDER by count DESC"
-                .format(guild_configs[guild_guid].table_prefix),
+            .format(guild_configs[guild_guid].table_prefix),
             (message,))
         db["minecraft"].close()
         if result:
@@ -262,7 +262,7 @@ class VacuumCog(Cog):
         result = db["minecraft"].do_query(
             "SELECT message,count(*) as `count` FROM `{0}_deaths` WHERE player=%s"
             " GROUP BY message ORDER BY count DESC"
-                .format(guild_configs[guild_guid].table_prefix),
+            .format(guild_configs[guild_guid].table_prefix),
             (player,))
         db["minecraft"].close()
         if result:
@@ -270,7 +270,7 @@ class VacuumCog(Cog):
         else:
             return 'No deaths recorded'
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -295,7 +295,7 @@ class VacuumCog(Cog):
         result = db["minecraft"].do_query(
             "SELECT message, count(*) as `count` FROM `{0}_deaths` "
             "GROUP BY message ORDER BY count DESC LIMIT 10"
-                .format(guild_configs[guild_guid].table_prefix),
+            .format(guild_configs[guild_guid].table_prefix),
             '')
         db["minecraft"].close()
         if result:
@@ -303,7 +303,7 @@ class VacuumCog(Cog):
         else:
             pass
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -327,7 +327,7 @@ class VacuumCog(Cog):
                 await asyncio.sleep(3)
             await ctx.send('Top 10 ouchies: %s' % r)
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -352,7 +352,7 @@ class VacuumCog(Cog):
     def top_10_deaths(self, guild_guid: int):
         result = db["minecraft"].do_query(
             "SELECT player, count(*) as `count` FROM `{0}_deaths` GROUP BY player ORDER BY count DESC LIMIT 10"
-                .format(guild_configs[guild_guid].table_prefix))
+            .format(guild_configs[guild_guid].table_prefix))
         if result:
             return self.sort(result, 'player', 'count')
         else:
@@ -364,12 +364,12 @@ class VacuumCog(Cog):
             "FROM {0}_playertracker_v2 as T left join(SELECT count(D.player) as deaths, "
             "D.player from {0}_deaths D GROUP BY D.player) D ON T.player = D.player group by"
             "T.player ORDER BY deaths_per_hour DESC LIMIT 10"
-                .format(guild_configs[guild_guid].table_prefix)
+            .format(guild_configs[guild_guid].table_prefix)
         )
         if dph:
             return self.sort(dph, 'player', 'deaths_per_hour')
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -380,7 +380,7 @@ class VacuumCog(Cog):
             "{0}_playertracker_v2 as T left join (SELECT count(D.player) as deaths, D.player"
             " from {0}_deaths D where player=%s GROUP BY D.player) D"
             " ON T.player = D.player where T.player=%s group by T.player"
-                .format(guild_configs[ctx.message.guild.id].table_prefix), (args[0], args[0]))
+            .format(guild_configs[ctx.message.guild.id].table_prefix), (args[0], args[0]))
         try:
             if dph[0]['deaths_per_hour'] > 0:
                 # good return
@@ -442,7 +442,7 @@ class VacuumCog(Cog):
             i = i + 1
         return cmsg
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -454,7 +454,7 @@ class VacuumCog(Cog):
             await asyncio.sleep(3)
         await ctx.send("uuid is %s" % str(uid))
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()
@@ -482,7 +482,7 @@ class VacuumCog(Cog):
             await asyncio.sleep(3)
         await ctx.send(message)
 
-    @command()
+    @commands.command()
     @commands.cooldown(1, 10, BucketType.guild)
     @valid_user_or_bot()
     @vacuum_enabled_in_guild()

@@ -1,5 +1,6 @@
 import logging
-from discord.ext.commands import Bot, Cog, Context, command, has_permissions, is_owner
+from discord.ext.commands import Bot, Cog, Context, has_permissions, is_owner
+from discord.ext import commands
 from butt_library import valid_user_or_bot, can_speak_in_channel
 import shared
 
@@ -11,12 +12,12 @@ class BotCommands(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @command()
+    @commands.command()
     async def test(self, ctx: Context, *args):
         print(ctx)
         print(*args)
 
-    @command()
+    @commands.command()
     @has_permissions(administrator=True)
     @valid_user_or_bot()
     @can_speak_in_channel()
@@ -32,7 +33,7 @@ class BotCommands(Cog):
             ctx.message.author.name, ctx.message.guild.name, ctx.message.guild.id))
         await ctx.send('fuck you youre not my real dad')
 
-    @command()
+    @commands.command()
     @is_owner()
     async def reloadconfig(self, ctx: Context, *args):
         if args:
