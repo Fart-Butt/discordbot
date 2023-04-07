@@ -1,5 +1,5 @@
 import logging
-from discord.ext.commands import Bot, Cog, Context, BucketType
+from discord.ext.commands import Bot, Context, BucketType
 from discord.ext import commands
 from shared import db, shitpost, guild_configs
 import mojang
@@ -11,7 +11,7 @@ from butt_library import valid_user_or_bot, vacuum_enabled_in_guild, can_speak_i
 log = logging.getLogger('bot.' + __name__)
 
 
-class VacuumCog(Cog):
+class VacuumCog(commands.Cog):
 
     def __init__(self, bot: Bot):
         self.bot = bot
