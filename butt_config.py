@@ -277,8 +277,3 @@ class Config(dict):
             log.debug("startup for %d" % g['guid'])
             log.debug("STARTUP - found config for %d, building config" % g['guid'])
             self.configs[g['guid']] = ButtConfig(g['guid'])
-            if self.configs[g['guid']].vacuum:
-                log.info("subscribing to vaccum for %d" % g['guid'])
-                shared.vacuum_instance.subscribe(self.configs[g['guid']])
-            else:
-                log.info("%d not configured for vacuum. skipping" % g['guid'])
