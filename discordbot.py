@@ -6,7 +6,6 @@ import aiohttp
 import config
 from cogs.bot import BotCommands
 from cogs.botconfig import BotConfig
-from cogs.vacuum import VacuumCog
 from buttbot import ButtBot
 from shared import guild_configs, bot, stat_module
 # from groups.bot import ButtbotCommands
@@ -120,12 +119,10 @@ async def main():
     # start the client
     async with bot:
         await bot.start(config.secretkey)
-        await bot.loop.create_task(buttbot.minecraft_scraper_subscription_task())
         await bot.loop.create_task(buttbot.butt_message_processing())
         await bot.loop.create_task(send_stats_to_db())
         await bot.add_cog(BotCommands(bot))
         await bot.add_cog(BotConfig(bot))
-        await bot.add_cog(VacuumCog(bot))
         await bot.loop.create_task(serialize_weights())
         bot.aiohttp_session = aiohttp.ClientSession()
 
