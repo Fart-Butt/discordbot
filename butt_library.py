@@ -27,10 +27,12 @@ def strip_IRI(sentence: str) -> str:
     text = sentence.split(" ")
     for w in text:
         try:
-            if parse(w, rule="IRI"):
+            d = parse(w, rule="URI")
+            strippable_schemas = ["http", "https"]
+            if d['scheme'] in strippable_schemas:
                 text.remove(w)
         except ValueError:
-            # we expect this to happen when the text is not an IRI, so we can ignore this
+            # we expect this to happen when the text is not a URI, so we can ignore this
             pass
     return " ".join(text)
 
