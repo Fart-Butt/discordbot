@@ -41,6 +41,11 @@ nlp_sentences = [
      [
          "I want to touch the buttcrusher"
      ]),
+    ("kitten update: we got a trail cam and are gonna try to trap mom",
+     [
+         "butt update: we got a trail cam and are gonna try to trap mom",
+         "kitten update: we got a butt cam and are gonna try to trap mom",
+     ]),
     # (
     # "how do they force feed you, ive seen some japanese anime videos on the internet and depending on how they do affects how quickly im booking a trip to japan"
     # "because i aint gonna lie, blightfal tickles my pickle even if its jank as fuck multiplay"
@@ -57,6 +62,7 @@ def test_word_replacer_comprehensive(test_input, expected_possible_returns):
     bs = wp.perform_text_to_butt(sdo)
     print(f"original sentence: {wp.original_sentence}")
     print(f"butted message: {bs}")
+    print(f"buttstatement: {wp.buttstatementobject}")
     assert (bs in expected_possible_returns)
 
 
