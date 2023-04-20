@@ -71,6 +71,16 @@ def test__replace_an_to_a_in_sentence():
     word = "apple"
     print(wp._replace_an_to_a_in_sentence(sentence, word))
 
-# def test__make_butted_sentence():
-#    sentence = "They can just require an apple to require all points! It's not hard!"
-#    print(wp._make_butted_sentence(sentence))
+
+proper_case_sentences = [
+    ("But not Pakkrat's World Ship?", "But not Pakkrat's World Butt?"),
+]
+
+
+@pytest.mark.parametrize("sentence, expected", proper_case_sentences)
+def test__butt_in_proper_case(sentence, expected):
+    sdo = SimulatedDiscordMessage(bot=False, message_content=sentence)
+    a = wp.perform_text_to_butt(sdo)
+    print(wp.lets_butt_this_chunk.shape)
+    print(a)
+    assert a == expected

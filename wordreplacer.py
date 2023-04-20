@@ -284,7 +284,7 @@ class WordReplacer:
         else:
             for i in range(0, len(word)):
                 try:
-                    if selected_chunk.noun.isupper():
+                    if selected_chunk.noun[i].isupper():
                         returnword.append(word[i].upper())
                     else:
                         returnword.append(word[i].lower())
