@@ -21,14 +21,24 @@ chunks = [
     ("They can just require the gm tier to require all points! It's not hard!", 2),
     ("because i aint gonna lie, blightfall tickles my pickle even if its jank as fuck multiplay", 3),
     ("I want to touch the skullcrusher", 1),
-    ("those items you get for upgrading the defender D/A into zaros, undead, rumbling, etc", 2)
+    ("those items you get for upgrading the defender D/A into zaros, undead, rumbling, etc", 2),
+    ("Okay game, you have my interest. They're playing it straight with how in space no one can hear you dakka", 0),
+    ("IT'S A BIT MUCH", 1),
+    ("Never seen advanced rocketry for the most part I guess?", 2),
+    ("did we check out wither stuff", 1)
 
 ]
 
+
 @pytest.mark.parametrize("test_input,expected_possible_chunks", chunks)
 def test_bad_chunks(test_input, expected_possible_chunks):
+    print(f"starting test for {test_input}")
+    print(f"expect {expected_possible_chunks} chunks")
     bs = wordreplacer.ButtStatement(test_input)
+    print(bs)
+    print("-----END RAW STATEMENT------")
     a = bs.get_good_chunks()
     for b in a:
         print(b)
+    print(f"got {len(a)} chunks")
     assert (len(a) == expected_possible_chunks)

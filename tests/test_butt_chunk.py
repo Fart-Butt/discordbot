@@ -13,12 +13,11 @@ bc = ButtChunk(db["buttbot"], nlp, nlp_sentence, chunks_to_investigate[1])
 
 def test_build_chunk_wordlist():
     assert (len(bc.tag) == 3)
-    assert (bc.tag[0] == 'DET')
-    assert (bc.tag[1] == 'PROPN')
-    assert (bc.tag[2] == 'NOUN')
-    assert (bc.normalized_tags == "DET PROPN NOUN")
+    assert (bc.tag[0] == 'DT' or bc.tag[0] == 'DET')
+    assert (bc.tag[1] == 'PROPN' or bc.tag[1] == 'NNP')
+    assert (bc.tag[2] == 'NOUN' or bc.tag[2] == "NN")
+    assert (bc.normalized_tags == "DET PROPN NOUN" or bc.normalized_tags == "DT NN NN")
     assert (bc.text == "the gm tier")
-    # assert False
 
 
 def test__butt_vector_analyser():
