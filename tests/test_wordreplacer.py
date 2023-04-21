@@ -46,6 +46,11 @@ nlp_sentences = [
          "butt update: we got a trail cam and are gonna try to trap mom",
          "kitten update: we got a butt cam and are gonna try to trap mom",
      ]),
+    ("what I used your scepters for was doing my enchantments",
+     [
+         "what I used your scepters for was doing my butts",
+         "what I used your butts for was doing my enchantments",
+     ]),
     # (
     # "how do they force feed you, ive seen some japanese anime videos on the internet and depending on how they do affects how quickly im booking a trip to japan"
     # "because i aint gonna lie, blightfal tickles my pickle even if its jank as fuck multiplay"

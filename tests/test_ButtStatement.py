@@ -25,7 +25,8 @@ chunks = [
     ("Okay game, you have my interest. They're playing it straight with how in space no one can hear you dakka", 0),
     ("IT'S A BIT MUCH", 1),
     ("Never seen advanced rocketry for the most part I guess?", 2),
-    ("did we check out wither stuff", 1)
+    ("did we check out wither stuff", 1),
+    ("what I used your scepters for was doing my enchantments", 2),
 
 ]
 

@@ -61,14 +61,16 @@ class ButtStatement:
 
     def compound_closed_noun(self, original_sentence: str, suspected_word: str):
         """hander for compound closed nouns. example: skullcrusher->buttcrusher"""
-        processed_suspected_word = " ".join(
-            list(decompound.sentence_to_words(str(suspected_word), use_common=True, top_limit=1).values())[0][0]
-        )
-        processed_sentence = self.__nlp(original_sentence.replace(str(suspected_word), processed_suspected_word))
+        decompounded_words = \
+        list(decompound.sentence_to_words(str(suspected_word), use_common=True, top_limit=1).values())[0][0]
+        processed_suspected_word = " ".join(decompounded_words)
         processed_nouns = ""
-        for i in processed_sentence:
-            if i.pos_ in ["NOUN", "NN", "NNS", "NNP", "NNPS"] and len(i.text) > 3:
-                processed_nouns = i.text
+        if len(min(decompounded_words, key=len)) > 3:
+            # all compound word components should be above len 3
+            processed_sentence = self.__nlp(original_sentence.replace(str(suspected_word), processed_suspected_word))
+            for i in processed_sentence:
+                if i.pos_ in ["NOUN", "NN", "NNS", "NNP", "NNPS"] and len(i.text) > 3:
+                    processed_nouns = i.text
         return processed_nouns
 
     def get_good_chunks(self):
