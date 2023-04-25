@@ -51,6 +51,11 @@ nlp_sentences = [
          "what I used your scepters for was doing my butts",
          "what I used your butts for was doing my enchantments",
      ]),
+    ("so like a sludgeblock, if i can mix terms?",
+     [
+         "so like a buttblock, if i can mix terms?",
+         "so like a sludgebutt, if i can mix terms?"
+     ]),
     # (
     # "how do they force feed you, ive seen some japanese anime videos on the internet and depending on how they do affects how quickly im booking a trip to japan"
     # "because i aint gonna lie, blightfal tickles my pickle even if its jank as fuck multiplay"
@@ -64,9 +69,11 @@ nlp_sentences = [
 @pytest.mark.parametrize("test_input,expected_possible_returns", nlp_sentences)
 def test_word_replacer_comprehensive(test_input, expected_possible_returns):
     sdo = SimulatedDiscordMessage(bot=False, message_content=test_input)
+    bs = ""
     bs = wp.perform_text_to_butt(sdo)
     print(f"original sentence: {wp.original_sentence}")
     print(f"butted message: {bs}")
+    print(f"selected chunk: {wp.lets_butt_this_chunk}")
     print(f"buttstatement: {wp.buttstatementobject}")
     assert (bs in expected_possible_returns)
 

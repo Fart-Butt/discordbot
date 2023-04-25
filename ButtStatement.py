@@ -55,6 +55,7 @@ class ButtStatement:
                         # checking for compound closed word:
                         corrected_noun = self.compound_closed_noun(self.message, chunks[-1].noun)
                     if corrected_noun:
+                        print(f"corrected noun {corrected_noun}")
                         chunks[-1].noun = corrected_noun
 
         return chunks
@@ -63,13 +64,16 @@ class ButtStatement:
         """hander for compound closed nouns. example: skullcrusher->buttcrusher"""
         decompounded_words = \
         list(decompound.sentence_to_words(str(suspected_word), use_common=True, top_limit=1).values())[0][0]
+        print(f"decompounded words {decompounded_words}")
         processed_suspected_word = " ".join(decompounded_words)
+        print(f"processed suspected words {processed_suspected_word}")
         processed_nouns = ""
         if len(min(decompounded_words, key=len)) > 3:
+            print("yes")
             # all compound word components should be above len 3
             processed_sentence = self.__nlp(original_sentence.replace(str(suspected_word), processed_suspected_word))
             for i in processed_sentence:
-                if i.pos_ in ["NOUN", "NN", "NNS", "NNP", "NNPS"] and len(i.text) > 3:
+                if i.text in decompounded_words and i.pos_ in ["NOUN", "NN", "NNS", "NNP", "NNPS"] and len(i.text) > 3:
                     processed_nouns = i.text
         return processed_nouns
 
