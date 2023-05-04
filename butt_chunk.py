@@ -217,25 +217,25 @@ class ButtChunk:
         return " ".join(list_)
 
     def adjust_weight(self, voted_weight: int):
-        log.info("PhraseWeights - updating phrase database")
+        log.debug("PhraseWeights - updating phrase database")
         count_update = 0
         count_ignored = 0
         if voted_weight == 0:
             count_ignored += 1
             # no further processing.
-            log.info("word %s: not adjusting weight since voted weight is %d" %
-                     (self.text, voted_weight)
-                     )
+            log.debug("word %s: not adjusting weight since voted weight is %d" %
+                      (self.text, voted_weight)
+                      )
             pass
         else:
             count_update += 1
             db_word_weight = self.text_weight
             calculated_weight = db_word_weight + voted_weight
-            log.info("word %s is getting weight %d adjusted to %d" % (self.text, db_word_weight, calculated_weight))
+            log.debug("word %s is getting weight %d adjusted to %d" % (self.text, db_word_weight, calculated_weight))
             self._store_phrase(self.text, calculated_weight, " ".join(self.tag))
             self._store_tag(self.normalized_tags, calculated_weight)
             self._store_lemma(" ".join(self.lemma), self.normalized_tags, calculated_weight)
-        log.info(
+        log.debug(
             "PhraseWeights - updating phrase database completed.  Updated: {} Ignored: {}"
             .format(count_update, count_ignored)
         )

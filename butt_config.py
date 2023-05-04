@@ -248,10 +248,10 @@ class Config(dict):
             # we have it, going to make a new instance
             self.configs[guid] = ButtConfig(guid)
             if self.configs[guid].vacuum:
-                log.info("subscribing to vaccum for %d" % guid)
+                log.debug("subscribing to vaccum for %d" % guid)
                 shared.vacuum_instance.subscribe(self.configs[guid])
             else:
-                log.info("%d not configured for vacuum. skipping" % guid)
+                log.debug("%d not configured for vacuum. skipping" % guid)
         else:
             # not in database, we need to generate a new
             self.create_config(guid)

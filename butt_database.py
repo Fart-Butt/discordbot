@@ -59,12 +59,12 @@ class Db:
         log.debug("INSERT_NO_ARGS - executing query %s" % (query))
         try:
             with self.connection.cursor() as cursor:
-                log.info("running query: %s" % str(query))
+                log.debug("running query: %s" % str(query))
                 cursor.execute(query)
                 self.connection.commit()
         except MySQLdb.OperationalError:
             with self.connection.cursor() as cursor:
-                log.info("running query: %s" % str(query))
+                log.debug("running query: %s" % str(query))
                 cursor.execute(query)
                 self.connection.commit()
         finally:
