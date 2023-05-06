@@ -32,6 +32,7 @@ class ButtChunk:
         self.text_list = []
         self.focusword = focusword
         self.noun_tag = ""
+        self.corrected = False
 
         # Processing
         if self.focusword:

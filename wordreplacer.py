@@ -177,7 +177,7 @@ class WordReplacer:
                     self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
                     # let's butt
                     self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk,
-                                                                      self.buttstatementobject.message)
+                                                                      self.buttstatementobject)
 
         if self.butted_sentence:
             return self.butted_sentence
@@ -259,32 +259,38 @@ class WordReplacer:
                     pass
         return " ".join(message)
 
-    def _make_butted_sentence(self, chunk: ButtChunk, sentence: str) -> str:
-        if chunk.noun_tag == "NNS":
-            return self._replace_an_to_a_in_sentence(
-                sentence.replace(
-                    chunk.noun,
-                    self._butt_in_proper_case(chunk, 'butts')
-                ),
-                "butts")
-        else:
-            return self._replace_an_to_a_in_sentence(
-                sentence.replace(
-                    chunk.noun,
-                    self._butt_in_proper_case(chunk, 'butt')
-                ),
-                "butt")
+    def _make_butted_sentence(self, chunk: ButtChunk, statement: ButtStatement) -> str:
+        sen = statement.message.split(" ")
+        neo = []
+        for word in sen:
+            neo.append([word, word.lower()])
+        print(neo)
+        new_sentence = []
+        replacement_word = "butts" if chunk.noun_tag == "NNS" else "butt"
+        for j in neo:
+            if chunk.noun.lower() in j[1]:
+                # normalized word match
+                if chunk.corrected:
+                    # post-processing modified this chunk (compound closed word) - we are not going to process further.
+                    new_sentence.append(j[1].replace(chunk.noun, replacement_word))
+                else:
+                    new_sentence.append(
+                        self._butt_in_proper_case(j[0], j[1].replace(chunk.noun.lower(), replacement_word))
+                    )
+            else:
+                new_sentence.append(j[0])
+        return self._replace_an_to_a_in_sentence(" ".join(new_sentence), replacement_word)
 
-    def _butt_in_proper_case(self, selected_chunk: ButtChunk, word: str) -> str:
+    def _butt_in_proper_case(self, shape, word: str) -> str:
         returnword = []
-        if selected_chunk.noun.isupper():
+        if shape.isupper():
             return word.upper()
-        elif selected_chunk.noun.islower():
+        elif shape.islower():
             return word
         else:
             for i in range(0, len(word)):
                 try:
-                    if selected_chunk.noun[i].isupper():
+                    if shape[i].isupper():
                         returnword.append(word[i].upper())
                     else:
                         returnword.append(word[i].lower())

@@ -16,9 +16,9 @@ class ButtStatement:
         self.__nlp = spacy.load('en_core_web_lg')
         self.chunks = []
         # process message
-        self.__processed_message = self.__nlp(buttlib.strip_IRI(message))
+        self.processed_message = self.__nlp(buttlib.strip_IRI(message))
         # extract noun chunks
-        self.__processed_message_noun_chunks = self.__processed_message.noun_chunks
+        self.__processed_message_noun_chunks = self.processed_message.noun_chunks
         # create message chunk objects
         self.chunks = self._create_buttchunks()
 
@@ -34,22 +34,22 @@ class ButtStatement:
                 # detect chunks that have more than 1 noun.  If there are more than 1 noun, create multiple
                 # butt_chunks per noun.
                 for j in range(chunk.start, chunk.end):
-                    if self.__processed_message[j].pos_ in nouns:
-                        noun.append(self.__processed_message[j].text)
+                    if self.processed_message[j].pos_ in nouns:
+                        noun.append(self.processed_message[j].text)
                 if len(noun) > 1:
                     for n in noun:
                         if len(n) > 10:
                             # checking for compound closed word:
                             corrected_noun = self.compound_closed_noun(self.message, n)
                         chunks.append(
-                            ButtChunk(self.db, self.__nlp, self.__processed_message, chunk, focusword=n)
+                            ButtChunk(self.db, self.__nlp, self.processed_message, chunk, focusword=n)
                         )
                         if corrected_noun:
                             chunks[-1].noun = corrected_noun
 
                 else:
                     chunks.append(
-                        ButtChunk(self.db, self.__nlp, self.__processed_message, chunk)
+                        ButtChunk(self.db, self.__nlp, self.processed_message, chunk)
                     )
                     if len(chunks[-1].noun) > 10:
                         # checking for compound closed word:
@@ -57,6 +57,7 @@ class ButtStatement:
                     if corrected_noun:
                         print(f"corrected noun {corrected_noun}")
                         chunks[-1].noun = corrected_noun
+                        chunks[-1].corrected = True
 
         return chunks
 
