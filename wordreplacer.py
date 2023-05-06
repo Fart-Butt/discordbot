@@ -264,7 +264,6 @@ class WordReplacer:
         neo = []
         for word in sen:
             neo.append([word, word.lower()])
-        print(neo)
         new_sentence = []
         replacement_word = "butts" if chunk.noun_tag == "NNS" else "butt"
         for j in neo:
