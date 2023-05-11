@@ -82,19 +82,15 @@ def test_word_replacer_comprehensive(test_input, expected_possible_returns):
     assert (bs in expected_possible_returns)
 
 
-def test__replace_an_to_a_in_sentence():
-    sentence = "They can just require an apple to require all points! It's not hard!"
-    word = "apple"
-    print(wp._replace_an_to_a_in_sentence(sentence, word))
-
-
 proper_case_sentences = [
     ("But not Pakkrat's World Ship?", "But not Pakkrat's World Butt?"),
+    ("as an aide, kara", "as a butt, kara"),
+    ("i want to touch an apple", "i want to touch a butt"),
 ]
 
 
 @pytest.mark.parametrize("sentence, expected", proper_case_sentences)
-def test__butt_in_proper_case(sentence, expected):
+def test_fully_integrated_wordreplacer(sentence, expected):
     sdo = SimulatedDiscordMessage(bot=False, message_content=sentence)
     a = wp.perform_text_to_butt(sdo)
     print(wp.lets_butt_this_chunk.shape)

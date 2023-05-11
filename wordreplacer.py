@@ -176,8 +176,8 @@ class WordReplacer:
                     # message is below length limit set on a per-guild basis
                     self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
                     # let's butt
-                    self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk,
-                                                                      self.buttstatementobject)
+                    self.butted_sentence = self._butt_transformer(self.lets_butt_this_chunk,
+                                                                  self.buttstatementobject)
 
         if self.butted_sentence:
             return self.butted_sentence
@@ -199,7 +199,7 @@ class WordReplacer:
             # message is below length limit set on a per-guild basis
             self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(self.buttstatementobject)
             # let's butt
-            self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk, str(message.content))
+            self.butted_sentence = self._butt_transformer(self.lets_butt_this_chunk, str(message.content))
             if self.butted_sentence:
                 return self.butted_sentence
             else:
@@ -213,7 +213,7 @@ class WordReplacer:
             # message is below length limit set on a per-guild basis
             self.lets_butt_this_chunk = self.__pick_word_pair_to_butt(bs)
             # let's butt
-            self.butted_sentence = self._make_butted_sentence(self.lets_butt_this_chunk, str(message))
+            self.butted_sentence = self._butt_transformer(self.lets_butt_this_chunk, str(message))
             if self.butted_sentence:
                 return self.butted_sentence
             else:
@@ -243,23 +243,9 @@ class WordReplacer:
         else:
             return True
 
-    def _replace_an_to_a_in_sentence(self, message: str, word_to_butt: str) -> str:
-        """replaces an to a in a sentence, such as in the case where we replace "an apple" with "a butt" """
-        message = message.split(" ")
-        indexes = buttlib.get_indexes(message, word_to_butt)
-        if indexes:
-            # we found one or more instances of butt, we need to check the list index i-1 of that butt word to see if we
-            # need to replace an with a.
-            for i in indexes:
-                try:
-                    if message[i - 1] == "an":
-                        message[i - 1] = "a"
-                except IndexError:
-                    # could be possible but we don't care
-                    pass
-        return " ".join(message)
-
-    def _make_butted_sentence(self, chunk: ButtChunk, statement: ButtStatement) -> str:
+    def _butt_transformer(self, chunk: ButtChunk, statement: ButtStatement) -> str:
+        # robutts in disguise
+        # this function was changed to match all words in normalized case.
         sen = statement.message.split(" ")
         neo = []
         for word in sen:
@@ -268,7 +254,7 @@ class WordReplacer:
         replacement_word = "butts" if chunk.noun_tag == "NNS" else "butt"
         for j in neo:
             if chunk.noun.lower() in j[1]:
-                # normalized word match
+                # normalized case match
                 if chunk.corrected:
                     # post-processing modified this chunk (compound closed word) - we are not going to process further.
                     new_sentence.append(j[1].replace(chunk.noun, replacement_word))
@@ -276,9 +262,12 @@ class WordReplacer:
                     new_sentence.append(
                         self._butt_in_proper_case(j[0], j[1].replace(chunk.noun.lower(), replacement_word))
                     )
+                # add functionality of old function _replace_an_to_a_in_sentence in-line in this processor
+                if new_sentence[len(new_sentence) - 2] == "an":
+                    new_sentence[len(new_sentence) - 2] = "a"
             else:
                 new_sentence.append(j[0])
-        return self._replace_an_to_a_in_sentence(" ".join(new_sentence), replacement_word)
+        return " ".join(new_sentence)
 
     def _butt_in_proper_case(self, shape, word: str) -> str:
         returnword = []
