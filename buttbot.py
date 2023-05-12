@@ -218,7 +218,6 @@ class ButtBot:
                                 timer_module.commit_timeout(str(message.guild.id) + 'shitpost',
                                                             guild_configs[message.guild.id].shitpost_freq)
                                 log.info("Message2Butt_Processor - butted a message in ")
-                            shitpost.log_disposition()
                         except AttributeError:
                             # no butted sentence
                             pass

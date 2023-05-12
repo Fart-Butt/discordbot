@@ -77,34 +77,6 @@ class WordReplacer:
         print("buttstatement: %s" % self.buttstatementobject)
         print("--------------------------------------------------------------------------------------------")
 
-    def log_disposition(self):
-        pass
-        '''
-        log.debug("saving disposition")
-        try:
-            self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
-                                           self.__does_message_contain_stop_phrases(),
-                                           self.__check_length_of_sentence_to_butt(self._message_channel),
-                                           str(self._spacy_nouns),
-                                           str(self._spacy_processed_nouns),
-                                           str(self._spacy_finalized_weights),
-                                           str(self._selected_noun_pair_to_butt.text),
-                                           self.__check_if_picked_phrase_weight_passes_minimum(),
-                                           self.butted_sentence
-                                           )
-        except AttributeError:
-            self.__stats.disposition_store(self._message_guild, self._message_channel, self._original_sentence,
-                                           self.__does_message_contain_stop_phrases(),
-                                           self.__check_length_of_sentence_to_butt(self._message_channel),
-                                           str(self._spacy_nouns),
-                                           str(self._spacy_processed_nouns),
-                                           str(self._spacy_finalized_weights),
-                                           "None",
-                                           self.__check_if_picked_phrase_weight_passes_minimum(),
-                                           self.butted_sentence
-                                           )
-        '''
-
     def __does_message_contain_stop_phrases(self, messageobject: Message) -> bool:
         if not any(v for v in shared.guild_configs[messageobject.guild.id].stop_phrases if
                    v in self.original_sentence) and not (
