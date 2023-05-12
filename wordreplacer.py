@@ -26,25 +26,6 @@ class WordReplacer:
         self.usable_chunks = []
         self.butted_sentence = ""
         self.lets_butt_this_chunk = ''
-        # self.should_we_butt = False  # this is the state variable that means butting should continue
-        # self._priority_nouns = []
-        # self._non_priority_nouns = []
-        # self._word_is_plural = False
-        # self._tagged_sentence = ""
-        # self._original_sentence = ""
-        # self._weight_of_picked_word = 0
-        # self._word_passed_weight_check = False
-        # self._final_sentence = ""
-        # self._sentence_contains_stop_words = False
-        # self.butted_sentence = ""
-        # self._spacy_nouns = []
-        # self._message_author = ""
-        # self._spacy_tagged_sentence = ""
-        # self._spacy_finalized_nouns = []
-        # self._spacy_finalized_weights = []
-        # self._message_channel = 0
-        # self._message_guild = 0
-        # self._spacy_processed_nouns = ""
 
     def __state_reset(self):
         self.message = ""
@@ -53,28 +34,6 @@ class WordReplacer:
         self.usable_chunks = []
         self.butted_sentence = ""
         self.lets_butt_this_chunk = ''
-        '''
-        self.should_we_butt = False  # this is the state variable that means butting should continue
-        self._priority_nouns = []
-        self._non_priority_nouns = []
-        self._word_is_plural = False
-        self._tagged_sentence = ""
-        self._original_sentence = ""
-        self._weight_of_picked_word = 0
-        self._word_passed_weight_check = False
-        self._final_sentence = ""
-        self._sentence_contains_stop_words = False
-        self._selected_noun_pair_to_butt = ButtChunk
-        self.butted_sentence = ""
-        self._spacy_nouns = []
-        self._message_author = ""
-        self._spacy_tagged_sentence = ""
-        self._spacy_finalized_nouns = []
-        self._spacy_finalized_weights = []
-        self._message_channel = 0
-        self._message_guild = 0
-        self._spacy_processed_nouns = ""
-        '''
 
     def __set_max_sentence_length(self, length):
         # DPT requested feature
