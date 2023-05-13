@@ -67,21 +67,21 @@ class ButtBot:
             pass
 
         if butt_library.is_word_in_text("rip", message.content):
-            log.info("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % (message.guild.id, message.content))
+            log.debug("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % (message.guild.id, message.content))
             await self._process_rip_message(message)
 
         elif butt_library.is_word_in_text("F", message.content):
-            log.info("CHAT_DISPATCH - GUID %d - message is F from player" % message.guild.id)
+            log.debug("CHAT_DISPATCH - GUID %d - message is F from player" % message.guild.id)
             await self._process_f_message(message)
 
         elif butt_library.is_word_in_text('butt', message.content) is True or butt_library.is_word_in_text('butts',
                                                                                                            message.content) is True:
-            log.info("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % (
+            log.debug("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % (
                 message.guild.id, message.content))
             await self._process_butt_message(message)
 
         else:
-            log.info("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % (
+            log.debug("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % (
                 message.guild.id, message.content))
             await self._process_all_other_messages(message)
 
@@ -217,7 +217,7 @@ class ButtBot:
                                 phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
                                 timer_module.commit_timeout(str(message.guild.id) + 'shitpost',
                                                             guild_configs[message.guild.id].shitpost_freq)
-                                log.info("Message2Butt_Processor - butted a message in ")
+                                shitpost.log_debug_message()
                         except AttributeError:
                             # no butted sentence
                             pass

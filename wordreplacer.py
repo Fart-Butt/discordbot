@@ -71,11 +71,11 @@ class WordReplacer:
         else:
             return False
 
-    def print_debug_message(self):
-        print("--------------------------------------------------------------------------------------------")
-        print("Original message: %s" % self.original_sentence)
-        print("buttstatement: %s" % self.buttstatementobject)
-        print("--------------------------------------------------------------------------------------------")
+    def log_debug_message(self):
+        log.info("--------------------------------------------------------------------------------------------")
+        log.info("Original message: %s" % self.original_sentence)
+        log.info("buttstatement: %s" % self.buttstatementobject)
+        log.info("--------------------------------------------------------------------------------------------")
 
     def __does_message_contain_stop_phrases(self, messageobject: Message) -> bool:
         if not any(v for v in shared.guild_configs[messageobject.guild.id].stop_phrases if

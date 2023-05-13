@@ -14,8 +14,8 @@ class BotConfig(Cog):
     @group(invoke_without_command=True)
     @valid_user_or_bot()
     async def config(self, ctx: Context, *args):
-        log.info("got config command from %s in channel %s. arguments are %s" %
-                 (str(ctx.message.author.name), str(ctx.message.channel.name), str(*args)))
+        log.debug("got config command from %s in channel %s. arguments are %s" %
+                  (str(ctx.message.author.name), str(ctx.message.channel.name), str(*args)))
 
     @config.command()
     @has_permissions(administrator=True)
@@ -47,10 +47,10 @@ class BotConfig(Cog):
     async def reloadconfig(self, ctx: Context, *args):
         try:
             shared.guild_configs[args[0]].reload()
-            log.info("reloading config for guid %s" % args[0])
+            log.debug("reloading config for guid %s" % args[0])
         except IndexError:
             # guid not provided
-            log.info("reloading config for guid %s" % ctx.message.guild.id)
+            log.debug("reloading config for guid %s" % ctx.message.guild.id)
             shared.guild_configs[ctx.message.guild.id].reload()
 
     @config.error
