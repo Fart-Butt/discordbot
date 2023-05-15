@@ -74,7 +74,8 @@ class WordReplacer:
     def log_debug_message(self):
         log.info("--------------------------------------------------------------------------------------------")
         log.info("Original message: %s" % self.original_sentence)
-        log.info("buttstatement: %s" % self.buttstatementobject)
+        log.info("butted message: %s" % self.butted_sentence)
+        log.info("buttstatement: %s" % self.buttstatementobjectbu)
         log.info("--------------------------------------------------------------------------------------------")
 
     def __does_message_contain_stop_phrases(self, messageobject: Message) -> bool:
