@@ -28,7 +28,7 @@ class ButtBot:
             if test_environment:
                 await asyncio.sleep(10)
             else:
-                await asyncio.sleep(120)
+                await asyncio.sleep(600)
             log.debug("Butted Message Processing - started")
             await self.check_stored_reactions()
             log.debug("Butted Message Processing - ended")
