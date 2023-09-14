@@ -43,6 +43,7 @@ class ButtChunk:
             self.normalized_tags = self.normalize_tags(self.tag)
             self.get_weights(self.normalized_tags, self.lemma, self.text)
             self.weight = self._check_posessive_phrases(self.weight)
+            self._spacy = ""
 
     def build_chunk_word_list(self, chunk, fw=False):
         if len(chunk.text.split(" ")) > 1:
