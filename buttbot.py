@@ -131,6 +131,7 @@ class ButtBot:
             if time.time() - items[0] > check_timer:
                 await self.process_cached_reaction_message(items[1], items[2])
                 phrase_weights.remove_message(items[0], items[1], items[2])
+                log.info(len(phrase_weights.messages))
 
     async def _process_rip_message(self, message: Message):
         """process someone saying RIP in channel.
