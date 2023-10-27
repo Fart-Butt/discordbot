@@ -12,6 +12,7 @@ from shared import guild_configs, bot, stat_module
 from discord.channel import DMChannel
 from discord import app_commands
 import logging
+from discord.ext import tasks
 
 from config import *
 
@@ -26,7 +27,7 @@ def setup_logger() -> logging.Logger:
     logger = logging.getLogger('bot')  # the actual logger instance
     logger.setLevel(logging.DEBUG)  # capture all log levels
     console_log = logging.StreamHandler()
-    console_log.setLevel(logging.INFO)  # log levels to be shown at the console
+    console_log.setLevel(logging.DEBUG)  # log levels to be shown at the console
     file_log = logging.FileHandler(logfile)
     file_log.setLevel(logging.INFO)  # log levels to be written to file
     formatter = logging.Formatter('{asctime} - {name} - {levelname} - {message}', style='{')
@@ -87,18 +88,17 @@ async def on_message(message):
             await buttbot.chat_dispatch(message)
 
 
+if config.test_environment:
+    loop_timer = 10
+else:
+    loop_timer = 300
+
+
+@tasks.loop(seconds=loop_timer)
 async def send_stats_to_db():
-    log.info("send_stats_to_tb: initializing")
-    await bot.wait_until_ready()
-    await asyncio.sleep(5)
-    while not bot.is_closed():
-        log.info("send_stats_to_db: starting to send stat data to db")
-        stat_module.send_stats_to_db()
-        log.info("send_stats_to_db: complete")
-        if test_environment:
-            await asyncio.sleep(10)
-        else:
-            await asyncio.sleep(300)
+    log.info("send_stats_to_db: starting to send stat data to db")
+    stat_module.send_stats_to_db()
+    log.info("send_stats_to_db: complete")
 
 
 async def serialize_weights():
@@ -118,13 +118,12 @@ async def main():
     # do other async things
     # start the client
     async with bot:
-        await bot.start(config.secretkey)
-        await bot.loop.create_task(buttbot.butt_message_processing())
-        await bot.loop.create_task(send_stats_to_db())
         await bot.add_cog(BotCommands(bot))
         await bot.add_cog(BotConfig(bot))
-        await bot.loop.create_task(serialize_weights())
         bot.aiohttp_session = aiohttp.ClientSession()
+        buttbot.butt_message_processing_task.start()
+        await bot.start(config.secretkey)
+        # await send_stats_to_db.start()
 
 
 #        tree = app_commands.CommandTree(bot)

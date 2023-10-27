@@ -2,10 +2,14 @@ import asyncio
 import random
 import time
 import logging
+
+import shared
 from phraseweights import PhraseWeights
 import butt_library
 from config import command_prefix
 from butt_chunk import ButtChunk
+from discord.ext import tasks
+from config import timer
 
 from butt_library import allowed_in_channel, allowed_in_channel_direct
 from discord import Message
@@ -21,17 +25,11 @@ class ButtBot:
     def __init__(self):
         self.discordBot = bot
 
-    async def butt_message_processing(self):
-        log.debug("Butted Message Processing - starting task")
-        await self.discordBot.wait_until_ready()
-        while not self.discordBot.is_closed():
-            if test_environment:
-                await asyncio.sleep(10)
-            else:
-                await asyncio.sleep(600)
-            log.debug("Butted Message Processing - started")
-            await self.check_stored_reactions()
-            log.debug("Butted Message Processing - ended")
+    @tasks.loop(seconds=10)
+    async def butt_message_processing_task(self):
+        log.debug("Butted Message Processing - started")
+        await self.check_stored_reactions()
+        log.debug("Butted Message Processing - ended")
 
     @staticmethod
     async def docomms(message, channel, guild_id, bypass_for_test=False):
@@ -124,6 +122,7 @@ class ButtBot:
 
     async def check_stored_reactions(self):
         """check recent butted messages and process their reaction emojis."""
+        log.debug("Check Stored Reactions")
         for items in phrase_weights.get_messages():
             check_timer = 300
             if test_environment:
