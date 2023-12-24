@@ -149,3 +149,10 @@ def strip_discord_shitty_formatting(message: str):
         return message[1:-1]
     else:
         return message
+
+
+def strip_discord_formatting(message: str) -> str:
+    message = message.replace("~~", "")
+    message = message.replace("||", "")
+    message = message.replace("*", "")
+    return message

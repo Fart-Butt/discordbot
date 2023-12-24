@@ -16,7 +16,7 @@ class ButtStatement:
         self.__nlp = spacy.load('en_core_web_lg')
         self.chunks = []
         # process message
-        self.processed_message = self.__nlp(buttlib.strip_IRI(message))
+        self.processed_message = self.__nlp(buttlib.strip_IRI(buttlib.strip_discord_formatting(message)))
         # extract noun chunks
         self.__processed_message_noun_chunks = self.processed_message.noun_chunks
         # create message chunk objects

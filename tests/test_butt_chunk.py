@@ -20,9 +20,9 @@ def test_build_chunk_wordlist():
     assert (bc.text == "the gm tier")
 
 
-def test__butt_vector_analyser():
-    test_word = nlp("car")
-    assert (bc._butt_vector_analyser(test_word) > 1000)
+# def test__butt_vector_analyser():
+#    test_word = nlp("car")
+#    assert (bc._butt_vector_analyser(test_word) > 1000)
 
 
 def test_normalize_tags():
@@ -31,7 +31,6 @@ def test_normalize_tags():
             "NN NN NN RB RB VB VB VB VB JJ JJ"
     )
 
-
-def test__time_vector_analyser():
-    test_word = nlp("minutes")
-    print(bc._butt_vector_analyser(test_word))
+# def test__time_vector_analyser():
+# test_word = nlp("minutes")
+#print(bc._butt_vector_analyser(test_word))

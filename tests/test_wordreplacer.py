@@ -60,6 +60,10 @@ nlp_sentences = [
      [
          "Butt butt butt butt butt",
      ]),
+    ("*now* you're thinking with portals. Also, sound ||https://i.imgur.com/d4bmAPI.mp4||",
+     ''
+     )
+
     # (
     # "how do they force feed you, ive seen some japanese anime videos on the internet and depending on how they do affects how quickly im booking a trip to japan"
     # "because i aint gonna lie, blightfal tickles my pickle even if its jank as fuck multiplay"
