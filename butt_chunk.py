@@ -33,6 +33,9 @@ class ButtChunk:
         self.focusword = focusword
         self.noun_tag = ""
         self.corrected = False
+        self.chunk_id = 0
+        self.lemma_id = 0
+        self.text_id = 0
 
         # Processing
         if self.focusword:
@@ -183,7 +186,9 @@ class ButtChunk:
         try:
             db_weight = self.db.do_query("select weight from lemma_weights where lemma=%s", (lemma,))[0]["weight"]
         except IndexError:
-            db_weight = 1000
+            # weight not found in table, let's create it
+            self._store_lemma(lemma, "", 1000)
+            db_weight = self.db.do_query("select weight from lemma_weights where lemma=%s", (lemma,))[0]["weight"]
         if not db_weight:
             return 0
         elif db_weight < 0:
@@ -194,7 +199,8 @@ class ButtChunk:
         try:
             db_weight = self.db.do_query("select weight from tag_weights where tag=%s", (tag,))[0]["weight"]
         except IndexError:
-            db_weight = 1000
+            self._store_tag(tag, 1000)
+            db_weight = self.db.do_query("select weight from tag_weights where tag=%s", (tag,))[0]["weight"]
         if not db_weight:
             return 0
         elif db_weight < 0:
@@ -206,7 +212,8 @@ class ButtChunk:
             db_weight = self.db.do_query("select weight from phraseweights where phrase=%s", (text,))[0]["weight"]
         except IndexError:
             # not in db
-            db_weight = 1000
+            self._store_phrase(text, 1000, "")
+            db_weight = self.db.do_query("select weight from phraseweights where phrase=%s", (text,))[0]["weight"]
         if not db_weight:
             return 0
         elif db_weight < 0:
