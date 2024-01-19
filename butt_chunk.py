@@ -33,9 +33,11 @@ class ButtChunk:
         self.focusword = focusword
         self.noun_tag = ""
         self.corrected = False
-        self.chunk_id = 0
+        self.tag_id = 0
         self.lemma_id = 0
         self.text_id = 0
+        self.modified = False
+        self.butted_chunk = False
 
         # Processing
         if self.focusword:
@@ -174,6 +176,9 @@ class ButtChunk:
         self.text_weight = self._butt_vector_analyser(text)
         self.tag_weight = self.__get_tag_weight(normalized_tag)
         self.lemma_weight = self.__get_lemma_weight(" ".join(lemma))
+        self.text_id = self.__get_text_id(text)
+        self.tag_id = self.__get_tag_id(normalized_tag)
+        self.lemma_id = self.__get_lemma_id(" ".join(lemma))
 
         if self.text_weight == 0 or self.tag_weight == 0 or self.lemma_weight == 0:
             # block crap
@@ -195,6 +200,9 @@ class ButtChunk:
             return 1
         return db_weight
 
+    def __get_lemma_id(self, lemma: str) -> int:
+        return self.db.do_query("select id from lemma_weights where lemma=%s", (lemma,))[0]["id"]
+
     def __get_tag_weight(self, tag: str) -> int:
         try:
             db_weight = self.db.do_query("select weight from tag_weights where tag=%s", (tag,))[0]["weight"]
@@ -206,6 +214,9 @@ class ButtChunk:
         elif db_weight < 0:
             return 1
         return db_weight
+
+    def __get_tag_id(self, tag: str) -> int:
+        return self.db.do_query("select id from tag_weights where tag=%s", (tag,))[0]["id"]
 
     def __get_text_weight(self, text: str) -> int:
         try:
@@ -220,6 +231,9 @@ class ButtChunk:
             return 1
         else:
             return db_weight
+
+    def __get_text_id(self, text: str) -> int:
+        return self.db.do_query("select id from phraseweights where phrase=%s", (text,))[0]["id"]
 
     @staticmethod
     def list_to_string(list_: list) -> str:
@@ -254,6 +268,35 @@ class ButtChunk:
             return self.weight * 10
         else:
             return weight
+
+    def store(self, message_id: int):
+        self.db.do_insert("""insert into chunk_history
+                                    (statement_id, chunk_text, phrase_id, tag_id, lemma_id, shape,
+                                    previous_word, previous_word_tag, noun, noun_tag, weight, 
+                                    similarities, butted_chunk, modified)
+                                    values (
+                                    (select id from statement_history where discord_message_guid = %s),
+                                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                                     )"""
+                          ,
+                          (
+                              message_id,
+                              self.text,
+                              self.text_id,
+                              self.tag_id,
+                              self.lemma_id,
+                              self.shape,
+                              self.previous_word,
+                              self.previous_word_tag,
+                              self.noun,
+                              self.noun_tag,
+                              self.weight,
+                              self._similarities,
+                              self.butted_chunk,
+                              self.modified
+                          )
+
+                          )
 
     def __repr__(self):
         return f"""

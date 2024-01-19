@@ -14,7 +14,7 @@ class ButtStatement:
         self.db = shared.db["buttbot"]
         self.message: str = message
         self.__nlp = spacy.load('en_core_web_lg')
-        self.chunks = []
+        self.chunks: list[ButtChunk] = []
         # process message
         self.processed_message = self.__nlp(buttlib.strip_IRI(buttlib.strip_discord_formatting(message)))
         # extract noun chunks
@@ -84,6 +84,23 @@ class ButtStatement:
             if a.usable_chunk:
                 good_chunks.append(a)
         return good_chunks
+
+    def store(self, butted_sentence: str, channel_id: int, message_id: int):
+        self.db.do_insert("""insert into statement_history
+                          (original_sentence, 
+                          butted_sentence, 
+                          discord_channel_guid, 
+                          discord_message_guid) 
+                          values 
+                          (%s, %s, %s, %s)""",
+                          (self.message,
+                           butted_sentence,
+                           channel_id,
+                           message_id)
+                          )
+
+    def store_chunks(self):
+        pass
 
     def __repr__(self):
         return f"""
