@@ -18,22 +18,23 @@ class WordReplacer:
         self.__stats = stat_module
         self.__wlist = self.__load_word_list()
         self.__command = {"nltk": 'wordreplacer'}
+        self.db = shared.db['buttbot']
 
         # state variables
-        self.message = ""
-        self.original_sentence = ""
-        self.buttstatementobject = ""
-        self.usable_chunks = []
-        self.butted_sentence = ""
-        self.lets_butt_this_chunk = ''
+        self.message: str = ""
+        self.original_sentence: str = ""
+        self.buttstatementobject: str = ""
+        self.usable_chunks: list[ButtChunk] = []
+        self.butted_sentence: str = ""
+        self.lets_butt_this_chunk: ButtChunk = ButtChunk.__new__(ButtChunk)
 
     def __state_reset(self):
-        self.message = ""
-        self.original_sentence = ""
-        self.buttstatementobject = ""
-        self.usable_chunks = []
-        self.butted_sentence = ""
-        self.lets_butt_this_chunk = ''
+        self.message: str = ""
+        self.original_sentence: str = ""
+        self.buttstatementobject: str = ""
+        self.usable_chunks: list[ButtChunk] = []
+        self.butted_sentence: str = ""
+        self.lets_butt_this_chunk: ButtChunk = ButtChunk.__new__(ButtChunk)
 
     def __set_max_sentence_length(self, length):
         # DPT requested feature
