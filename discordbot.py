@@ -52,16 +52,6 @@ async def on_ready():
 
 
 @bot.event
-async def on_raw_reaction_add(payload):
-    pass
-
-
-@bot.event
-async def on_raw_reaction_remove(payload):
-    pass
-
-
-@bot.event
 async def on_message(message):
     if isinstance(message.channel, DMChannel):
         # we don't care about this
@@ -98,29 +88,6 @@ async def on_message(message):
             await buttbot.chat_dispatch(message)
 
 
-if config.test_environment:
-    loop_timer = 10
-else:
-    loop_timer = 300
-
-
-@tasks.loop(seconds=loop_timer)
-async def send_stats_to_db():
-    log.info("send_stats_to_db: starting to send stat data to db")
-    stat_module.send_stats_to_db()
-    log.info("send_stats_to_db: complete")
-
-
-async def serialize_weights():
-    await bot.wait_until_ready()
-    await asyncio.sleep(5)
-    while not bot.is_closed():
-        if test_environment:
-            await asyncio.sleep(10)
-        else:
-            await asyncio.sleep(300)
-
-
 buttbot = ButtBot()
 
 
@@ -131,15 +98,7 @@ async def main():
         await bot.add_cog(BotCommands(bot))
         await bot.add_cog(BotConfig(bot))
         bot.aiohttp_session = aiohttp.ClientSession()
-        buttbot.butt_message_processing_task.start()
         await bot.start(config.secretkey)
-        # await send_stats_to_db.start()
-
-
-#        tree = app_commands.CommandTree(bot)
-#        tree.add_command(ButtbotCommands())
-#        bot.tree.copy_global_to(guild=507477640375042049)
-# await tree.sync(guild=bot.Object(id=507477640375042049))
 
 
 asyncio.run(main())
