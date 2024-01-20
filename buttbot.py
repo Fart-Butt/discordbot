@@ -1,15 +1,10 @@
-import asyncio
 import random
-import time
 import logging
 
-import shared
 from phraseweights import PhraseWeights
 import butt_library
 from config import command_prefix
-from butt_chunk import ButtChunk
 from discord.ext import tasks
-from config import timer
 
 from butt_library import allowed_in_channel, allowed_in_channel_direct
 from discord import Message
@@ -24,12 +19,6 @@ phrase_weights = PhraseWeights()
 class ButtBot:
     def __init__(self):
         self.discordBot = bot
-
-    @tasks.loop(seconds=10)
-    async def butt_message_processing_task(self):
-        log.debug("Butted Message Processing - started")
-        await self.check_stored_reactions()
-        log.debug("Butted Message Processing - ended")
 
     @staticmethod
     async def docomms(message, channel, guild_id, bypass_for_test=False):
@@ -107,30 +96,6 @@ class ButtBot:
             # I make sure that the commands are only processed by allowed bots in a decorator on the commands themselves
             ctx = await bot.get_context(message)
             await bot.invoke(ctx)
-
-    @staticmethod
-    async def process_cached_reaction_message(message: Message, chunk: ButtChunk):
-        """process emoji reactions from a previously butted sentence."""
-        # i know this looks dumb as hell but trust me on this one
-        message = await message.channel.fetch_message(message.id)
-        if test_environment:
-            log.debug("running cached reaction on id %s - message %s" % (message.id, message.content))
-
-        votes = phrase_weights.process_reactions(message.reactions)
-        log.debug("votes tallied to %d" % votes)
-        chunk.adjust_weight(votes)
-
-    async def check_stored_reactions(self):
-        """check recent butted messages and process their reaction emojis."""
-        log.debug("Check Stored Reactions")
-        for items in phrase_weights.get_messages():
-            check_timer = 300
-            if test_environment:
-                check_timer = 15
-            if time.time() - items[0] > check_timer:
-                await self.process_cached_reaction_message(items[1], items[2])
-                phrase_weights.remove_message(items[0], items[1], items[2])
-                log.info(len(phrase_weights.messages))
 
     async def _process_rip_message(self, message: Message):
         """process someone saying RIP in channel.
