@@ -64,7 +64,7 @@ class ButtStatement:
     def compound_closed_noun(self, original_sentence: str, suspected_word: str):
         """hander for compound closed nouns. example: skullcrusher->buttcrusher"""
         decompounded_words = \
-        list(decompound.sentence_to_words(str(suspected_word), use_common=True, top_limit=1).values())[0][0]
+            list(decompound.sentence_to_words(str(suspected_word), use_common=True, top_limit=1).values())[0][0]
         print(f"decompounded words {decompounded_words}")
         processed_suspected_word = " ".join(decompounded_words)
         print(f"processed suspected words {processed_suspected_word}")
@@ -85,7 +85,7 @@ class ButtStatement:
                 good_chunks.append(a)
         return good_chunks
 
-    def store(self, butted_sentence: str, channel_id: int, message_id: int):
+    def _store(self, butted_sentence: str, channel_id: int, message_id: int):
         self.db.do_insert("""insert into statement_history
                           (original_sentence, 
                           butted_sentence, 
@@ -99,8 +99,11 @@ class ButtStatement:
                            message_id)
                           )
 
-    def store_chunks(self):
-        pass
+    def store(self, butted_sentence: str, channel_id: int, message_id: int):
+        self._store(butted_sentence, channel_id, message_id)
+        chunks: list[ButtChunk] = self.get_good_chunks()
+        for c in chunks:
+            c.store(message_id)
 
     def __repr__(self):
         return f"""
