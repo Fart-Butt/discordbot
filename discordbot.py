@@ -52,6 +52,16 @@ async def on_ready():
 
 
 @bot.event
+async def on_raw_reaction_add(payload):
+    pass
+
+
+@bot.event
+async def on_raw_reaction_remove(payload):
+    pass
+
+
+@bot.event
 async def on_message(message):
     if isinstance(message.channel, DMChannel):
         # we don't care about this

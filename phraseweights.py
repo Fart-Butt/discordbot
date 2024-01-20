@@ -11,16 +11,6 @@ class PhraseWeights:
         # butted messages we need to store
         self.messages = []
 
-    def add_message(self, message, butt_chunk: ButtChunk):
-        log.debug("got message id {} for noun {}".format(message, butt_chunk))
-        self.messages.append([time.time(), message, butt_chunk])
-
-    def get_messages(self):
-        return self.messages
-
-    def remove_message(self, _time, message, butt_chunk: ButtChunk):
-        self.messages.remove([_time, message, butt_chunk])
-
     @staticmethod
     def process_reactions(reactions):
         negativeemojis = ['😕', '🙁', '☹', '😨', '😦', '😧', '👎', '😠', '😭', '😖', '👎', '💤', '🚫', '🔫', '❎', '😪']
