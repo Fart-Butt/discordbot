@@ -36,7 +36,7 @@ class ButtBot:
         """sends a message to a provided discord channel in guild."""
         if allowed_in_channel_direct(guild_id, channel.id) or bypass_for_test is True:
             msg = await comms_instance.do_send_message(channel, message)
-            return msg  # returns the message object of the message that was sent to discord
+            return msg  # returns the message obje ct of the message that was sent to discord
 
     async def doreact(self, message, emojis):
         """adds a reaction to a message object."""
@@ -214,7 +214,8 @@ class ButtBot:
                                 # passes butt check
                                 msg = await self.docomms(shitpost.butted_sentence, message.channel,
                                                          message.guild.id)
-                                phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
+                                shitpost.buttstatementobject.store(shitpost.butted_sentence, msg.channel.id,
+                                                                   msg.id)
                                 timer_module.commit_timeout(str(message.guild.id) + 'shitpost',
                                                             guild_configs[message.guild.id].shitpost_freq)
                                 shitpost.log_debug_message()
@@ -239,4 +240,5 @@ class ButtBot:
                     if shitpost.butted_sentence:
                         msg = await self.docomms(shitpost.butted_sentence, message.channel, message.guild.id,
                                                  True)
-                        phrase_weights.add_message(msg, shitpost.lets_butt_this_chunk)
+                        shitpost.buttstatementobject.store(shitpost.butted_sentence, msg.channel.id,
+                                                           msg.id)

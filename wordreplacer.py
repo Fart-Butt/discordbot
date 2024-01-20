@@ -23,7 +23,7 @@ class WordReplacer:
         # state variables
         self.message: str = ""
         self.original_sentence: str = ""
-        self.buttstatementobject: str = ""
+        self.buttstatementobject: ButtStatement = ButtStatement.__new__(ButtStatement)
         self.usable_chunks: list[ButtChunk] = []
         self.butted_sentence: str = ""
         self.lets_butt_this_chunk: ButtChunk = ButtChunk.__new__(ButtChunk)
@@ -31,7 +31,7 @@ class WordReplacer:
     def __state_reset(self):
         self.message: str = ""
         self.original_sentence: str = ""
-        self.buttstatementobject: str = ""
+        self.buttstatementobject: ButtStatement = ButtStatement.__new__(ButtStatement)
         self.usable_chunks: list[ButtChunk] = []
         self.butted_sentence: str = ""
         self.lets_butt_this_chunk: ButtChunk = ButtChunk.__new__(ButtChunk)
@@ -111,6 +111,7 @@ class WordReplacer:
                     # let's butt
                     self.butted_sentence = self._butt_transformer(self.lets_butt_this_chunk,
                                                                   self.buttstatementobject)
+                    self.lets_butt_this_chunk.butted_chunk = True
 
         if self.butted_sentence:
             return self.butted_sentence

@@ -274,26 +274,25 @@ class ButtChunk:
                                     (statement_id, chunk_text, phrase_id, tag_id, lemma_id, shape,
                                     previous_word, previous_word_tag, noun, noun_tag, weight, 
                                     similarities, butted_chunk, modified)
-                                    values (
-                                    (select id from statement_history where discord_message_guid = %s),
-                                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                                     )"""
+                                    select id, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                                     from statement_history where discord_message_guid = %s
+                                     """
                           ,
                           (
-                              message_id,
                               self.text,
                               self.text_id,
                               self.tag_id,
                               self.lemma_id,
-                              self.shape,
+                              str(self.shape),
                               self.previous_word,
                               self.previous_word_tag,
                               self.noun,
                               self.noun_tag,
                               self.weight,
-                              self._similarities,
+                              str(self._similarities),
                               self.butted_chunk,
-                              self.modified
+                              self.modified,
+                              message_id
                           )
 
                           )
