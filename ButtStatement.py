@@ -103,7 +103,7 @@ class ButtStatement:
         logging.debug(f"storing sentence: {butted_sentence}")
         self._store(butted_sentence, channel_id, message_id)
         logging.debug(f"storing chunks")
-        for c in self.good_chunks:
+        for c in self.chunks:
             logging.debug("storing chunk: {c}")
             c.store(message_id)
 
