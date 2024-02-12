@@ -15,6 +15,7 @@ class ButtChunk:
         self.text_weight = 0
         self.tag_weight = 0
         self.lemma_weight = 0
+        self.noun_weight = 0
         self.weight = 0
         self.usable_chunk = False
         self._spacy = spacy
@@ -36,6 +37,7 @@ class ButtChunk:
         self.tag_id = 0
         self.lemma_id = 0
         self.text_id = 0
+        self.noun_id = 0
         self.modified = False
         self.butted_chunk = False
 
@@ -46,7 +48,7 @@ class ButtChunk:
             self.build_chunk_word_list(chunk)
         if self.usable_chunk:
             self.normalized_tags = self.normalize_tags(self.tag)
-            self.get_weights(self.normalized_tags, self.lemma, self.text)
+            self.get_weights(self.normalized_tags, self.lemma, self.text, self.noun)
             self.weight = self._check_posessive_phrases(self.weight)
             self._spacy = ""
 
@@ -172,20 +174,26 @@ class ButtChunk:
             (word, weight, pos, weight)
         )
 
-    def get_weights(self, normalized_tag: str, lemma: list, text: str):
+    def _store_noun(self, noun: str, weight: int):
+        self.db.do_insert(
+            "INSERT into noun_weights (noun, weight) VALUES (%s, %s) ON DUPLICATE KEY UPDATE weight=%s",
+            (noun, weight, weight))
+
+    def get_weights(self, normalized_tag: str, lemma: list, text: str, noun: str):
         self.text_weight = self._butt_vector_analyser(text)
         self.tag_weight = self.__get_tag_weight(normalized_tag)
         self.lemma_weight = self.__get_lemma_weight(" ".join(lemma))
+        self.noun_weight = self.__get_noun_weight(noun)
         self.text_id = self.__get_text_id(text)
         self.tag_id = self.__get_tag_id(normalized_tag)
         self.lemma_id = self.__get_lemma_id(" ".join(lemma))
 
-        if self.text_weight == 0 or self.tag_weight == 0 or self.lemma_weight == 0:
+        if self.text_weight == 0 or self.tag_weight == 0 or self.lemma_weight == 0 or self.noun_weight == 0:
             # block crap
             self.weight = 0
             self.usable_chunk = False
         else:
-            self.weight = self.text_weight + self.tag_weight + self.lemma_weight
+            self.weight = self.text_weight + self.tag_weight + self.lemma_weight + self.noun_weight
 
     def __get_lemma_weight(self, lemma: str) -> int:
         try:
@@ -232,6 +240,20 @@ class ButtChunk:
         else:
             return db_weight
 
+    def __get_noun_weight(self, noun: str) -> int:
+        try:
+            db_weight = self.db.do_query("select weight from noun_weights where noun=%s", (noun,))[0]["weight"]
+        except IndexError:
+            # not in db
+            self._store_noun(noun, 1000)
+            db_weight = self.db.do_query("select weight from noun_weights where noun=%s", (noun,))[0]["weight"]
+        if not db_weight:
+            return 0
+        elif db_weight < 0:
+            return 1
+        else:
+            return db_weight
+
     def __get_text_id(self, text: str) -> int:
         return self.db.do_query("select id from phraseweights where phrase=%s", (text,))[0]["id"]
 
@@ -258,6 +280,7 @@ class ButtChunk:
             self._store_phrase(self.text, calculated_weight, " ".join(self.tag))
             self._store_tag(self.normalized_tags, calculated_weight)
             self._store_lemma(" ".join(self.lemma), self.normalized_tags, calculated_weight)
+            self._store_noun(self.noun, calculated_weight)
         log.debug(
             "PhraseWeights - updating phrase database completed.  Updated: {} Ignored: {}"
             .format(count_update, count_ignored)
@@ -271,7 +294,7 @@ class ButtChunk:
 
     def store(self, message_id: int):
         self.db.do_insert("""insert into chunk_history
-                                    (statement_id, chunk_text, phrase_id, tag_id, lemma_id, shape,
+                                    (statement_id, chunk_text, phrase_id, tag_id, lemma_id, noun_id, shape,
                                     previous_word, previous_word_tag, noun, noun_tag, weight, 
                                     similarities, butted_chunk, modified)
                                     select id, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
@@ -283,6 +306,7 @@ class ButtChunk:
                               self.text_id,
                               self.tag_id,
                               self.lemma_id,
+                              self.noun_id,
                               str(self.shape),
                               self.previous_word,
                               self.previous_word_tag,
@@ -313,6 +337,7 @@ class ButtChunk:
         Previous Word Tag: {self.previous_word_tag}
         Noun: {self.noun}
         Noun Tag: {self.noun_tag}
+        Noun Weight: {self.noun_weight}
         N: {self.passes_noun_check} CL {self.passes_chunk_length_check} UC {self.usable_chunk}
         weight: {self.weight}
         similarities: {self._similarities}
