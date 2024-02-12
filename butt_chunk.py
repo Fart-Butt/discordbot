@@ -297,7 +297,7 @@ class ButtChunk:
                                     (statement_id, chunk_text, phrase_id, tag_id, lemma_id, noun_id, shape,
                                     previous_word, previous_word_tag, noun, noun_tag, weight, 
                                     similarities, butted_chunk, modified)
-                                    select id, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                                    select id, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                                      from statement_history where discord_message_guid = %s
                                      """
                           ,
