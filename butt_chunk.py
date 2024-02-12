@@ -187,6 +187,7 @@ class ButtChunk:
         self.text_id = self.__get_text_id(text)
         self.tag_id = self.__get_tag_id(normalized_tag)
         self.lemma_id = self.__get_lemma_id(" ".join(lemma))
+        self.noun_id = self.__get_noun_id(noun)
 
         if self.text_weight == 0 or self.tag_weight == 0 or self.lemma_weight == 0 or self.noun_weight == 0:
             # block crap
@@ -225,6 +226,9 @@ class ButtChunk:
 
     def __get_tag_id(self, tag: str) -> int:
         return self.db.do_query("select id from tag_weights where tag=%s", (tag,))[0]["id"]
+
+    def __get_noun_id(self, noun: str) -> int:
+        return self.db.do_query("select id from noun_weights where noun=%s", (noun,))[0]["id"]
 
     def __get_text_weight(self, text: str) -> int:
         try:
