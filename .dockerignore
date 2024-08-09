@@ -4,3 +4,10 @@
 /Dockerfile_prod_build
 /venv*
 /.env
+/*.sh
+/cheevos_to_load.txt
+/phrase_weight_list.txt
+/stat_dispositions.txt
+/stat_messages.txt
+/README.md
+/--force/
