@@ -1,0 +1,6 @@
+/tests/
+/prof/
+/logs*
+/Dockerfile_prod_build
+/venv*
+/.env

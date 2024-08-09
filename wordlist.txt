@@ -1,0 +1,1 @@
+["bot", "brand", "cloud", "anime", "elevator", "tool", "backpack", "hammer", "lasso", "twilight", "cat", "flower", "dungeon", "cave", "hole", "mod", "book", "base", "scanner", "peanut", "fort", "fortress", "sword", "portal", "boat", "food", "melon", "TF", "star", "tank", "nether", "thermal", "block", "eye", "chamber", "laptop", "gusset"]

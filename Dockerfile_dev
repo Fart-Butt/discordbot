@@ -1,0 +1,57 @@
+# syntax=docker/dockerfile:1
+
+ARG PYTHON_VERSION=3.9.19
+FROM --platform=linux/amd64 python:${PYTHON_VERSION}-slim-bullseye
+
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Keeps Python from buffering stdout and stderr to avoid situations where
+# the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
+
+#upgrade container
+RUN apt update && apt upgrade
+
+#install requirements for mysqlclient
+RUN apt install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
+
+#break out install of spacy so spacy can be used to download the trained model
+#break out mysqlclient install
+RUN python -m pip install -U pip setuptools wheel mysqlclient spacy
+
+#download trained model
+#for buttbot
+RUN python -m spacy download en_core_web_lg
+#for decompounder
+RUN python -m spacy download en_core_web_trf
+
+#cd
+WORKDIR /buttbot
+
+#copy code to /app
+COPY . .
+
+#volume for buttbot's logs folder
+VOLUME /buttbot/logs
+
+#load rest of buttbot's requirements
+RUN python -m pip install -r requirements.txt
+
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+
+# Switch to the non-privileged user to run the application.
+USER appuser
+
+# Run the application.
+CMD python3 /buttbot/discordbot.py
