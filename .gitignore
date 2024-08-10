@@ -7,7 +7,6 @@ venv/*
 converter.py
 deathreason.txt
 hamletscraper.py
-config.py
 /tests/.pytest_cache/
 /prof/
 /logs*
