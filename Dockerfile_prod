@@ -12,6 +12,7 @@ ENV PYTHONUNBUFFERED=1
 
 #upgrade container
 RUN apt update && apt upgrade
+RUN pip install --upgrade pip
 
 #install requirements for mysqlclient
 RUN apt install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
@@ -29,14 +30,17 @@ RUN python -m spacy download en_core_web_trf
 #cd
 WORKDIR /buttbot
 
-#copy code to /app
-COPY . .
+#copy requirements to /app
+COPY requirements.txt .
 
 #volume for buttbot's logs folder
 VOLUME /buttbot/logs
 
 #load rest of buttbot's requirements
 RUN python -m pip install -r requirements.txt
+
+#copy the rest of the code to /app
+COPY . .
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
