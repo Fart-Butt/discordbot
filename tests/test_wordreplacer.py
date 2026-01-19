@@ -77,7 +77,6 @@ nlp_sentences = [
 @pytest.mark.parametrize("test_input,expected_possible_returns", nlp_sentences)
 def test_word_replacer_comprehensive(test_input, expected_possible_returns):
     sdo = SimulatedDiscordMessage(bot=False, message_content=test_input)
-    bs = ""
     bs = wp.perform_text_to_butt(sdo)
     print(f"original sentence: {wp.original_sentence}")
     print(f"butted message: {bs}")
