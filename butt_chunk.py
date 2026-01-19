@@ -328,21 +328,23 @@ class ButtChunk:
     def __repr__(self):
         return f"""
         butt_chunk
-        text: {self.text}
-        text weight: {self.text_weight}
-        tag: {self.tag}
-        tag weight: {self.tag_weight}
-        normalized tags: {self.normalized_tags}
-        lemma: {self.lemma}
-        lemma weight: {self.lemma_weight}
-        shape: {self.shape} 
-        original spacy object: {self.original_spacy_object}
-        Previous Word: {self.previous_word}
-        Previous Word Tag: {self.previous_word_tag}
-        Noun: {self.noun}
-        Noun Tag: {self.noun_tag}
-        Noun Weight: {self.noun_weight}
-        N: {self.passes_noun_check} CL {self.passes_chunk_length_check} UC {self.usable_chunk}
-        weight: {self.weight}
-        similarities: {self._similarities}
+        text: {self.text if hasattr(self, "text") else "None"}
+        text weight: {self.text_weight if hasattr(self, "text_weight") else "None"}
+        tag: {self.tag if hasattr(self, "tag") else "None"}
+        tag weight: {self.tag_weight if hasattr(self, "tag_weight") else "None"}
+        normalized tags: {self.normalized_tags if hasattr(self, "normalized_tags") else "None"}
+        lemma: {self.lemma if hasattr(self, "lemma") else "None"}
+        lemma weight: {self.lemma_weight if hasattr(self, "lemma_weight") else "None"}
+        shape: {self.shape if hasattr(self, "shape") else "None"} 
+        original spacy object: {self.original_spacy_object if hasattr(self, "original_spacy_object") else "None"}
+        Previous Word: {self.previous_word if hasattr(self, "previous_word") else "None"}
+        Previous Word Tag: {self.previous_word_tag if hasattr(self, "previous_word_tag") else "None"}
+        Noun: {self.noun if hasattr(self, "noun") else "None"}
+        Noun Tag: {self.noun_tag if hasattr(self, "noun_tag") else "None"}
+        Noun Weight: {self.noun_weight if hasattr(self, "noun_weight") else "None"}
+        N: {self.passes_noun_check if hasattr(self, "passes_noun_check") else "None"} 
+        CL {self.passes_chunk_length_check if hasattr(self, "passes_chunk_length_check") else "None"}
+        UC {self.usable_chunk if hasattr(self, "usable_chunk") else "None"}
+        weight: {self.weight if hasattr(self, "weight") else "None"}
+        similarities: {self._similarities if hasattr(self, "_similarities") else "None"}
         """
