@@ -155,6 +155,29 @@ class ButtBot:
                     await self.doreact(message,
                                        random.choice(guild_configs[message.guild.id].emojis))
 
+    async def eightball(self, message: Message):
+        if allowed_in_channel(message):
+            log.debug("EIGHTBALL - allowed to speak in channel")
+            if message.author == bot.user.id:
+                pass
+            else:
+                try:
+                    for m in message.mentions:
+                        if m.id == bot.user.id and timer_module.check_timeout(str(message.guild.id) + '8ball', 30):
+                            responses = ['it is certain', 'it is decidedly so', 'without a doubt', 'yes definitely',
+                                         'you may rely on it', 'as i see it, yes', 'most likely', 'outlook good', 'yes',
+                                         'signs point to yes', 'reply hazy, try again', 'ask again later',
+                                         'better not tell you now', 'cannot predict now', 'concentrate and ask again',
+                                         'dont count on it', 'my reply is no', 'my sources say no',
+                                         'outlook not so good',
+                                         'very doubtful', 'i dont think so', 'many people have said this',
+                                         'some people have said this']
+                            msg = await self.docomms(random.choice(responses), message.channel,
+                                                     message.guild.id)
+                            timer_module.commit_timeout(str(message.guild.id) + '8ball', 30)
+                except:
+                    pass
+
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
         if allowed_in_channel(message):
