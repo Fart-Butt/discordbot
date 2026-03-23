@@ -163,7 +163,8 @@ class ButtBot:
             else:
                 try:
                     for m in message.mentions:
-                        if m.id == bot.user.id and timer_module.check_timeout(str(message.guild.id) + '8ball', 30):
+                        if m.id == bot.user.id and message.content[-1] == "?" and timer_module.check_timeout(
+                                str(message.guild.id) + '8ball', 30):
                             responses = ['it is certain', 'it is decidedly so', 'without a doubt', 'yes definitely',
                                          'you may rely on it', 'as i see it, yes', 'most likely', 'outlook good', 'yes',
                                          'signs point to yes', 'reply hazy, try again', 'ask again later',

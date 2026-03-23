@@ -72,9 +72,11 @@ async def on_message(message):
             guild_configs.create_config(message.guild.id)
 
         try:
-            if bot.user.id in message.content and message.content[-1] == "?":
-                await buttbot.eightball(message)
-            elif message.content[0] == command_prefix:
+            for m in message.mentions:
+                if m.id == bot.user.id and message.content[-1] == "?":
+                    await buttbot.eightball(message)
+                    return
+            if message.content[0] == command_prefix:
                 if message.author.id != 249966240787988480 and message.author.id != 992866467903176765:
                     log.debug(
                         "MAIN - ON_MESSAGE - sending message to command processor - author %s" % str(message.author.id))
