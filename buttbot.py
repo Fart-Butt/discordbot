@@ -169,7 +169,9 @@ class ButtBot:
                                          'signs point to yes', 'reply hazy, try again', 'ask again later',
                                          'better not tell you now', 'cannot predict now', 'concentrate and ask again',
                                          'dont count on it', 'my reply is no', 'my sources say no',
-                                         'outlook not so good',
+                                         'outlook not so good', 'something went wrong',
+                                         'your authentication token has been invalidated. please try signing in again',
+                                         'your free trial of buttbot has ended please register to continue',
                                          'very doubtful', 'i dont think so', 'many people have said this',
                                          'some people have said this']
                             msg = await self.docomms(random.choice(responses), message.channel,

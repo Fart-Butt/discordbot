@@ -72,7 +72,7 @@ async def on_message(message):
             guild_configs.create_config(message.guild.id)
 
         try:
-            if "is this true" in message.content or "is this good" in message.content:
+            if bot.user.id in message.content and message.content[-1] == "?":
                 await buttbot.eightball(message)
             elif message.content[0] == command_prefix:
                 if message.author.id != 249966240787988480 and message.author.id != 992866467903176765:
