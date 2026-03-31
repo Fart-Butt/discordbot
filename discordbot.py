@@ -71,11 +71,15 @@ async def on_message(message):
         except KeyError:
             guild_configs.create_config(message.guild.id)
 
+        print(message.mentions)
+        print(message.content)
+        print(bot.user.id)
+        for m in message.mentions:
+            if m.id == bot.user.id:
+                print("in mentions")
+                await buttbot.eightball(message)
+                return
         try:
-            for m in message.mentions:
-                if m.id == bot.user.id and message.content[-1] == "?":
-                    await buttbot.eightball(message)
-                    return
             if message.content[0] == command_prefix:
                 if message.author.id != 249966240787988480 and message.author.id != 992866467903176765:
                     log.debug(

@@ -10,7 +10,7 @@ from butt_library import allowed_in_channel, allowed_in_channel_direct
 from discord import Message
 
 from shared import guild_configs, test_environment, shitpost, comms_instance, \
-    timer_instance as timer_module, bot
+    timer_instance as timer_module, bot, db
 
 log = logging.getLogger('bot.' + __name__)
 phrase_weights = PhraseWeights()
@@ -156,30 +156,23 @@ class ButtBot:
                                        random.choice(guild_configs[message.guild.id].emojis))
 
     async def eightball(self, message: Message):
+        print("8ball")
         if allowed_in_channel(message):
             log.debug("EIGHTBALL - allowed to speak in channel")
             if message.author == bot.user.id:
                 pass
             else:
-                try:
-                    for m in message.mentions:
-                        if m.id == bot.user.id and message.content[-1] == "?" and timer_module.check_timeout(
-                                str(message.guild.id) + '8ball', 30):
-                            responses = ['it is certain', 'it is decidedly so', 'without a doubt', 'yes definitely',
-                                         'you may rely on it', 'as i see it, yes', 'most likely', 'outlook good', 'yes',
-                                         'signs point to yes', 'reply hazy, try again', 'ask again later',
-                                         'better not tell you now', 'cannot predict now', 'concentrate and ask again',
-                                         'dont count on it', 'my reply is no', 'my sources say no',
-                                         'outlook not so good', 'something went wrong',
-                                         'your authentication token has been invalidated. please try signing in again',
-                                         'your free trial of buttbot has ended please register to continue',
-                                         'very doubtful', 'i dont think so', 'many people have said this',
-                                         'some people have said this']
-                            msg = await self.docomms(random.choice(responses), message.channel,
-                                                     message.guild.id)
-                            timer_module.commit_timeout(str(message.guild.id) + '8ball', 30)
-                except:
-                    pass
+                questions = ['who', 'what', 'when', 'where', 'why']
+                response = ""
+                for q in questions:
+                    if q in message.content.split()[:5]:
+                        response = db['buttbot'].do_query(
+                            "select * from 8ball where type = '%s' order by RAND() limit 1", (q,))
+                if not response:
+                    response = db['buttbot'].do_query(
+                        "select * from 8ball where type = 'yesno' order by RAND() limit 1")
+                msg = await self.docomms(response, message.channel, message.guild.id)
+                timer_module.commit_timeout(str(message.guild.id) + '8ball', 30)
 
     async def _process_all_other_messages(self, message):
         # here's where im going to evaluate all other sentences for shitposting
