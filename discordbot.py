@@ -71,9 +71,6 @@ async def on_message(message):
         except KeyError:
             guild_configs.create_config(message.guild.id)
 
-        print(message.mentions)
-        print(message.content)
-        print(bot.user.id)
         for m in message.mentions:
             if m.id == bot.user.id:
                 print("in mentions")
