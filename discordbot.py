@@ -73,7 +73,7 @@ async def on_message(message):
 
         for m in message.mentions:
             if m.id == bot.user.id:
-                print("in mentions")
+                log.debug("MAIN - ON_MESSAGE - sending to 8ball")
                 await buttbot.eightball(message)
                 return
         try:
