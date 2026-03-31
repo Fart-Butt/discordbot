@@ -156,7 +156,7 @@ class ButtBot:
                                        random.choice(guild_configs[message.guild.id].emojis))
 
     async def eightball(self, message: Message):
-        print("8ball")
+        log.debug("EIGHTBALL - start")
         if allowed_in_channel(message):
             log.debug("EIGHTBALL - allowed to speak in channel")
             if message.author == bot.user.id:
@@ -166,14 +166,15 @@ class ButtBot:
                 response = ""
                 for q in questions:
                     if q in message.content.split()[:5]:
-                        log.debug(f"found q {q}")
+                        log.debug(f"EIGHTBALL - found q {q}")
                         response = db['buttbot'].do_query(
                             "select msg from 8ball where type = '%s' order by RAND() limit 1", (q,))[0]['msg']
                 if not response:
-                    log.debug("did not find proper question")
+                    log.debug("EIGHTBALL - did not find proper question")
                     response = db['buttbot'].do_query(
                         "select msg from 8ball where type = 'yesno' order by RAND() limit 1")[0]['msg']
                     log.debug(response)
+                    log.debug(f"EIGHTBALL - reponse is {response}")
                 msg = await self.docomms(response, message.channel, message.guild.id)
                 timer_module.commit_timeout(str(message.guild.id) + '8ball', 30)
 
