@@ -168,12 +168,11 @@ class ButtBot:
                     if q in message.content.split()[:5]:
                         log.debug(f"EIGHTBALL - found q {q}")
                         response = db['buttbot'].do_query(
-                            "select msg from 8ball where type = '%s' order by RAND() limit 1", (q,))[0]['msg']
+                            f"select msg from 8ball where type = '{q}' order by RAND() limit 1")[0]['msg']
                 if not response:
                     log.debug("EIGHTBALL - did not find proper question")
                     response = db['buttbot'].do_query(
                         "select msg from 8ball where type = 'yesno' order by RAND() limit 1")[0]['msg']
-                    log.debug(response)
                     log.debug(f"EIGHTBALL - reponse is {response}")
                 msg = await self.docomms(response, message.channel, message.guild.id)
                 timer_module.commit_timeout(str(message.guild.id) + '8ball', 30)
