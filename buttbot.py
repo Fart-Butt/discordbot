@@ -55,7 +55,7 @@ class ButtBot:
 
             # role mentions
             for m in message.role_mentions:
-                if m.name == bot.user.name:
+                if m.name == bot.user.name or m.name in ['Buttbot', 'Testes']:
                     log.debug("MAIN - ON_MESSAGE - role mention - sending to 8ball")
                     await self.eightball(message)
                     return
