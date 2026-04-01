@@ -170,7 +170,7 @@ class ButtBot:
                         response = db['buttbot'].do_query(
                             f"select msg from 8ball where type = '{q}' order by RAND() limit 1")[0]['msg']
                 if not response:
-                    log.debug("EIGHTBALL - did not find proper question")
+                    log.debug("EIGHTBALL - didnt find who/what/when/where/why")
                     response = db['buttbot'].do_query(
                         "select msg from 8ball where type = 'yesno' order by RAND() limit 1")[0]['msg']
                     log.debug(f"EIGHTBALL - reponse is {response}")
