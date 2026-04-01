@@ -43,7 +43,7 @@ class ButtBot:
             message.guild.id, message.content))
         log.debug(f"CHAT_DISPATCH - user mentions {message.mentions}")
         log.debug(f"CHAT_DISPATCH - role mentions {message.role_mentions}")
-        if message.mentions.count() > 0 or message.role_mentions.count() > 0:
+        if message.mentions or message.role_mentions:
             # rigid logic to prevent buttbot from sending 2 messages for a reaction
             # stops butting mentions in general, which usually arent funny
             # user mentions
