@@ -71,12 +71,6 @@ async def on_message(message):
         except KeyError:
             guild_configs.create_config(message.guild.id)
 
-        for m in message.mentions:
-            if m.id == bot.user.id:
-                log.debug("MAIN - ON_MESSAGE - mention - sending to 8ball")
-                await buttbot.eightball(message)
-                return
-
         try:
             if message.content[0] == command_prefix:
                 if message.author.id != 249966240787988480 and message.author.id != 992866467903176765:
