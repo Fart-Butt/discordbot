@@ -70,12 +70,6 @@ async def on_message(message):
                 # loaded
         except KeyError:
             guild_configs.create_config(message.guild.id)
-        if bot.user.id in message.content:
-            # im putting this back in because i can't figure out why discord populates mentions only sometimes.
-            # hopefully we can catch more mentions
-            log.debug("MAIN - ON_MESSAGE - found GUID in text - sending to 8ball")
-            await buttbot.eightball(message)
-            return
 
         for m in message.mentions:
             if m.id == bot.user.id:
