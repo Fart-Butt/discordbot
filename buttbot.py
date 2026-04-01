@@ -43,50 +43,54 @@ class ButtBot:
             message.guild.id, message.content))
         log.debug(f"CHAT_DISPATCH - user mentions {message.mentions}")
         log.debug(f"CHAT_DISPATCH - role mentions {message.role_mentions}")
+        if message.mentions.count() > 0 or message.role_mentions.count() > 0:
+            # rigid logic to prevent buttbot from sending 2 messages for a reaction
+            # stops butting mentions in general, which usually arent funny
+            # user mentions
+            for m in message.mentions:
+                if m.id == bot.user.id:
+                    log.debug("MAIN - ON_MESSAGE - user mention - sending to 8ball")
+                    await self.eightball(message)
+                    return
 
-        # user mentions
-        for m in message.mentions:
-            if m.id == bot.user.id:
-                log.debug("MAIN - ON_MESSAGE - user mention - sending to 8ball")
-                await self.eightball(message)
-                return
-
-        # role mentions
-        for m in message.role_mentions:
-            if m.name == bot.user.name:
-                log.debug("MAIN - ON_MESSAGE - role mention - sending to 8ball")
-                await self.eightball(message)
-                return
-        try:
-            if str(message.content)[0] == command_prefix:
-                # command from inside of MC or other game server
-                log.debug(
-                    "CHAT_DISPATCH  - GUID %d - message is command from game server: %s " % (
-                        message.guild.id, message.content))
-                await self._process_command_interception(message)
-                return
-        except IndexError:
-            # not in here, skip it and keep going
-            pass
-
-        if butt_library.is_word_in_text("rip", message.content):
-            log.debug("CHAT_DISPATCH - GUID %d - message is rip from player: %s " % (message.guild.id, message.content))
-            await self._process_rip_message(message)
-
-        elif butt_library.is_word_in_text("F", message.content):
-            log.debug("CHAT_DISPATCH - GUID %d - message is F from player" % message.guild.id)
-            await self._process_f_message(message)
-
-        elif butt_library.is_word_in_text('butt', message.content) is True or butt_library.is_word_in_text('butts',
-                                                                                                           message.content) is True:
-            log.debug("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % (
-                message.guild.id, message.content))
-            await self._process_butt_message(message)
-
+            # role mentions
+            for m in message.role_mentions:
+                if m.name == bot.user.name:
+                    log.debug("MAIN - ON_MESSAGE - role mention - sending to 8ball")
+                    await self.eightball(message)
+                    return
         else:
-            log.debug("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % (
-                message.guild.id, message.content))
-            await self._process_all_other_messages(message)
+            try:
+                if str(message.content)[0] == command_prefix:
+                    # command from inside of MC or other game server
+                    log.debug(
+                        "CHAT_DISPATCH  - GUID %d - message is command from game server: %s " % (
+                            message.guild.id, message.content))
+                    await self._process_command_interception(message)
+                    return
+            except IndexError:
+                # not in here, skip it and keep going
+                pass
+
+            if butt_library.is_word_in_text("rip", message.content):
+                log.debug(
+                    "CHAT_DISPATCH - GUID %d - message is rip from player: %s " % (message.guild.id, message.content))
+                await self._process_rip_message(message)
+
+            elif butt_library.is_word_in_text("F", message.content):
+                log.debug("CHAT_DISPATCH - GUID %d - message is F from player" % message.guild.id)
+                await self._process_f_message(message)
+
+            elif butt_library.is_word_in_text('butt', message.content) is True or butt_library.is_word_in_text('butts',
+                                                                                                               message.content) is True:
+                log.debug("CHAT_DISPATCH - GUID %d - message contains butt and is going to RSP %s " % (
+                    message.guild.id, message.content))
+                await self._process_butt_message(message)
+
+            else:
+                log.debug("CHAT_DISPATCH - GUID %d - message is going to all_other_messages: %s" % (
+                    message.guild.id, message.content))
+                await self._process_all_other_messages(message)
 
     @staticmethod
     async def _process_command_interception(message: Message):
