@@ -41,6 +41,22 @@ class ButtBot:
         shitposting, RIP, etc.)"""
         log.debug("CHAT_DISPATCH  - GUID %d -  %s " % (
             message.guild.id, message.content))
+        log.debug(f"CHAT_DISPATCH - user mentions {message.mentions}")
+        log.debug(f"CHAT_DISPATCH - role mentions {message.role_mentions}")
+
+        # user mentions
+        for m in message.mentions:
+            if m.id == bot.user.id:
+                log.debug("MAIN - ON_MESSAGE - user mention - sending to 8ball")
+                await self.eightball(message)
+                return
+
+        # role mentions
+        for m in message.role_mentions:
+            if m.name == bot.user.name:
+                log.debug("MAIN - ON_MESSAGE - role mention - sending to 8ball")
+                await self.eightball(message)
+                return
         try:
             if str(message.content)[0] == command_prefix:
                 # command from inside of MC or other game server
