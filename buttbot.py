@@ -182,13 +182,15 @@ class ButtBot:
             if message.author == bot.user.id:
                 pass
             else:
-                questions = ['who', 'what', 'when', 'where', 'why']
+                questions = ['what is', 'who', 'what', 'when', 'where', 'why', 'how long']
                 response = ""
                 for q in questions:
                     if q in message.content.split()[:5]:
                         log.debug(f"EIGHTBALL - found q {q}")
                         response = db['buttbot'].do_query(
                             f"select msg from 8ball where type = '{q}' order by RAND() limit 1")[0]['msg']
+                        if q == 'how long':
+                            response = str(random.randint(0, 40000000)) + " " + response
                 if not response:
                     log.debug("EIGHTBALL - didnt find who/what/when/where/why")
                     response = db['buttbot'].do_query(
