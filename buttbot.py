@@ -182,15 +182,30 @@ class ButtBot:
             if message.author == bot.user.id:
                 pass
             else:
-                questions = ['what is', 'who', 'what', 'when', 'where', 'why', 'how long']
                 response = ""
+                # checking word pair questions first
+                questions = ['how long', 'what is']
+                words = message.content.split()[:5]
+                wordpairs = [words[i] + ' ' + words[i + 1] for i in range(len(words) - 1)]
                 for q in questions:
-                    if q in message.content.split()[:5]:
-                        log.debug(f"EIGHTBALL - found q {q}")
+                    if q in wordpairs:
+                        log.debug(f"EIGHTBALL - found wordpair {q}")
                         response = db['buttbot'].do_query(
                             f"select msg from 8ball where type = '{q}' order by RAND() limit 1")[0]['msg']
                         if q == 'how long':
-                            response = str(random.randint(0, 40000000)) + " " + response
+                            response = f"{str(random.randint(0, 40))} {response}"
+                questions = ['who', 'what', 'when', 'where', 'why']
+                # single word
+                if not response:
+                    response = ""
+                    for q in questions:
+                        if q in message.content.split()[:5]:
+                            log.debug(f"EIGHTBALL - found q {q}")
+                            response = db['buttbot'].do_query(
+                                f"select msg from 8ball where type = '{q}' order by RAND() limit 1")[0]['msg']
+                            if q == 'how long':
+                                response = str(random.randint(0, 40000000)) + " " + response
+
                 if not response:
                     log.debug("EIGHTBALL - didnt find who/what/when/where/why")
                     response = db['buttbot'].do_query(
