@@ -194,7 +194,7 @@ class ButtBot:
                             f"select msg from 8ball where type = '{q}' order by RAND() limit 1")[0]['msg']
                         if q == 'how long':
                             response = f"{str(random.randint(0, 40))} {response}"
-                questions = ['who', 'what', 'when', 'where', 'why']
+                questions = ['who', 'what', 'when', 'where', 'why', 'how']
                 # single word
                 if not response:
                     response = ""
