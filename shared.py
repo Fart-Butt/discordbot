@@ -48,6 +48,3 @@ guild_configs = butt_config.Config()
 async def create_http_session():
     session = aiohttp.ClientSession()
     return session
-
-
-http_session = asyncio.get_event_loop().run_until_complete(create_http_session())
